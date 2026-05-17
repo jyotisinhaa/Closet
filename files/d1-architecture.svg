@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 540" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#1A1612"/>
+    </marker>
+    <marker id="arrow-dashed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#8C8273"/>
+    </marker>
+  </defs>
+
+  <rect width="1100" height="540" fill="#FBF8F1"/>
+
+  <!-- Title -->
+  <text x="550" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1A1612">System Architecture</text>
+  <text x="550" y="58" text-anchor="middle" font-size="13" font-style="italic" fill="#8C8273">Claude does the thinking · Perfect Corp does the rendering · Cloudinary does the hosting</text>
+
+  <!-- User -->
+  <g>
+    <rect x="60" y="220" width="140" height="80" rx="40" fill="#F4EFE6" stroke="#1A1612" stroke-width="1.5"/>
+    <text x="130" y="255" text-anchor="middle" font-size="22">📱</text>
+    <text x="130" y="282" text-anchor="middle" font-size="13" fill="#1A1612">User on mobile</text>
+  </g>
+
+  <!-- Frontend -->
+  <g>
+    <rect x="260" y="200" width="180" height="120" rx="12" fill="#EBE3D4" stroke="#1A1612" stroke-width="1.5"/>
+    <text x="350" y="240" text-anchor="middle" font-size="15" font-weight="600" fill="#1A1612">Frontend</text>
+    <text x="350" y="262" text-anchor="middle" font-size="11" fill="#3A322A">React + Vite + Tailwind</text>
+    <text x="350" y="280" text-anchor="middle" font-size="11" fill="#8C8273" font-style="italic">deployed on Vercel</text>
+  </g>
+
+  <!-- Backend -->
+  <g>
+    <rect x="500" y="200" width="180" height="120" rx="12" fill="#EBE3D4" stroke="#1A1612" stroke-width="1.5"/>
+    <text x="590" y="240" text-anchor="middle" font-size="15" font-weight="600" fill="#1A1612">Backend</text>
+    <text x="590" y="262" text-anchor="middle" font-size="11" fill="#3A322A">Node + Express</text>
+    <text x="590" y="280" text-anchor="middle" font-size="11" fill="#8C8273" font-style="italic">deployed on Railway</text>
+  </g>
+
+  <!-- Database -->
+  <g>
+    <ellipse cx="590" cy="430" rx="80" ry="14" fill="#EBE3D4" stroke="#1A1612" stroke-width="1.5"/>
+    <rect x="510" y="416" width="160" height="50" fill="#EBE3D4" stroke="#1A1612" stroke-width="1.5"/>
+    <ellipse cx="590" cy="466" rx="80" ry="14" fill="#EBE3D4" stroke="#1A1612" stroke-width="1.5"/>
+    <line x1="510" y1="430" x2="510" y2="466" stroke="#1A1612" stroke-width="1.5"/>
+    <line x1="670" y1="430" x2="670" y2="466" stroke="#1A1612" stroke-width="1.5"/>
+    <text x="590" y="447" text-anchor="middle" font-size="11" font-weight="600" fill="#1A1612">SQLite</text>
+    <text x="590" y="461" text-anchor="middle" font-size="9" fill="#3A322A">users · wardrobe · wishlist</text>
+  </g>
+
+  <!-- Cloudinary -->
+  <g>
+    <rect x="760" y="80" width="240" height="90" rx="12" fill="#1A1612"/>
+    <text x="880" y="115" text-anchor="middle" font-size="15" font-weight="600" fill="#FBF8F1">☁️ Cloudinary</text>
+    <text x="880" y="138" text-anchor="middle" font-size="11" fill="#D4CBB8">image hosting + public URLs</text>
+    <text x="880" y="156" text-anchor="middle" font-size="10" fill="#8C8273" font-style="italic">free tier · 25GB</text>
+  </g>
+
+  <!-- Claude -->
+  <g>
+    <rect x="760" y="225" width="240" height="100" rx="12" fill="#5B6A3F"/>
+    <text x="880" y="258" text-anchor="middle" font-size="15" font-weight="600" fill="#FBF8F1">🧠 Claude API</text>
+    <text x="880" y="280" text-anchor="middle" font-size="11" fill="#EBE3D4">vision + pairing logic</text>
+    <text x="880" y="298" text-anchor="middle" font-size="10" fill="#D4CBB8" font-style="italic">tags wardrobe, picks combos,</text>
+    <text x="880" y="312" text-anchor="middle" font-size="10" fill="#D4CBB8" font-style="italic">honest assessment</text>
+  </g>
+
+  <!-- Perfect Corp -->
+  <g>
+    <rect x="760" y="370" width="240" height="100" rx="12" fill="#C2563A"/>
+    <text x="880" y="403" text-anchor="middle" font-size="15" font-weight="600" fill="#FBF8F1">👗 Perfect Corp</text>
+    <text x="880" y="425" text-anchor="middle" font-size="11" fill="#FBF8F1">AI Clothes Try-On</text>
+    <text x="880" y="443" text-anchor="middle" font-size="10" fill="#F4EFE6" font-style="italic">/s2s/v2.0/task/cloth</text>
+    <text x="880" y="457" text-anchor="middle" font-size="10" fill="#F4EFE6" font-style="italic">~15-25s per render</text>
+  </g>
+
+  <!-- Arrows -->
+  <!-- User <-> Frontend -->
+  <line x1="200" y1="260" x2="252" y2="260" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="252" y1="275" x2="200" y2="275" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Frontend <-> Backend -->
+  <line x1="440" y1="252" x2="492" y2="252" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="492" y1="268" x2="440" y2="268" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="466" y="245" text-anchor="middle" font-size="9" fill="#8C8273" font-style="italic">REST</text>
+
+  <!-- Backend <-> DB -->
+  <line x1="590" y1="320" x2="590" y2="410" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="600" y1="410" x2="600" y2="320" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Backend -> Cloudinary -->
+  <line x1="680" y1="230" x2="755" y2="140" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="700" y="170" font-size="10" fill="#3A322A" font-style="italic">uploads</text>
+  <line x1="755" y1="155" x2="680" y2="245" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="745" y="210" font-size="10" fill="#3A322A" font-style="italic">public URLs</text>
+
+  <!-- Backend -> Claude -->
+  <line x1="680" y1="260" x2="755" y2="275" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="755" y1="290" x2="680" y2="278" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Backend -> Perfect Corp -->
+  <line x1="680" y1="305" x2="755" y2="400" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="690" y="370" font-size="10" fill="#3A322A" font-style="italic">src_file_url, ref_file_url</text>
+  <line x1="755" y1="420" x2="680" y2="318" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="745" y="450" font-size="10" fill="#3A322A" font-style="italic">rendered image URL</text>
+
+  <!-- Perfect Corp ..> Cloudinary (dashed - fetches images) -->
+  <line x1="880" y1="370" x2="880" y2="170" stroke="#8C8273" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow-dashed)"/>
+  <text x="888" y="280" font-size="10" fill="#8C8273" font-style="italic">fetches images</text>
+</svg>

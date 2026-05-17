@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+  <defs>
+    <marker id="ar4" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#1A1612"/>
+    </marker>
+  </defs>
+
+  <rect width="1000" height="500" fill="#FBF8F1"/>
+
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1A1612">The "Bought It" Loop</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" font-style="italic" fill="#8C8273">How purchases compound — every bought item becomes future pairing material</text>
+
+  <!-- States -->
+  <!-- Start dot -->
+  <circle cx="80" cy="180" r="10" fill="#1A1612"/>
+
+  <!-- Browsing -->
+  <g>
+    <rect x="140" y="155" width="140" height="50" rx="25" fill="#F4EFE6" stroke="#1A1612" stroke-width="1.5"/>
+    <text x="210" y="186" text-anchor="middle" font-size="13" font-weight="600" fill="#1A1612">Browsing</text>
+  </g>
+
+  <!-- Trying On -->
+  <g>
+    <rect x="350" y="155" width="140" height="50" rx="25" fill="#F4EFE6" stroke="#1A1612" stroke-width="1.5"/>
+    <text x="420" y="186" text-anchor="middle" font-size="13" font-weight="600" fill="#1A1612">Trying On</text>
+  </g>
+
+  <!-- Seeing Results -->
+  <g>
+    <rect x="560" y="155" width="160" height="50" rx="25" fill="#F4EFE6" stroke="#1A1612" stroke-width="1.5"/>
+    <text x="640" y="186" text-anchor="middle" font-size="13" font-weight="600" fill="#1A1612">Seeing Results</text>
+  </g>
+
+  <!-- Wishlisted -->
+  <g>
+    <rect x="560" y="280" width="160" height="50" rx="25" fill="#EBE3D4" stroke="#C2563A" stroke-width="1.5"/>
+    <text x="640" y="311" text-anchor="middle" font-size="13" font-weight="600" fill="#1A1612">Wishlisted</text>
+  </g>
+
+  <!-- Purchased -->
+  <g>
+    <rect x="350" y="280" width="140" height="50" rx="25" fill="#EBE3D4" stroke="#C2563A" stroke-width="1.5"/>
+    <text x="420" y="311" text-anchor="middle" font-size="13" font-weight="600" fill="#1A1612">Purchased</text>
+  </g>
+
+  <!-- InWardrobe -->
+  <g>
+    <rect x="140" y="280" width="140" height="50" rx="25" fill="#5B6A3F" stroke="#5B6A3F" stroke-width="1.5"/>
+    <text x="210" y="311" text-anchor="middle" font-size="13" font-weight="600" fill="#FBF8F1">In Wardrobe</text>
+  </g>
+
+  <!-- Arrows -->
+  <!-- start -> Browsing -->
+  <line x1="90" y1="180" x2="135" y2="180" stroke="#1A1612" stroke-width="1.5" marker-end="url(#ar4)"/>
+
+  <!-- Browsing -> TryingOn -->
+  <line x1="285" y1="180" x2="345" y2="180" stroke="#1A1612" stroke-width="1.5" marker-end="url(#ar4)"/>
+  <text x="315" y="173" text-anchor="middle" font-size="9" fill="#3A322A" font-style="italic">snap new item</text>
+
+  <!-- TryingOn -> SeeingResults -->
+  <line x1="495" y1="180" x2="555" y2="180" stroke="#1A1612" stroke-width="1.5" marker-end="url(#ar4)"/>
+  <text x="525" y="173" text-anchor="middle" font-size="9" fill="#3A322A" font-style="italic">render done</text>
+
+  <!-- SeeingResults -> Browsing (skip) -->
+  <path d="M 560 165 Q 400 110 215 155" fill="none" stroke="#1A1612" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#ar4)"/>
+  <text x="395" y="115" text-anchor="middle" font-size="10" fill="#8C8273" font-style="italic">skip — not interested</text>
+
+  <!-- SeeingResults -> Wishlisted -->
+  <line x1="640" y1="210" x2="640" y2="275" stroke="#1A1612" stroke-width="1.5" marker-end="url(#ar4)"/>
+  <text x="650" y="245" font-size="10" fill="#3A322A" font-style="italic">"Save"</text>
+
+  <!-- Wishlisted -> Wishlisted (self-loop) -->
+  <path d="M 720 295 Q 800 295 800 305 Q 800 320 720 320" fill="none" stroke="#1A1612" stroke-width="1.2" marker-end="url(#ar4)"/>
+  <text x="815" y="312" font-size="9" fill="#3A322A" font-style="italic">try more</text>
+
+  <!-- Wishlisted -> Purchased -->
+  <line x1="555" y1="305" x2="495" y2="305" stroke="#C2563A" stroke-width="1.5" marker-end="url(#ar4)"/>
+  <text x="525" y="298" text-anchor="middle" font-size="10" font-weight="600" fill="#C2563A">"Bought it"</text>
+
+  <!-- Purchased -> InWardrobe -->
+  <line x1="345" y1="305" x2="285" y2="305" stroke="#5B6A3F" stroke-width="1.5" marker-end="url(#ar4)"/>
+  <text x="315" y="298" text-anchor="middle" font-size="9" font-weight="600" fill="#5B6A3F">auto-move</text>
+
+  <!-- InWardrobe -> Browsing (the magic arrow) -->
+  <path d="M 210 280 Q 210 240 210 210" fill="none" stroke="#5B6A3F" stroke-width="2" marker-end="url(#ar4)"/>
+  <text x="160" y="245" text-anchor="middle" font-size="10" font-weight="600" fill="#5B6A3F" font-style="italic">future pairings</text>
+
+  <!-- Annotation -->
+  <text x="500" y="420" text-anchor="middle" font-size="13" font-style="italic" fill="#3A322A">The green arrow is the magic: every purchase grows the pairing pool for next time.</text>
+  <text x="500" y="442" text-anchor="middle" font-size="11" fill="#8C8273">The app gets smarter the more the user shops.</text>
+</svg>

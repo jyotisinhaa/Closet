@@ -1,0 +1,204 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1100" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#1A1612"/>
+    </marker>
+    <marker id="arr-dash" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#8C8273"/>
+    </marker>
+    <marker id="arr-return" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#3A322A"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="1100" fill="#FBF8F1"/>
+
+  <!-- Title -->
+  <text x="600" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1A1612">Core Try-On Flow</text>
+  <text x="600" y="58" text-anchor="middle" font-size="13" font-style="italic" fill="#8C8273">What happens when the user taps "See How It Looks" on Screen 03</text>
+
+  <!-- Actor headers -->
+  <g font-size="13" font-weight="600" fill="#1A1612" text-anchor="middle">
+    <rect x="50" y="88" width="120" height="36" rx="6" fill="#EBE3D4" stroke="#1A1612"/>
+    <text x="110" y="111">User</text>
+
+    <rect x="220" y="88" width="120" height="36" rx="6" fill="#EBE3D4" stroke="#1A1612"/>
+    <text x="280" y="111">Frontend</text>
+
+    <rect x="390" y="88" width="120" height="36" rx="6" fill="#EBE3D4" stroke="#1A1612"/>
+    <text x="450" y="111">Backend</text>
+
+    <rect x="560" y="88" width="120" height="36" rx="6" fill="#1A1612"/>
+    <text x="620" y="111" fill="#FBF8F1">Cloudinary</text>
+
+    <rect x="730" y="88" width="120" height="36" rx="6" fill="#5B6A3F"/>
+    <text x="790" y="111" fill="#FBF8F1">Claude</text>
+
+    <rect x="900" y="88" width="120" height="36" rx="6" fill="#C2563A"/>
+    <text x="960" y="111" fill="#FBF8F1">Perfect Corp</text>
+  </g>
+
+  <!-- Lifelines (dashed vertical lines) -->
+  <g stroke="#D4CBB8" stroke-width="1" stroke-dasharray="4 4">
+    <line x1="110" y1="130" x2="110" y2="1050"/>
+    <line x1="280" y1="130" x2="280" y2="1050"/>
+    <line x1="450" y1="130" x2="450" y2="1050"/>
+    <line x1="620" y1="130" x2="620" y2="1050"/>
+    <line x1="790" y1="130" x2="790" y2="1050"/>
+    <line x1="960" y1="130" x2="960" y2="1050"/>
+  </g>
+
+  <!-- Step 1: User -> Frontend -->
+  <g>
+    <line x1="115" y1="160" x2="275" y2="160" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arr)"/>
+    <circle cx="40" cy="160" r="11" fill="#1A1612"/>
+    <text x="40" y="164" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">1</text>
+    <text x="195" y="153" text-anchor="middle" font-size="11" fill="#1A1612">Taps "See How It Looks"</text>
+    <text x="195" y="174" text-anchor="middle" font-size="10" fill="#8C8273" font-style="italic">submits photo + price + category</text>
+  </g>
+
+  <!-- Step 2: Frontend -> Backend -->
+  <g>
+    <line x1="285" y1="210" x2="445" y2="210" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arr)"/>
+    <circle cx="40" cy="210" r="11" fill="#1A1612"/>
+    <text x="40" y="214" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">2</text>
+    <text x="365" y="203" text-anchor="middle" font-size="11" fill="#1A1612">POST /api/tryon</text>
+    <text x="365" y="224" text-anchor="middle" font-size="10" fill="#8C8273" font-style="italic">{new_item, price, category}</text>
+  </g>
+
+  <!-- Step 3: Backend -> Cloudinary -->
+  <g>
+    <line x1="455" y1="260" x2="615" y2="260" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arr)"/>
+    <circle cx="40" cy="260" r="11" fill="#1A1612"/>
+    <text x="40" y="264" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">3</text>
+    <text x="535" y="253" text-anchor="middle" font-size="11" fill="#1A1612">Upload new item image</text>
+  </g>
+
+  <!-- Step 4: Cloudinary -> Backend -->
+  <g>
+    <line x1="615" y1="300" x2="455" y2="300" stroke="#3A322A" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#arr-return)"/>
+    <circle cx="40" cy="300" r="11" fill="#3A322A"/>
+    <text x="40" y="304" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">4</text>
+    <text x="535" y="293" text-anchor="middle" font-size="11" fill="#3A322A" font-style="italic">Public URL</text>
+  </g>
+
+  <!-- Parallel block -->
+  <g>
+    <rect x="395" y="335" width="600" height="280" fill="none" stroke="#C2563A" stroke-width="1.5" stroke-dasharray="6 3" rx="8"/>
+    <rect x="395" y="335" width="80" height="22" fill="#C2563A"/>
+    <text x="435" y="351" text-anchor="middle" font-size="10" font-weight="600" fill="#FBF8F1">par</text>
+    <text x="690" y="351" text-anchor="middle" font-size="11" fill="#C2563A" font-style="italic">in parallel — Claude pairing + solo render</text>
+  </g>
+
+  <!-- Step 5: Backend -> Claude -->
+  <g>
+    <line x1="460" y1="385" x2="785" y2="385" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arr)"/>
+    <circle cx="40" cy="385" r="11" fill="#1A1612"/>
+    <text x="40" y="389" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">5</text>
+    <text x="622" y="378" text-anchor="middle" font-size="11" fill="#1A1612">"Pick 2-3 outfit combos + honest take"</text>
+    <text x="622" y="399" text-anchor="middle" font-size="10" fill="#8C8273" font-style="italic">new item + full wardrobe list</text>
+  </g>
+
+  <!-- Step 6: Claude -> Backend -->
+  <g>
+    <line x1="785" y1="430" x2="460" y2="430" stroke="#3A322A" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#arr-return)"/>
+    <circle cx="40" cy="430" r="11" fill="#3A322A"/>
+    <text x="40" y="434" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">6</text>
+    <text x="622" y="423" text-anchor="middle" font-size="11" fill="#3A322A" font-style="italic">{ combinations, honest_assessment }</text>
+  </g>
+
+  <!-- divider -->
+  <line x1="400" y1="465" x2="990" y2="465" stroke="#C2563A" stroke-width="0.5" stroke-dasharray="3 3"/>
+  <text x="410" y="478" font-size="10" fill="#C2563A" font-weight="600">and</text>
+
+  <!-- Step 7: Backend -> Perfect Corp solo -->
+  <g>
+    <line x1="460" y1="510" x2="955" y2="510" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arr)"/>
+    <circle cx="40" cy="510" r="11" fill="#1A1612"/>
+    <text x="40" y="514" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">7</text>
+    <text x="707" y="503" text-anchor="middle" font-size="11" fill="#1A1612">POST /task/cloth (solo render)</text>
+    <text x="707" y="524" text-anchor="middle" font-size="10" fill="#8C8273" font-style="italic">src_file_url=user, ref_file_url=new_item</text>
+  </g>
+
+  <!-- Step 8: PC -> Backend task_id -->
+  <g>
+    <line x1="955" y1="555" x2="460" y2="555" stroke="#3A322A" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#arr-return)"/>
+    <circle cx="40" cy="555" r="11" fill="#3A322A"/>
+    <text x="40" y="559" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">8</text>
+    <text x="707" y="548" text-anchor="middle" font-size="11" fill="#3A322A" font-style="italic">task_id</text>
+  </g>
+
+  <!-- Step 9: Poll loop -->
+  <g>
+    <rect x="430" y="575" width="540" height="30" rx="4" fill="#EBE3D4" stroke="#8C8273" stroke-dasharray="3 3"/>
+    <text x="700" y="594" text-anchor="middle" font-size="11" fill="#3A322A" font-style="italic">loop: GET /task/cloth/{task_id} every 3s · running → success · ~15-25s total</text>
+    <circle cx="40" cy="590" r="11" fill="#1A1612"/>
+    <text x="40" y="594" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">9</text>
+  </g>
+
+  <!-- Step 10: PC -> Backend solo_render_url -->
+  <g>
+    <line x1="955" y1="640" x2="460" y2="640" stroke="#3A322A" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#arr-return)"/>
+    <circle cx="40" cy="640" r="11" fill="#3A322A"/>
+    <text x="40" y="644" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">10</text>
+    <text x="707" y="633" text-anchor="middle" font-size="11" fill="#3A322A" font-weight="600">solo_render_url</text>
+  </g>
+
+  <!-- Note about combos -->
+  <g>
+    <rect x="380" y="680" width="610" height="32" rx="6" fill="#F4EFE6" stroke="#3A322A"/>
+    <text x="685" y="700" text-anchor="middle" font-size="11" fill="#1A1612" font-style="italic">Now: chain renders per combo · combos run in parallel · within a combo, calls are sequential</text>
+  </g>
+
+  <!-- Combo loop block -->
+  <g>
+    <rect x="395" y="730" width="600" height="200" fill="none" stroke="#5B6A3F" stroke-width="1.5" stroke-dasharray="6 3" rx="8"/>
+    <rect x="395" y="730" width="120" height="22" fill="#5B6A3F"/>
+    <text x="455" y="746" text-anchor="middle" font-size="10" font-weight="600" fill="#FBF8F1">for each combo</text>
+  </g>
+
+  <!-- Step 11: Combo call 1 -->
+  <g>
+    <line x1="460" y1="780" x2="955" y2="780" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arr)"/>
+    <circle cx="40" cy="780" r="11" fill="#1A1612"/>
+    <text x="40" y="784" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">11</text>
+    <text x="707" y="773" text-anchor="middle" font-size="11" fill="#1A1612">POST /task/cloth · ref = new item</text>
+    <text x="985" y="780" font-size="10" fill="#3A322A" font-style="italic">→ dst_id_1</text>
+  </g>
+
+  <!-- Step 12: Combo call 2 -->
+  <g>
+    <line x1="460" y1="830" x2="955" y2="830" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arr)"/>
+    <circle cx="40" cy="830" r="11" fill="#1A1612"/>
+    <text x="40" y="834" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">12</text>
+    <text x="707" y="823" text-anchor="middle" font-size="11" fill="#1A1612">POST /task/cloth · src_id=dst_id_1, ref = wardrobe item 2</text>
+    <text x="985" y="830" font-size="10" fill="#3A322A" font-style="italic">→ dst_id_2</text>
+  </g>
+
+  <!-- Step 13: Combo call 3 -->
+  <g>
+    <line x1="460" y1="880" x2="955" y2="880" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arr)"/>
+    <circle cx="40" cy="880" r="11" fill="#1A1612"/>
+    <text x="40" y="884" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">13</text>
+    <text x="707" y="873" text-anchor="middle" font-size="11" fill="#1A1612">POST /task/cloth · src_id=dst_id_2, ref = wardrobe item 3</text>
+    <text x="985" y="880" font-size="10" fill="#3A322A" font-weight="600">→ composite_render_url</text>
+  </g>
+
+  <!-- Step 14: Backend -> Frontend -->
+  <g>
+    <line x1="445" y1="960" x2="285" y2="960" stroke="#3A322A" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#arr-return)"/>
+    <circle cx="40" cy="960" r="11" fill="#3A322A"/>
+    <text x="40" y="964" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">14</text>
+    <text x="365" y="953" text-anchor="middle" font-size="11" fill="#3A322A">assembled response</text>
+    <text x="365" y="974" text-anchor="middle" font-size="10" fill="#8C8273" font-style="italic">solo_url, combos, assessment</text>
+  </g>
+
+  <!-- Step 15: Frontend -> User -->
+  <g>
+    <line x1="275" y1="1010" x2="115" y2="1010" stroke="#3A322A" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#arr-return)"/>
+    <circle cx="40" cy="1010" r="11" fill="#3A322A"/>
+    <text x="40" y="1014" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">15</text>
+    <text x="195" y="1003" text-anchor="middle" font-size="11" fill="#3A322A">Render Screen 04</text>
+    <text x="195" y="1024" text-anchor="middle" font-size="10" fill="#8C8273" font-style="italic">with all images</text>
+  </g>
+</svg>

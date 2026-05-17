@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Closet — UI Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter+Tight:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #F4EFE6;
+  --cream-deep: #EBE3D4;
+  --ink: #1A1612;
+  --ink-soft: #3A322A;
+  --olive: #5B6A3F;
+  --olive-deep: #3F4B2A;
+  --terracotta: #C2563A;
+  --rust: #9A3E26;
+  --gold: #C9A961;
+  --paper: #FBF8F1;
+  --line: #D4CBB8;
+  --muted: #8C8273;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter Tight', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 60px 20px 80px;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(194, 86, 58, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 85% 70%, rgba(91, 106, 63, 0.06) 0%, transparent 45%);
+}
+
+/* Grain overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.08 0 0 0 0 0.06 0 0 0 0.18 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.page-header {
+  max-width: 1400px;
+  margin: 0 auto 60px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.page-header .eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--terracotta);
+  margin-bottom: 16px;
+}
+
+.page-header h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  font-size: clamp(48px, 7vw, 96px);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  font-variation-settings: "SOFT" 50, "WONK" 1;
+  margin-bottom: 16px;
+}
+
+.page-header h1 em {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--terracotta);
+}
+
+.page-header .sub {
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  font-style: italic;
+  font-size: 18px;
+  color: var(--ink-soft);
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.legend span::before {
+  content: '◆';
+  margin-right: 6px;
+  color: var(--terracotta);
+}
+
+/* Screens grid */
+.screens {
+  max-width: 1500px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 60px 40px;
+  position: relative;
+  z-index: 2;
+}
+
+.screen-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.screen-label {
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.screen-label .num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.screen-label .name {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: 22px;
+  font-style: italic;
+}
+
+/* The phone frame */
+.phone {
+  width: 360px;
+  height: 740px;
+  background: var(--paper);
+  border-radius: 44px;
+  border: 1px solid var(--ink);
+  padding: 12px;
+  box-shadow:
+    0 30px 60px -20px rgba(26, 22, 18, 0.25),
+    0 12px 24px -10px rgba(26, 22, 18, 0.15),
+    inset 0 0 0 2px var(--paper);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.phone::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 28px;
+  background: var(--ink);
+  border-radius: 0 0 18px 18px;
+  z-index: 10;
+}
+
+.screen {
+  width: 100%;
+  height: 100%;
+  background: var(--paper);
+  border-radius: 32px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Status bar */
+.status-bar {
+  height: 44px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 28px 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.status-bar .icons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Top bar */
+.top-bar {
+  padding: 14px 22px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 22px;
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  letter-spacing: -0.02em;
+}
+
+.brand em {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--terracotta);
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--cream-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+}
+
+.content {
+  flex: 1;
+  overflow: hidden;
+  padding: 0 22px;
+}
+
+/* Bottom nav */
+.bottom-nav {
+  height: 72px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  background: var(--paper);
+  padding: 8px 16px 18px;
+  gap: 4px;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-top: 6px;
+}
+
+.nav-item .nav-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--muted);
+}
+
+.nav-item .nav-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.nav-item.active .nav-icon { color: var(--ink); }
+.nav-item.active .nav-label { color: var(--ink); font-weight: 500; }
+
+/* ─── SCREEN 1: ONBOARDING ──────────────────────────────── */
+
+.onboard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 60px 28px 28px;
+  position: relative;
+  background: linear-gradient(180deg, var(--paper) 0%, var(--cream-deep) 100%);
+}
+
+.onboard-art {
+  font-family: 'Fraunces', serif;
+  font-size: 140px;
+  text-align: center;
+  line-height: 1;
+  color: var(--terracotta);
+  font-style: italic;
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  position: relative;
+}
+
+.onboard-art::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40%;
+  height: 1px;
+  background: var(--ink);
+}
+
+.onboard-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-align: center;
+  margin-top: 24px;
+}
+
+.onboard-headline {
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  font-size: 36px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-align: center;
+  margin: 32px 0 16px;
+}
+
+.onboard-headline em {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  color: var(--terracotta);
+}
+
+.onboard-body {
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--ink-soft);
+  margin-bottom: auto;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: 100px;
+  padding: 18px 28px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  transition: transform 0.2s;
+}
+
+.btn-primary:hover { transform: translateY(-1px); }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: 100px;
+  padding: 16px 28px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* ─── SCREEN 2: WARDROBE ────────────────────────────────── */
+
+.greeting {
+  padding: 4px 0 18px;
+}
+
+.greeting .hi {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.greeting .name {
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  font-size: 28px;
+  line-height: 1.1;
+  margin-top: 4px;
+  letter-spacing: -0.02em;
+}
+
+.greeting .name em {
+  font-style: italic;
+  font-family: 'Instrument Serif', serif;
+  color: var(--terracotta);
+}
+
+.stats-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.stat {
+  flex: 1;
+}
+
+.stat .num {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+}
+
+.stat .label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.section-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.section-title h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: 18px;
+  font-style: italic;
+}
+
+.section-title .filter {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.wardrobe-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.wardrobe-item {
+  aspect-ratio: 3/4;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--line);
+}
+
+.wardrobe-item .img {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-size: 36px;
+  font-style: italic;
+}
+
+.wardrobe-item .tag {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  background: var(--paper);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.bg-olive { background: var(--olive); color: var(--paper); }
+.bg-terra { background: var(--terracotta); color: var(--paper); }
+.bg-ink { background: var(--ink); color: var(--paper); }
+.bg-gold { background: var(--gold); color: var(--ink); }
+.bg-cream { background: var(--cream-deep); color: var(--ink-soft); }
+.bg-rust { background: var(--rust); color: var(--paper); }
+
+.fab {
+  position: absolute;
+  bottom: 92px;
+  right: 22px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--terracotta);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  border: none;
+  box-shadow: 0 8px 24px -4px rgba(194, 86, 58, 0.5);
+  z-index: 20;
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+}
+
+/* ─── SCREEN 3: TRY ON CAPTURE ──────────────────────────── */
+
+.screen-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  font-size: 32px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 8px 0 4px;
+}
+
+.screen-title em {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  color: var(--terracotta);
+}
+
+.screen-sub {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 22px;
+}
+
+.capture-frame {
+  aspect-ratio: 3/4;
+  border-radius: 16px;
+  border: 2px dashed var(--line);
+  background: var(--cream);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  position: relative;
+}
+
+.capture-frame .icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  font-size: 24px;
+}
+
+.capture-frame .cap-label {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 16px;
+}
+
+.capture-frame .cap-or {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 10px 0;
+}
+
+.cap-upload {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  color: var(--ink-soft);
+}
+
+.field {
+  margin-bottom: 14px;
+}
+
+.field-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.field-input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  padding: 6px 0 8px;
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  background: transparent;
+  outline: none;
+}
+
+.field-input::placeholder { color: var(--muted); font-style: italic; }
+
+.chip-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  border-radius: 100px;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+}
+
+.chip.active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+/* ─── SCREEN 4: TRY ON RESULT ───────────────────────────── */
+
+.result-hero {
+  aspect-ratio: 3/4;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--olive) 0%, var(--olive-deep) 100%);
+  position: relative;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: flex-end;
+  padding: 14px;
+}
+
+.result-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(244, 239, 230, 0.15), transparent 60%),
+    repeating-linear-gradient(45deg, transparent 0 12px, rgba(0,0,0,0.05) 12px 13px);
+}
+
+.result-hero .silhouette {
+  position: absolute;
+  font-family: 'Fraunces', serif;
+  font-size: 200px;
+  color: rgba(244, 239, 230, 0.85);
+  font-style: italic;
+  font-weight: 300;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  line-height: 1;
+}
+
+.result-hero .badge {
+  background: var(--paper);
+  padding: 6px 10px 7px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 2;
+}
+
+.assessment {
+  background: var(--cream-deep);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  border-left: 3px solid var(--terracotta);
+}
+
+.assessment .label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--terracotta);
+  margin-bottom: 4px;
+}
+
+.assessment .verdict {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.combo {
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.combo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.combo-title {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 16px;
+}
+
+.combo-price {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+}
+
+.combo-items {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.combo-thumb {
+  width: 52px;
+  height: 64px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 18px;
+  position: relative;
+}
+
+.combo-thumb.new::after {
+  content: 'NEW';
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px;
+  background: var(--terracotta);
+  color: var(--paper);
+  padding: 1px 4px;
+  border-radius: 2px;
+  letter-spacing: 0.1em;
+}
+
+.combo-note {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+/* Solo try-on (new item only, top of result screen) */
+.solo-tryon {
+  aspect-ratio: 4/5;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(165deg, var(--olive) 0%, var(--olive-deep) 100%);
+  position: relative;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: flex-start;
+  padding: 12px;
+}
+
+.solo-tryon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(244, 239, 230, 0.18), transparent 60%),
+    repeating-linear-gradient(45deg, transparent 0 12px, rgba(0,0,0,0.04) 12px 13px);
+}
+
+.solo-silhouette {
+  position: absolute;
+  font-family: 'Fraunces', serif;
+  font-size: 220px;
+  color: rgba(244, 239, 230, 0.92);
+  font-style: italic;
+  font-weight: 300;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  line-height: 1;
+}
+
+.solo-badge {
+  background: var(--paper);
+  padding: 6px 10px 7px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 2;
+}
+
+/* Outfit card (combo with full render) */
+.outfit-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.outfit-render {
+  aspect-ratio: 4/5;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  padding: 10px;
+}
+
+.outfit-render::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(244, 239, 230, 0.18), transparent 60%),
+    repeating-linear-gradient(45deg, transparent 0 12px, rgba(0,0,0,0.04) 12px 13px);
+}
+
+.outfit-silhouette {
+  position: absolute;
+  font-family: 'Fraunces', serif;
+  font-size: 200px;
+  color: rgba(244, 239, 230, 0.92);
+  font-style: italic;
+  font-weight: 300;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  line-height: 1;
+}
+
+.outfit-overlay-tag {
+  background: var(--paper);
+  padding: 5px 9px 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 2;
+}
+
+.outfit-body {
+  padding: 14px 16px 16px;
+}
+
+.outfit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.outfit-name {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 17px;
+}
+
+.outfit-budget {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.budget-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.outfit-pieces {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 8px 0;
+  margin-bottom: 10px;
+}
+
+.piece-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+}
+
+.piece-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid var(--ink);
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.piece-dot.new-dot {
+  background: var(--terracotta);
+  border-color: var(--terracotta);
+  box-shadow: 0 0 0 3px rgba(194, 86, 58, 0.15);
+}
+
+.piece-name {
+  flex: 1;
+  color: var(--ink);
+}
+
+.piece-name em {
+  font-style: italic;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.piece-price {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.outfit-note {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+/* ─── SCREEN 5: WISHLIST ────────────────────────────────── */
+
+.wish-card {
+  background: var(--paper);
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  margin-bottom: 12px;
+  overflow: hidden;
+  display: flex;
+}
+
+.wish-img {
+  width: 110px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 40px;
+}
+
+.wish-body {
+  flex: 1;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.wish-cat {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.wish-name {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 17px;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+.wish-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.wish-price {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.wish-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  padding: 6px 10px;
+  border-radius: 100px;
+}
+
+/* ─── SCREEN 6: ADD WARDROBE ITEM ───────────────────────── */
+
+.preview-frame {
+  aspect-ratio: 3/4;
+  border-radius: 16px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 80px;
+}
+
+.ai-detected {
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ai-detected .spark {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: var(--gold);
+}
+
+.ai-detected .text {
+  flex: 1;
+}
+
+.ai-detected .ai-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.ai-detected .ai-result {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 14px;
+  margin-top: 2px;
+}
+
+/* annotations beside each screen */
+.annotations {
+  margin-top: 18px;
+  max-width: 360px;
+  padding: 0 8px;
+}
+
+.annotation {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.annotation .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--terracotta);
+  flex-shrink: 0;
+  margin-top: 7px;
+}
+
+/* SVG icon styles */
+.icon-svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon-sm {
+  width: 14px;
+  height: 14px;
+}
+
+.footnote {
+  max-width: 800px;
+  margin: 80px auto 0;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  padding: 32px;
+  border-top: 1px solid var(--line);
+}
+
+.footnote p {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+.footnote .sig {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--terracotta);
+  margin-top: 14px;
+}
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="eyebrow">DevNetwork AI+ML Hackathon · 2026</div>
+  <h1>Closet — <em>a wardrobe<br>that thinks back</em></h1>
+  <p class="sub">UI specification & visual reference for the development team. Six core screens, mobile-first, designed in an editorial fashion-magazine register.</p>
+  <div class="legend">
+    <span>Cream &amp; Ink Palette</span>
+    <span>Fraunces / Instrument Serif</span>
+    <span>Mobile 360×740</span>
+  </div>
+</header>
+
+<main class="screens">
+
+  <!-- ═══════ SCREEN 1: ONBOARDING ═══════ -->
+  <div class="screen-wrap">
+    <div class="screen-label">
+      <span class="num">01 / 06</span>
+      <span class="name">Onboarding</span>
+    </div>
+    <div class="phone">
+      <div class="screen">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="icons">●●●● ▮</span>
+        </div>
+        <div class="onboard">
+          <div>
+            <div class="onboard-art">C.</div>
+            <div class="onboard-tag">Est. 2026 · A wardrobe app</div>
+            <h2 class="onboard-headline">Show us <em>you</em>, once.</h2>
+            <p class="onboard-body">One clean full-body photo. We use it to render every try-on going forward. Your photo stays yours.</p>
+          </div>
+          <div>
+            <button class="btn-primary">
+              <svg class="icon-svg icon-sm" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Take a Photo
+            </button>
+            <button class="btn-secondary">Upload from Camera Roll</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="annotations">
+      <div class="annotation"><div class="dot"></div>One-time setup. Photo uploads to Cloudinary, URL stored locally.</div>
+      <div class="annotation"><div class="dot"></div>This is the photo Perfect Corp's try-on API will dress.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ SCREEN 2: WARDROBE HOME ═══════ -->
+  <div class="screen-wrap">
+    <div class="screen-label">
+      <span class="num">02 / 06</span>
+      <span class="name">Wardrobe</span>
+    </div>
+    <div class="phone">
+      <div class="screen">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="icons">●●●● ▮</span>
+        </div>
+        <div class="top-bar">
+          <div class="brand">Clos<em>et</em></div>
+          <div class="icon-btn">
+            <svg class="icon-svg icon-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </div>
+        </div>
+        <div class="content">
+          <div class="greeting">
+            <div class="hi">Good morning</div>
+            <div class="name">Hello, <em>Priya</em></div>
+          </div>
+          <div class="stats-row">
+            <div class="stat"><div class="num">24</div><div class="label">Items</div></div>
+            <div class="stat"><div class="num">6</div><div class="label">Looks</div></div>
+            <div class="stat"><div class="num">$840</div><div class="label">Value</div></div>
+          </div>
+          <div class="section-title">
+            <h2>Your closet</h2>
+            <span class="filter">All ▾</span>
+          </div>
+          <div class="wardrobe-grid">
+            <div class="wardrobe-item"><div class="img bg-olive">J</div><div class="tag">Jacket</div></div>
+            <div class="wardrobe-item"><div class="img bg-cream">T</div><div class="tag">Tee</div></div>
+            <div class="wardrobe-item"><div class="img bg-ink">P</div><div class="tag">Pants</div></div>
+            <div class="wardrobe-item"><div class="img bg-terra">B</div><div class="tag">Blouse</div></div>
+            <div class="wardrobe-item"><div class="img bg-gold">S</div><div class="tag">Skirt</div></div>
+            <div class="wardrobe-item"><div class="img bg-rust">C</div><div class="tag">Coat</div></div>
+            <div class="wardrobe-item"><div class="img bg-ink">B</div><div class="tag">Boots</div></div>
+            <div class="wardrobe-item"><div class="img bg-cream">D</div><div class="tag">Dress</div></div>
+            <div class="wardrobe-item"><div class="img bg-olive">S</div><div class="tag">Scarf</div></div>
+          </div>
+        </div>
+        <button class="fab">+</button>
+        <div class="bottom-nav">
+          <div class="nav-item active">
+            <svg class="icon-svg nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span class="nav-label">Closet</span>
+          </div>
+          <div class="nav-item">
+            <svg class="icon-svg nav-icon" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span class="nav-label">Try On</span>
+          </div>
+          <div class="nav-item">
+            <svg class="icon-svg nav-icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span class="nav-label">Wishlist</span>
+          </div>
+          <div class="nav-item">
+            <svg class="icon-svg nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+            <span class="nav-label">You</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="annotations">
+      <div class="annotation"><div class="dot"></div>Grid of wardrobe items. Tap any item to view, edit tags, or delete.</div>
+      <div class="annotation"><div class="dot"></div>FAB (+) launches the Add Wardrobe Item flow (Screen 06).</div>
+    </div>
+  </div>
+
+  <!-- ═══════ SCREEN 3: TRY ON CAPTURE ═══════ -->
+  <div class="screen-wrap">
+    <div class="screen-label">
+      <span class="num">03 / 06</span>
+      <span class="name">Try On — Capture</span>
+    </div>
+    <div class="phone">
+      <div class="screen">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="icons">●●●● ▮</span>
+        </div>
+        <div class="top-bar">
+          <div class="brand" style="font-size: 15px;">← Back</div>
+          <div class="icon-btn" style="font-family: 'JetBrains Mono', monospace; font-size: 9px;">1/3</div>
+        </div>
+        <div class="content">
+          <h1 class="screen-title">Spotted something <em>worth it?</em></h1>
+          <p class="screen-sub">Snap the item. We'll style it for you.</p>
+          <div class="capture-frame">
+            <div class="icon">
+              <svg class="icon-svg" style="color: var(--paper);" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+            <div class="cap-label">Tap to capture</div>
+            <div class="cap-or">— or —</div>
+            <span class="cap-upload">Upload from gallery</span>
+          </div>
+          <div class="field">
+            <label class="field-label">Price tag</label>
+            <input class="field-input" placeholder="$ 58.00" value="$ 58.00">
+          </div>
+          <div class="field">
+            <label class="field-label">Category</label>
+            <div class="chip-row">
+              <span class="chip">Top</span>
+              <span class="chip active">Outerwear</span>
+              <span class="chip">Bottom</span>
+              <span class="chip">Shoes</span>
+              <span class="chip">Accessory</span>
+            </div>
+          </div>
+        </div>
+        <div style="padding: 14px 22px 18px; border-top: 1px solid var(--line);">
+          <button class="btn-primary">See How It Looks →</button>
+        </div>
+      </div>
+    </div>
+    <div class="annotations">
+      <div class="annotation"><div class="dot"></div>Camera-first, gallery as fallback. Price entered manually (no OCR for v1).</div>
+      <div class="annotation"><div class="dot"></div>Claude vision API auto-suggests category — user confirms or overrides.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ SCREEN 4: TRY ON RESULT ═══════ -->
+  <div class="screen-wrap">
+    <div class="screen-label">
+      <span class="num">04 / 06</span>
+      <span class="name">Try On — Result</span>
+    </div>
+    <div class="phone">
+      <div class="screen">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="icons">●●●● ▮</span>
+        </div>
+        <div class="top-bar">
+          <div class="brand" style="font-size: 15px;">← Back</div>
+          <div class="icon-btn">
+            <svg class="icon-svg icon-sm" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+        </div>
+        <div class="content" style="overflow-y: auto;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px;">
+            <div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);">The new piece</div>
+              <div style="font-family: 'Fraunces', serif; font-style: italic; font-size: 18px; margin-top: 2px;">Olive utility jacket</div>
+            </div>
+            <div style="font-family: 'Fraunces', serif; font-weight: 500; font-size: 20px;">$58</div>
+          </div>
+
+          <!-- Solo try-on (just the new item) -->
+          <div class="solo-tryon">
+            <span class="solo-silhouette">P.</span>
+            <span class="solo-badge">You + new item only</span>
+          </div>
+
+          <div class="assessment">
+            <div class="label">★ Honest take</div>
+            <div class="verdict">"You already own two field jackets in similar tones. Skip unless you specifically need lighter weight."</div>
+          </div>
+
+          <h2 style="font-family: 'Fraunces', serif; font-style: italic; font-size: 18px; margin-bottom: 4px;">Styled with your closet</h2>
+          <p style="font-family: 'Fraunces', serif; font-style: italic; font-size: 13px; color: var(--muted); margin-bottom: 14px;">Real renders of you wearing the new item with pieces you already own.</p>
+
+          <!-- Combo 1 - full outfit render -->
+          <div class="outfit-card">
+            <div class="outfit-render bg-olive">
+              <span class="outfit-silhouette">P.</span>
+              <div class="outfit-overlay-tag">Look 01</div>
+            </div>
+            <div class="outfit-body">
+              <div class="outfit-header">
+                <div class="outfit-name">Weekend errands</div>
+                <div class="outfit-budget">$58<span class="budget-sub"> · rest is yours</span></div>
+              </div>
+              <div class="outfit-pieces">
+                <div class="piece-row">
+                  <span class="piece-dot new-dot"></span>
+                  <span class="piece-name">Olive utility jacket</span>
+                  <span class="piece-price">$58</span>
+                </div>
+                <div class="piece-row">
+                  <span class="piece-dot"></span>
+                  <span class="piece-name">Cream cotton tee · <em>owned</em></span>
+                  <span class="piece-price">—</span>
+                </div>
+                <div class="piece-row">
+                  <span class="piece-dot"></span>
+                  <span class="piece-name">Dark indigo denim · <em>owned</em></span>
+                  <span class="piece-price">—</span>
+                </div>
+                <div class="piece-row">
+                  <span class="piece-dot"></span>
+                  <span class="piece-name">Rust chelsea boots · <em>owned</em></span>
+                  <span class="piece-price">—</span>
+                </div>
+              </div>
+              <p class="outfit-note">"Olive plays well against the cream tee — adds a layer without competing for attention."</p>
+            </div>
+          </div>
+
+          <!-- Combo 2 - full outfit render -->
+          <div class="outfit-card">
+            <div class="outfit-render bg-terra">
+              <span class="outfit-silhouette">P.</span>
+              <div class="outfit-overlay-tag">Look 02</div>
+            </div>
+            <div class="outfit-body">
+              <div class="outfit-header">
+                <div class="outfit-name">Office casual</div>
+                <div class="outfit-budget">$58<span class="budget-sub"> · rest is yours</span></div>
+              </div>
+              <div class="outfit-pieces">
+                <div class="piece-row">
+                  <span class="piece-dot new-dot"></span>
+                  <span class="piece-name">Olive utility jacket</span>
+                  <span class="piece-price">$58</span>
+                </div>
+                <div class="piece-row">
+                  <span class="piece-dot"></span>
+                  <span class="piece-name">Terracotta silk blouse · <em>owned</em></span>
+                  <span class="piece-price">—</span>
+                </div>
+                <div class="piece-row">
+                  <span class="piece-dot"></span>
+                  <span class="piece-name">Charcoal trousers · <em>owned</em></span>
+                  <span class="piece-price">—</span>
+                </div>
+              </div>
+              <p class="outfit-note">"Layer over the rust blouse for a slightly bolder, unexpected take."</p>
+            </div>
+          </div>
+
+          <div style="height: 12px;"></div>
+
+        </div>
+        <div style="padding: 12px 22px 16px; border-top: 1px solid var(--line); display: flex; gap: 8px;">
+          <button class="btn-primary" style="flex: 1;">♡ Save to Wishlist</button>
+        </div>
+      </div>
+    </div>
+    <div class="annotations">
+      <div class="annotation"><div class="dot"></div>Top render: Perfect Corp Clothes Try-On — just the new item on the user.</div>
+      <div class="annotation"><div class="dot"></div>Each "Look" below: a second Perfect Corp call rendering the user in the new item <strong>plus paired wardrobe items as one composite outfit</strong>.</div>
+      <div class="annotation"><div class="dot"></div>The orange dot marks the new item; outlined dots are pieces already owned.</div>
+      <div class="annotation"><div class="dot"></div>"Honest take" + outfit selections come from Claude. Total only shows the new-item cost — everything else is free.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ SCREEN 5: WISHLIST ═══════ -->
+  <div class="screen-wrap">
+    <div class="screen-label">
+      <span class="num">05 / 06</span>
+      <span class="name">Wishlist</span>
+    </div>
+    <div class="phone">
+      <div class="screen">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="icons">●●●● ▮</span>
+        </div>
+        <div class="top-bar">
+          <div class="brand">Wish<em>list</em></div>
+          <div class="icon-btn">
+            <svg class="icon-svg icon-sm" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </div>
+        </div>
+        <div class="content">
+          <p class="screen-sub" style="margin-bottom: 16px;">Items you tried on and saved. Tap "Bought it" once purchased — we'll add it to your closet automatically.</p>
+
+          <div class="wish-card">
+            <div class="wish-img bg-olive">J</div>
+            <div class="wish-body">
+              <div>
+                <div class="wish-cat">Outerwear · Target</div>
+                <div class="wish-name">Olive utility jacket</div>
+              </div>
+              <div class="wish-meta">
+                <span class="wish-price">$58</span>
+                <button class="wish-btn">✓ Bought it</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="wish-card">
+            <div class="wish-img bg-terra">D</div>
+            <div class="wish-body">
+              <div>
+                <div class="wish-cat">Dress · Zara</div>
+                <div class="wish-name">Terracotta linen midi</div>
+              </div>
+              <div class="wish-meta">
+                <span class="wish-price">$89</span>
+                <button class="wish-btn">✓ Bought it</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="wish-card">
+            <div class="wish-img bg-ink">B</div>
+            <div class="wish-body">
+              <div>
+                <div class="wish-cat">Shoes · COS</div>
+                <div class="wish-name">Leather chelsea boot</div>
+              </div>
+              <div class="wish-meta">
+                <span class="wish-price">$140</span>
+                <button class="wish-btn">✓ Bought it</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-item">
+            <svg class="icon-svg nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span class="nav-label">Closet</span>
+          </div>
+          <div class="nav-item">
+            <svg class="icon-svg nav-icon" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span class="nav-label">Try On</span>
+          </div>
+          <div class="nav-item active">
+            <svg class="icon-svg nav-icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span class="nav-label">Wishlist</span>
+          </div>
+          <div class="nav-item">
+            <svg class="icon-svg nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+            <span class="nav-label">You</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="annotations">
+      <div class="annotation"><div class="dot"></div>"Bought it" moves the item into Wardrobe (Screen 02), removes from Wishlist.</div>
+      <div class="annotation"><div class="dot"></div>Tapping a card opens the saved try-on result (Screen 04 state).</div>
+    </div>
+  </div>
+
+  <!-- ═══════ SCREEN 6: ADD TO WARDROBE ═══════ -->
+  <div class="screen-wrap">
+    <div class="screen-label">
+      <span class="num">06 / 06</span>
+      <span class="name">Add Wardrobe Item</span>
+    </div>
+    <div class="phone">
+      <div class="screen">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="icons">●●●● ▮</span>
+        </div>
+        <div class="top-bar">
+          <div class="brand" style="font-size: 15px;">← Cancel</div>
+          <div class="icon-btn" style="font-family: 'JetBrains Mono', monospace; font-size: 9px;">Add</div>
+        </div>
+        <div class="content">
+          <h1 class="screen-title">Add to <em>closet</em></h1>
+          <p class="screen-sub">Snap a clean photo of the item on a plain surface.</p>
+          <div class="preview-frame bg-olive" style="color: var(--paper);">J.</div>
+          <div class="ai-detected">
+            <svg class="icon-svg spark" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <div class="text">
+              <div class="ai-label">AI detected</div>
+              <div class="ai-result">Olive field jacket, cotton</div>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Category</label>
+            <div class="chip-row">
+              <span class="chip">Top</span>
+              <span class="chip active">Outerwear</span>
+              <span class="chip">Bottom</span>
+              <span class="chip">Shoes</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Color</label>
+            <div class="chip-row">
+              <span class="chip active">Olive</span>
+              <span class="chip">+ Add tag</span>
+            </div>
+          </div>
+        </div>
+        <div style="padding: 14px 22px 18px; border-top: 1px solid var(--line);">
+          <button class="btn-primary">Save to Closet</button>
+        </div>
+      </div>
+    </div>
+    <div class="annotations">
+      <div class="annotation"><div class="dot"></div>Photo uploads to Cloudinary → Claude vision auto-tags category &amp; color.</div>
+      <div class="annotation"><div class="dot"></div>User can override any tag before saving. Item joins the wardrobe grid.</div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footnote">
+  <p>A handoff document. Six screens, one core loop, designed for a developer to build in 10 days.<br>For the full step-by-step build plan, see <strong>instructions.md</strong>.</p>
+  <div class="sig">Closet · UI v1.0 · May 2026</div>
+</footer>
+
+</body>
+</html>

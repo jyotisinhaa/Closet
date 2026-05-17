@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+  <defs>
+    <marker id="arr3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#1A1612"/>
+    </marker>
+    <marker id="arr3-return" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#3A322A"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="640" fill="#FBF8F1"/>
+
+  <text x="600" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1A1612">Adding a Wardrobe Item</text>
+  <text x="600" y="58" text-anchor="middle" font-size="13" font-style="italic" fill="#8C8273">Screen 06 — user uploads a photo of something they own, AI auto-tags it</text>
+
+  <g font-size="13" font-weight="600" fill="#1A1612" text-anchor="middle">
+    <rect x="50" y="88" width="120" height="36" rx="6" fill="#EBE3D4" stroke="#1A1612"/>
+    <text x="110" y="111">User</text>
+
+    <rect x="220" y="88" width="120" height="36" rx="6" fill="#EBE3D4" stroke="#1A1612"/>
+    <text x="280" y="111">Frontend</text>
+
+    <rect x="450" y="88" width="120" height="36" rx="6" fill="#EBE3D4" stroke="#1A1612"/>
+    <text x="510" y="111">Backend</text>
+
+    <rect x="680" y="88" width="120" height="36" rx="6" fill="#1A1612"/>
+    <text x="740" y="111" fill="#FBF8F1">Cloudinary</text>
+
+    <rect x="850" y="88" width="120" height="36" rx="6" fill="#5B6A3F"/>
+    <text x="910" y="111" fill="#FBF8F1">Claude</text>
+
+    <rect x="1020" y="88" width="120" height="36" rx="6" fill="#EBE3D4" stroke="#1A1612"/>
+    <text x="1080" y="111">Database</text>
+  </g>
+
+  <g stroke="#D4CBB8" stroke-width="1" stroke-dasharray="4 4">
+    <line x1="110" y1="130" x2="110" y2="610"/>
+    <line x1="280" y1="130" x2="280" y2="610"/>
+    <line x1="510" y1="130" x2="510" y2="610"/>
+    <line x1="740" y1="130" x2="740" y2="610"/>
+    <line x1="910" y1="130" x2="910" y2="610"/>
+    <line x1="1080" y1="130" x2="1080" y2="610"/>
+  </g>
+
+  <!-- 1 User -> Frontend -->
+  <g>
+    <line x1="115" y1="170" x2="275" y2="170" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arr3)"/>
+    <circle cx="40" cy="170" r="11" fill="#1A1612"/>
+    <text x="40" y="174" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">1</text>
+    <text x="195" y="163" text-anchor="middle" font-size="11" fill="#1A1612">Tap "Add to Closet"</text>
+    <text x="195" y="184" text-anchor="middle" font-size="10" fill="#8C8273" font-style="italic">uploads garment photo</text>
+  </g>
+
+  <!-- 2 Frontend -> Backend -->
+  <g>
+    <line x1="285" y1="220" x2="505" y2="220" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arr3)"/>
+    <circle cx="40" cy="220" r="11" fill="#1A1612"/>
+    <text x="40" y="224" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">2</text>
+    <text x="395" y="213" text-anchor="middle" font-size="11" fill="#1A1612">POST /api/wardrobe (multipart image)</text>
+  </g>
+
+  <!-- 3 Backend -> Cloudinary -->
+  <g>
+    <line x1="515" y1="265" x2="735" y2="265" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arr3)"/>
+    <circle cx="40" cy="265" r="11" fill="#1A1612"/>
+    <text x="40" y="269" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">3</text>
+    <text x="625" y="258" text-anchor="middle" font-size="11" fill="#1A1612">Upload image</text>
+  </g>
+
+  <!-- 4 Cloudinary -> Backend -->
+  <g>
+    <line x1="735" y1="305" x2="515" y2="305" stroke="#3A322A" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#arr3-return)"/>
+    <circle cx="40" cy="305" r="11" fill="#3A322A"/>
+    <text x="40" y="309" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">4</text>
+    <text x="625" y="298" text-anchor="middle" font-size="11" fill="#3A322A" font-style="italic">Public URL</text>
+  </g>
+
+  <!-- 5 Backend -> Claude -->
+  <g>
+    <line x1="515" y1="350" x2="905" y2="350" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arr3)"/>
+    <circle cx="40" cy="350" r="11" fill="#1A1612"/>
+    <text x="40" y="354" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">5</text>
+    <text x="710" y="343" text-anchor="middle" font-size="11" fill="#1A1612">"Return JSON: category, color, description"</text>
+  </g>
+
+  <!-- 6 Claude -> Backend -->
+  <g>
+    <line x1="905" y1="395" x2="515" y2="395" stroke="#3A322A" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#arr3-return)"/>
+    <circle cx="40" cy="395" r="11" fill="#3A322A"/>
+    <text x="40" y="399" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">6</text>
+    <text x="710" y="388" text-anchor="middle" font-size="11" fill="#3A322A" font-style="italic">{ category, color, description }</text>
+  </g>
+
+  <!-- 7 Backend -> DB -->
+  <g>
+    <line x1="515" y1="440" x2="1075" y2="440" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arr3)"/>
+    <circle cx="40" cy="440" r="11" fill="#1A1612"/>
+    <text x="40" y="444" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">7</text>
+    <text x="795" y="433" text-anchor="middle" font-size="11" fill="#1A1612">INSERT wardrobe_item (returns item_id)</text>
+  </g>
+
+  <!-- 8 Backend -> Frontend (pre-filled form) -->
+  <g>
+    <line x1="505" y1="485" x2="285" y2="485" stroke="#3A322A" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#arr3-return)"/>
+    <circle cx="40" cy="485" r="11" fill="#3A322A"/>
+    <text x="40" y="489" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">8</text>
+    <text x="395" y="478" text-anchor="middle" font-size="11" fill="#3A322A" font-style="italic">Pre-filled form with AI tags</text>
+  </g>
+
+  <!-- 9 User confirms -->
+  <g>
+    <line x1="115" y1="535" x2="275" y2="535" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arr3)"/>
+    <circle cx="40" cy="535" r="11" fill="#1A1612"/>
+    <text x="40" y="539" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">9</text>
+    <text x="195" y="528" text-anchor="middle" font-size="11" fill="#1A1612">Confirm or override tags, Save</text>
+  </g>
+
+  <!-- 10 Frontend -> Backend PATCH, then -> Frontend OK -->
+  <g>
+    <line x1="285" y1="580" x2="1075" y2="580" stroke="#1A1612" stroke-width="1.5" marker-end="url(#arr3)"/>
+    <circle cx="40" cy="580" r="11" fill="#1A1612"/>
+    <text x="40" y="584" text-anchor="middle" font-size="11" fill="#FBF8F1" font-weight="600">10</text>
+    <text x="680" y="573" text-anchor="middle" font-size="11" fill="#1A1612">PATCH /api/wardrobe/{id} · UPDATE row · 200 OK → navigate to Wardrobe</text>
+  </g>
+</svg>

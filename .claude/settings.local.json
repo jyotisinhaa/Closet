@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(npm create *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(Start-Process -NoNewWindow npm -ArgumentList \"run\",\"dev\",\"--\",\"--port\",\"5173\" -PassThru)",
+      "Bash(mkdir \"D:\\\\Personal Projects\\\\Closet\\\\server\")",
+      "Bash(npm init *)",
+      "Bash(timeout 3 node index.js)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(npx vite *)",
+      "PowerShell(Get-ChildItem -Path \"d:\\\\Downloads1\\\\Hackkathon\" -Force | ForEach-Object { $_.FullName })",
+      "PowerShell(Get-ChildItem -Path \"d:\\\\Downloads1\\\\Hackkathon\\\\files\" -Force | ForEach-Object { $_.FullName })",
+      "PowerShell(Get-ChildItem -Path \"D:\\\\Personal Projects\\\\Closet\" -Recurse -Force | Where-Object { $_.Extension -match '\\\\.\\(jpg|jpeg|png|webp|gif\\)$' } | Select-Object FullName, LastWriteTime | Sort-Object LastWriteTime -Descending)",
+      "PowerShell(Copy-Item *)",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Test-Path *)"
+    ]
+  }
+}
