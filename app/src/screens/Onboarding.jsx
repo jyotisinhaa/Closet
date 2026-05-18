@@ -1,224 +1,123 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// ── Sidebar nav definition ────────────────────────────────────────────────────
-const NAV = [
+const BODY_TYPES = [
   {
-    key: "onboarding",
-    label: "Onboarding",
-    icon: (
-      <svg
-        width="15"
-        height="15"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
+    key: "hourglass", label: "Hourglass", desc: "Balanced shoulders & hips, defined waist",
+    svg: (
+      <svg viewBox="0 0 60 120" width="44" height="88">
+        <circle cx="30" cy="10" r="8" fill="currentColor"/>
+        <path d="M 25,18 C 16,22 7,24 7,26 C 4,36 10,48 20,56 C 12,62 4,66 7,68 L 7,78 L 23,78 L 23,118 L 37,118 L 37,78 L 53,78 L 53,68 C 56,66 48,62 40,56 C 50,48 56,36 53,26 C 53,24 44,22 35,18 Z" fill="currentColor"/>
       </svg>
     ),
   },
   {
-    key: "wardrobe",
-    label: "Wardrobe",
-    icon: (
-      <svg
-        width="15"
-        height="15"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="2" y="3" width="20" height="18" rx="2" />
-        <line x1="12" y1="3" x2="12" y2="21" />
+    key: "rectangle", label: "Rectangle", desc: "Shoulders, waist & hips similar width",
+    svg: (
+      <svg viewBox="0 0 60 120" width="44" height="88">
+        <circle cx="30" cy="10" r="8" fill="currentColor"/>
+        <path d="M 25,18 C 20,22 16,23 16,26 C 14,36 16,48 16,56 C 15,62 14,66 16,68 L 16,78 L 24,78 L 24,118 L 36,118 L 36,78 L 44,78 L 44,68 C 46,66 45,62 44,56 C 44,48 46,36 44,26 C 44,23 40,22 35,18 Z" fill="currentColor"/>
       </svg>
     ),
   },
   {
-    key: "tryon",
-    label: "Try On",
-    icon: (
-      <svg
-        width="15"
-        height="15"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-        <circle cx="12" cy="13" r="4" />
+    key: "pear", label: "Pear", desc: "Hips wider than shoulders",
+    svg: (
+      <svg viewBox="0 0 60 120" width="44" height="88">
+        <circle cx="30" cy="10" r="8" fill="currentColor"/>
+        <path d="M 26,18 C 22,22 20,23 20,26 C 18,36 18,48 18,56 C 14,62 6,66 7,68 L 7,78 L 23,78 L 23,118 L 37,118 L 37,78 L 53,78 L 53,68 C 54,66 46,62 42,56 C 42,48 42,36 40,26 C 40,23 38,22 34,18 Z" fill="currentColor"/>
       </svg>
     ),
   },
   {
-    key: "results",
-    label: "Results",
-    icon: (
-      <svg
-        width="15"
-        height="15"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    key: "apple", label: "Apple", desc: "Shoulders wider, fuller midsection",
+    svg: (
+      <svg viewBox="0 0 60 120" width="44" height="88">
+        <circle cx="30" cy="10" r="8" fill="currentColor"/>
+        <path d="M 25,18 C 19,22 14,23 14,26 C 8,34 5,46 7,56 C 5,62 8,66 14,68 L 14,78 L 24,78 L 24,118 L 36,118 L 36,78 L 46,78 L 46,68 C 52,66 55,62 53,56 C 55,46 52,34 46,26 C 46,23 41,22 35,18 Z" fill="currentColor"/>
       </svg>
     ),
   },
   {
-    key: "wishlist",
-    label: "Wishlist",
-    icon: (
-      <svg
-        width="15"
-        height="15"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-      </svg>
-    ),
-  },
-  {
-    key: "additem",
-    label: "Add Item",
-    icon: (
-      <svg
-        width="15"
-        height="15"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="8" x2="12" y2="16" />
-        <line x1="8" y1="12" x2="16" y2="12" />
-      </svg>
-    ),
-  },
-  {
-    key: "uploadphoto",
-    label: "Upload Photo",
-    icon: (
-      <svg
-        width="15"
-        height="15"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-        <polyline points="17 8 12 3 7 8" />
-        <line x1="12" y1="3" x2="12" y2="15" />
-      </svg>
-    ),
-  },
-  {
-    key: "profile",
-    label: "Profile",
-    icon: (
-      <svg
-        width="15"
-        height="15"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
-      </svg>
-    ),
-  },
-  {
-    key: "settings",
-    label: "Settings",
-    icon: (
-      <svg
-        width="15"
-        height="15"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="12" cy="12" r="3" />
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    key: "inverted", label: "Inverted Triangle", desc: "Shoulders notably wider than hips",
+    svg: (
+      <svg viewBox="0 0 60 120" width="44" height="88">
+        <circle cx="30" cy="10" r="8" fill="currentColor"/>
+        <path d="M 25,18 C 15,22 5,23 5,26 C 4,36 12,48 18,56 C 16,62 18,66 22,68 L 22,78 L 27,78 L 27,118 L 33,118 L 33,78 L 38,78 L 38,68 C 42,66 44,62 42,56 C 48,48 56,36 55,26 C 55,23 45,22 35,18 Z" fill="currentColor"/>
       </svg>
     ),
   },
 ];
 
 export default function Onboarding() {
-  const navigate = useNavigate();
+  const navigate     = useNavigate();
   const fileInputRef = useRef(null);
-  const cameraInputRef = useRef(null);
+  const videoRef     = useRef(null);
+  const streamRef    = useRef(null);
 
-  const [photo, setPhoto] = useState(null);
+  const [gender,      setGender]      = useState("");
+  const [bodyType,    setBodyType]    = useState("");
+  const [photo,       setPhoto]       = useState(null);
+  const [hoveredBody, setHoveredBody] = useState("");
+  const [showCamera,  setShowCamera]  = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState("");
+  const [error,     setError]     = useState("");
 
   function handleFileSelect(e) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setError("Please select an image file.");
-      return;
-    }
+    if (!file.type.startsWith("image/")) { setError("Please select an image file."); return; }
     setError("");
     setPhoto({ file, preview: URL.createObjectURL(file) });
   }
 
-  async function handleNext() {
-    if (!photo) {
-      setError("Please add a photo to continue.");
-      return;
+  async function openCamera() {
+    setError("");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+      streamRef.current = stream;
+      setShowCamera(true);
+      setTimeout(() => {
+        if (videoRef.current) videoRef.current.srcObject = stream;
+      }, 50);
+    } catch {
+      setError("Camera access denied. Please allow camera permission or upload a photo instead.");
     }
+  }
+
+  function capturePhoto() {
+    const video = videoRef.current;
+    const canvas = document.createElement("canvas");
+    canvas.width  = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0);
+    canvas.toBlob((blob) => {
+      const file = new File([blob], "photo.jpg", { type: "image/jpeg" });
+      setPhoto({ file, preview: URL.createObjectURL(blob) });
+      closeCamera();
+    }, "image/jpeg", 0.92);
+  }
+
+  function closeCamera() {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    setShowCamera(false);
+  }
+
+  async function handleSubmit() {
+    if (!photo)    { setError("Please add a photo to continue."); return; }
+    if (!gender)   { setError("Please select your gender."); return; }
+    if (!bodyType) { setError("Please select your body type."); return; }
+
     setUploading(true);
     setError("");
     try {
       const fd = new FormData();
       fd.append("photo", photo.file);
-      const res = await fetch("/api/profile/photo", {
-        method: "POST",
-        body: fd,
-      });
+      const res = await fetch("/api/profile/photo", { method: "POST", body: fd });
       if (!res.ok) throw new Error("Upload failed");
       const { profile_photo_url } = await res.json();
-      const existing = JSON.parse(
-        localStorage.getItem("closet_profile") || "{}",
-      );
-      localStorage.setItem(
-        "closet_profile",
-        JSON.stringify({ ...existing, profilePhotoUrl: profile_photo_url }),
-      );
+      localStorage.setItem("closet_profile", JSON.stringify({ gender, bodyType, profilePhotoUrl: profile_photo_url }));
       navigate("/wardrobe");
     } catch {
       setError("Upload failed. Please try again.");
@@ -228,506 +127,233 @@ export default function Onboarding() {
   }
 
   return (
+    <>
     <div
-      style={{ display: "flex", minHeight: "100svh", background: "var(--ink)" }}
+      style={{
+        flex: 1, background: "var(--paper)",
+        display: "flex", justifyContent: "center", alignItems: "flex-start",
+        padding: "clamp(40px, 6vw, 72px) clamp(24px, 6vw, 80px) 60px",
+        overflowY: "auto",
+      }}
     >
-      {/* ── Sidebar ── */}
-      <aside
-        className="ob-sidebar"
-        style={{
-          width: "200px",
-          flexShrink: 0,
-          background: "var(--ink)",
-          padding: "32px 18px",
-          flexDirection: "column",
-          position: "sticky",
-          top: 0,
-          height: "100svh",
-          overflowY: "auto",
-        }}
-      >
-        {/* Brand */}
-        <div
-          style={{
-            fontFamily: "'Fraunces', serif",
-            fontWeight: 500,
-            fontSize: "20px",
-            fontVariationSettings: '"SOFT" 100, "WONK" 1',
-            letterSpacing: "-0.01em",
-            color: "var(--paper)",
-            marginBottom: "32px",
-          }}
-        >
-          Clos
-          <em
-            style={{
-              fontFamily: "'Instrument Serif', serif",
-              fontStyle: "italic",
-              fontWeight: 400,
-              color: "var(--terracotta)",
-            }}
-          >
-            et
-          </em>
-        </div>
+        <div style={{ width: "100%", maxWidth: "540px" }}>
 
-        {/* Nav */}
-        <nav
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "1px",
-            flex: 1,
-          }}
-        >
-          {NAV.map((item) => {
-            const active = item.key === "onboarding";
-            return (
-              <div
-                key={item.key}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  padding: "9px 10px",
-                  borderRadius: "8px",
-                  background: active ? "rgba(255,255,255,0.1)" : "transparent",
-                  cursor: "default",
-                }}
-              >
-                <span
-                  style={{
-                    color: active ? "var(--paper)" : "rgba(251,248,241,0.3)",
-                    flexShrink: 0,
-                  }}
-                >
-                  {item.icon}
-                </span>
-                <span
-                  style={{
-                    fontFamily: "'Inter Tight', sans-serif",
-                    fontSize: "13px",
-                    fontWeight: active ? 500 : 400,
-                    color: active ? "var(--paper)" : "rgba(251,248,241,0.3)",
-                  }}
-                >
-                  {item.label}
-                </span>
-              </div>
-            );
-          })}
-        </nav>
-
-        {/* Log out */}
-        <button
-          onClick={() => navigate("/login")}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            padding: "9px 10px",
-            borderRadius: "8px",
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            width: "100%",
-            textAlign: "left",
-            marginTop: "12px",
-          }}
-        >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="rgba(251,248,241,0.35)"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-          <span
-            style={{
-              fontFamily: "'Inter Tight', sans-serif",
-              fontSize: "13px",
-              color: "rgba(251,248,241,0.35)",
-            }}
-          >
-            Log out
-          </span>
-        </button>
-      </aside>
-
-      {/* ── Mobile top bar ── */}
-      <div
-        className="ob-mobile-header"
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 20,
-          background: "var(--ink)",
-          padding: "16px 22px",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div
-          style={{
-            fontFamily: "'Fraunces', serif",
-            fontWeight: 500,
-            fontSize: "18px",
-            fontVariationSettings: '"SOFT" 100, "WONK" 1',
-            color: "var(--paper)",
-          }}
-        >
-          Clos
-          <em
-            style={{
-              fontFamily: "'Instrument Serif', serif",
-              fontStyle: "italic",
-              fontWeight: 400,
-              color: "var(--terracotta)",
-            }}
-          >
-            et
-          </em>
-        </div>
-        <span
-          style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: "9px",
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            color: "rgba(251,248,241,0.45)",
-          }}
-        >
-          Onboarding
-        </span>
-      </div>
-
-      {/* ── Main content ── */}
-      <div
-        style={{
-          flex: 1,
-          background: "var(--paper)",
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "center",
-          padding: "clamp(72px, 8vw, 96px) clamp(24px, 6vw, 80px) 60px",
-          minHeight: "100svh",
-          overflowY: "auto",
-        }}
-      >
-        <div style={{ width: "100%", maxWidth: "460px" }}>
           {/* Heading */}
-          <h1
-            style={{
-              fontFamily: "'Fraunces', serif",
-              fontWeight: 300,
-              fontSize: "clamp(28px, 4.5vw, 40px)",
-              letterSpacing: "-0.02em",
-              lineHeight: 1.1,
-              color: "var(--ink)",
-              marginBottom: "10px",
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "10px",
-              flexWrap: "wrap",
-            }}
-          >
-            Let's get to know you
-            <span
-              style={{
-                color: "var(--gold)",
-                fontSize: "0.7em",
-                lineHeight: 1.4,
-              }}
-            >
-              ✦
-            </span>
+          <h1 style={{ fontFamily: "'Fraunces', serif", fontWeight: 300, fontSize: "clamp(36px, 5.5vw, 56px)", letterSpacing: "-0.02em", lineHeight: 1.1, color: "var(--ink)", marginBottom: "8px", textAlign: "center" }}>
+            Let&apos;s get to know you <span style={{ color: "var(--gold)", fontSize: "0.7em" }}>✦</span>
           </h1>
-
-          {/* Italic sub */}
-          <p
-            style={{
-              fontFamily: "'Fraunces', serif",
-              fontStyle: "italic",
-              fontWeight: 300,
-              fontSize: "18px",
-              color: "var(--ink)",
-              marginBottom: "14px",
-            }}
-          >
-            Show us you, once.
+          <p style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 300, fontSize: "17px", color: "var(--ink-soft)", marginBottom: "20px", textAlign: "center" }}>
+            Just a few things so we can style you perfectly.
           </p>
+          <div style={{ height: "1px", background: "var(--line)", margin: "0 0 40px" }} />
 
-          {/* Description */}
-          <p
-            style={{
-              fontFamily: "'Inter Tight', sans-serif",
-              fontSize: "14px",
-              color: "var(--muted)",
-              lineHeight: 1.7,
-              maxWidth: "360px",
-              marginBottom: "36px",
-            }}
-          >
-            One clean full-body photo. We use it to render every try-on going
-            forward.{" "}
-            <strong style={{ color: "var(--ink-soft)", fontWeight: 500 }}>
-              Your photo stays yours.
-            </strong>
-          </p>
-
-          {/* Photo preview (if selected) */}
-          {photo && (
-            <div
-              style={{
-                marginBottom: "28px",
-                width: "180px",
-                aspectRatio: "3/4",
-                borderRadius: "14px",
-                overflow: "hidden",
-                border: "1.5px solid var(--line)",
-                position: "relative",
-              }}
-            >
-              <img
-                src={photo.preview}
-                alt="Your photo"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-              <button
-                onClick={() => setPhoto(null)}
-                style={{
-                  position: "absolute",
-                  top: "8px",
-                  right: "8px",
-                  background: "rgba(26,22,18,0.72)",
-                  color: "var(--paper)",
-                  border: "none",
-                  borderRadius: "100px",
-                  padding: "3px 10px",
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: "8px",
-                  letterSpacing: "0.15em",
-                  textTransform: "uppercase",
-                  cursor: "pointer",
-                }}
-              >
-                Retake
-              </button>
+          {/* Gender */}
+          <div style={{ marginBottom: "28px" }}>
+            <h3 style={sectionHeader}>Gender</h3>
+            <p style={sectionSub}>Helps us show the most relevant clothing fits</p>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              {["Female", "Male", "Non-binary", "Prefer not to say"].map((opt) => (
+                <button key={opt} type="button" onClick={() => setGender(opt === gender ? "" : opt)} style={{
+                  padding: "10px 20px", borderRadius: "100px", cursor: "pointer",
+                  border: gender === opt ? "1.5px solid var(--terracotta)" : "1.5px solid var(--line)",
+                  background: gender === opt ? "rgba(194,86,58,0.07)" : "white",
+                  color: gender === opt ? "var(--terracotta)" : "var(--ink-soft)",
+                  fontFamily: "'Inter Tight', sans-serif", fontSize: "13px",
+                  fontWeight: gender === opt ? 600 : 400, transition: "all 0.15s",
+                }}>
+                  {opt}
+                </button>
+              ))}
             </div>
-          )}
-
-          {/* CTA buttons */}
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-          >
-            <button
-              onClick={() => cameraInputRef.current?.click()}
-              style={btnDark}
-            >
-              <svg
-                width="17"
-                height="17"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                <circle cx="12" cy="13" r="4" />
-              </svg>
-              Take a Photo
-            </button>
-
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              style={btnOutline}
-            >
-              <svg
-                width="17"
-                height="17"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <polyline points="21 15 16 10 5 21" />
-              </svg>
-              Upload from Camera Roll
-            </button>
           </div>
 
-          <input
-            ref={cameraInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={handleFileSelect}
-            style={{ display: "none" }}
-          />
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileSelect}
-            style={{ display: "none" }}
-          />
+          {/* Body type */}
+          <div style={{ marginBottom: "28px" }}>
+            <h3 style={sectionHeader}>Body Shape</h3>
+            <p style={sectionSub}>So we can suggest the best cuts and silhouettes for you</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+              {BODY_TYPES.map((b) => {
+                const sel     = bodyType === b.key;
+                const hovered = hoveredBody === b.key && !sel;
+                return (
+                  <button
+                    key={b.key} type="button"
+                    onClick={() => setBodyType(sel ? "" : b.key)}
+                    onMouseEnter={() => setHoveredBody(b.key)}
+                    onMouseLeave={() => setHoveredBody("")}
+                    style={{
+                      flex: "1 1 calc(33% - 8px)", minWidth: "110px",
+                      padding: "16px 12px 14px", borderRadius: "14px", textAlign: "center",
+                      border: sel ? "1.5px solid var(--terracotta)" : hovered ? "1.5px solid rgba(194,86,58,0.4)" : "1.5px solid var(--line)",
+                      background: sel ? "rgba(194,86,58,0.06)" : hovered ? "rgba(194,86,58,0.03)" : "white",
+                      cursor: "pointer", transition: "all 0.18s ease",
+                      display: "flex", flexDirection: "column", alignItems: "center", gap: "10px",
+                      transform: hovered ? "translateY(-2px)" : "none",
+                      boxShadow: hovered ? "0 4px 16px rgba(194,86,58,0.1)" : "none",
+                    }}
+                  >
+                    <div style={{ color: sel ? "var(--terracotta)" : hovered ? "rgba(194,86,58,0.7)" : "var(--ink-soft)", opacity: sel ? 1 : hovered ? 0.85 : 0.55, transition: "all 0.18s ease" }}>
+                      {b.svg}
+                    </div>
+                    <div>
+                      <div style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: "13px", fontWeight: 700, color: sel ? "var(--terracotta)" : hovered ? "var(--ink)" : "var(--ink)", marginBottom: "3px" }}>
+                        {b.label}
+                      </div>
+                      <div style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: "10px", color: "var(--muted)", lineHeight: 1.4 }}>
+                        {b.desc}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-          {/* Privacy notice */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "9px",
-              marginTop: "20px",
-            }}
-          >
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--muted)"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ flexShrink: 0, marginTop: "2px" }}
-            >
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-            <p
-              style={{
-                fontFamily: "'Inter Tight', sans-serif",
-                fontSize: "12px",
-                color: "var(--muted)",
-                lineHeight: 1.55,
-              }}
-            >
-              Your photo is private and secure. Only you can see it.
-            </p>
+          {/* Photo */}
+          <div style={{ marginBottom: "36px" }}>
+            <h3 style={sectionHeader}>Your Photo</h3>
+            <p style={sectionSub}>A full-body shot works best — we use it to render every try-on</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {photo && (
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", background: "rgba(91,106,63,0.08)", border: "1.5px solid rgba(91,106,63,0.2)" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--olive)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  <span style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: "13px", color: "var(--olive-deep)", fontWeight: 500, flex: 1 }}>Photo selected</span>
+                  <button onClick={() => setPhoto(null)} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'Inter Tight', sans-serif", fontSize: "12px", color: "var(--muted)", padding: 0 }}>Remove</button>
+                </div>
+              )}
+              <button onClick={openCamera} style={btnDark}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+                </svg>
+                Take a Photo
+              </button>
+              <button onClick={() => fileInputRef.current?.click()} style={btnOutline}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Upload from Gallery
+              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <span style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: "11px", color: "var(--muted)" }}>Private — only you can see it</span>
+              </div>
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} style={{ display: "none" }} />
+            </div>
           </div>
 
           {/* Error */}
           {error && (
-            <p
-              style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: "9px",
-                color: "var(--terracotta)",
-                letterSpacing: "0.05em",
-                marginTop: "14px",
-              }}
-            >
+            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "9px", color: "var(--terracotta)", letterSpacing: "0.05em", marginBottom: "16px" }}>
               {error}
             </p>
           )}
 
-          {/* Next button */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              marginTop: "36px",
-            }}
-          >
-            <button
-              onClick={handleNext}
-              disabled={uploading}
-              style={{
-                background: "var(--olive)",
-                color: "var(--paper)",
-                border: "none",
-                borderRadius: "100px",
-                padding: "13px 28px",
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: "11px",
-                fontWeight: 500,
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                cursor: uploading ? "not-allowed" : "pointer",
-                opacity: uploading ? 0.6 : 1,
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                transition: "opacity 0.15s",
-              }}
-            >
-              {uploading ? (
-                "Saving…"
-              ) : (
-                <>
-                  Next
-                  <svg
-                    width="13"
-                    height="13"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
-                </>
-              )}
-            </button>
-          </div>
+          {/* Submit */}
+          <button onClick={handleSubmit} disabled={uploading} style={{
+            width: "100%", background: "var(--terracotta)", color: "var(--paper)", border: "none",
+            borderRadius: "12px", padding: "16px",
+            fontFamily: "'Inter Tight', sans-serif", fontSize: "15px", fontWeight: 600,
+            cursor: uploading ? "not-allowed" : "pointer", opacity: uploading ? 0.6 : 1,
+            display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
+            transition: "opacity 0.15s",
+          }}>
+            {uploading ? "Setting up your wardrobe…" : (
+              <>
+                Set up my wardrobe
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </>
+            )}
+          </button>
+
+        </div>
+    </div>
+
+    {/* ── Camera modal ── */}
+
+    {showCamera && (
+      <div style={{
+        position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)",
+        zIndex: 200, display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center", gap: "24px",
+        padding: "24px",
+      }}>
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          style={{ maxWidth: "100%", maxHeight: "65vh", borderRadius: "16px", background: "#111", display: "block" }}
+        />
+        <div style={{ display: "flex", gap: "12px" }}>
+          <button onClick={capturePhoto} style={{
+            background: "var(--terracotta)", color: "white", border: "none",
+            borderRadius: "100px", padding: "14px 32px",
+            fontFamily: "'Inter Tight', sans-serif", fontSize: "15px", fontWeight: 600, cursor: "pointer",
+            display: "flex", alignItems: "center", gap: "8px",
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+            Capture
+          </button>
+          <button onClick={closeCamera} style={{
+            background: "rgba(255,255,255,0.12)", color: "white", border: "1px solid rgba(255,255,255,0.2)",
+            borderRadius: "100px", padding: "14px 28px",
+            fontFamily: "'Inter Tight', sans-serif", fontSize: "15px", fontWeight: 500, cursor: "pointer",
+          }}>
+            Cancel
+          </button>
         </div>
       </div>
+    )}
+    </>
+  );
+}
+
+function Section({ children }) {
+  return (
+    <div style={{ marginBottom: "36px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
+        <div style={{ flex: 1, height: "1px", background: "var(--line)" }} />
+      </div>
+      <div style={{ marginBottom: "16px" }}>
+      </div>
+      {children}
     </div>
   );
 }
 
-// ── Shared styles ─────────────────────────────────────────────────────────────
+const sectionHeader = {
+  fontFamily: "'Fraunces', serif",
+  fontWeight: 500,
+  fontSize: "20px",
+  letterSpacing: "-0.01em",
+  color: "var(--ink)",
+  marginBottom: "4px",
+};
+
+const sectionSub = {
+  fontFamily: "'Inter Tight', sans-serif",
+  fontSize: "13px",
+  color: "var(--muted)",
+  marginBottom: "16px",
+};
 
 const btnDark = {
-  width: "100%",
-  background: "var(--ink)",
-  color: "var(--paper)",
-  border: "none",
-  borderRadius: "10px",
-  padding: "16px 20px",
-  fontFamily: "'Inter Tight', sans-serif",
-  fontSize: "15px",
-  fontWeight: 500,
-  cursor: "pointer",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: "10px",
+  background: "var(--ink)", color: "var(--paper)", border: "none",
+  borderRadius: "10px", padding: "13px 18px",
+  fontFamily: "'Inter Tight', sans-serif", fontSize: "14px", fontWeight: 500,
+  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
 };
 
 const btnOutline = {
-  width: "100%",
-  background: "var(--paper)",
-  color: "var(--ink)",
-  border: "1.5px solid var(--line)",
-  borderRadius: "10px",
-  padding: "15px 20px",
-  fontFamily: "'Inter Tight', sans-serif",
-  fontSize: "15px",
-  fontWeight: 500,
-  cursor: "pointer",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: "10px",
+  background: "white", color: "var(--ink)", border: "1.5px solid var(--line)",
+  borderRadius: "10px", padding: "12px 18px",
+  fontFamily: "'Inter Tight', sans-serif", fontSize: "14px", fontWeight: 500,
+  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
 };

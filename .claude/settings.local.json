@@ -16,7 +16,8 @@
       "PowerShell(Get-ChildItem -Path \"D:\\\\Personal Projects\\\\Closet\" -Recurse -Force | Where-Object { $_.Extension -match '\\\\.\\(jpg|jpeg|png|webp|gif\\)$' } | Select-Object FullName, LastWriteTime | Sort-Object LastWriteTime -Descending)",
       "PowerShell(Copy-Item *)",
       "PowerShell(Get-ChildItem *)",
-      "PowerShell(Test-Path *)"
+      "PowerShell(Test-Path *)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\jyoti\\\\Downloads\" -Force -ErrorAction SilentlyContinue | Select-Object Name, @{N=\"Size \\(MB\\)\";E={[math]::Round\\($_.Length / 1MB, 1\\)}}, LastWriteTime | Format-Table -AutoSize)"
     ]
   }
 }

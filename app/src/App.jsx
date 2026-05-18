@@ -14,7 +14,7 @@ import Home from "./screens/Home";
 
 const NAV = [
   {
-    num: "01",
+    num: "",
     key: "onboarding",
     label: "Onboarding",
     path: "/onboarding",
@@ -29,17 +29,11 @@ const NAV = [
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
+        <circle cx="12" cy="12" r="10" />
+        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
       </svg>
     ),
-    sub: [
-      "Profile type",
-      "Your style",
-      "Colour palette",
-      "Body type",
-      "Your photo",
-    ],
+    sub: [],
   },
   {
     num: "02",
@@ -409,7 +403,7 @@ function Sidebar({ collapsed, setCollapsed, openSections, toggleSection }) {
 
 function AppShell() {
   const location = useLocation();
-  const isAuthPage = ["/", "/login", "/onboarding"].includes(location.pathname);
+  const isAuthPage = ["/", "/login"].includes(location.pathname);
 
   const [collapsed, setCollapsed] = useState(false);
   const [openSections, setOpenSections] = useState({ wardrobe: true });
@@ -423,7 +417,6 @@ function AppShell() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/onboarding" element={<Onboarding />} />
       </Routes>
     );
   }
@@ -452,6 +445,7 @@ function AppShell() {
         }}
       >
         <Routes>
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/wardrobe" element={<Wardrobe sidebar />} />
           <Route path="/profile" element={<Profile sidebar />} />
           <Route path="*" element={<Home />} />
