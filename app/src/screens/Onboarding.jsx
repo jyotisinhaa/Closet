@@ -55,6 +55,9 @@ export default function Onboarding() {
   const videoRef     = useRef(null);
   const streamRef    = useRef(null);
 
+  const savedProfile = JSON.parse(localStorage.getItem("closet_profile") || "{}");
+  const isComplete   = !!(savedProfile.gender && savedProfile.bodyType && savedProfile.profilePhotoUrl);
+
   const [gender,      setGender]      = useState("");
   const [bodyType,    setBodyType]    = useState("");
   const [photo,       setPhoto]       = useState(null);
@@ -62,6 +65,146 @@ export default function Onboarding() {
   const [showCamera,  setShowCamera]  = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error,     setError]     = useState("");
+
+  if (isComplete) {
+    const bodyLabel = BODY_TYPES.find(b => b.key === savedProfile.bodyType)?.label ?? savedProfile.bodyType;
+    const bodySvg   = BODY_TYPES.find(b => b.key === savedProfile.bodyType)?.svg;
+
+    return (
+      <div style={{
+        flex: 1, display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        background: "var(--paper)", padding: "48px 32px",
+        textAlign: "center",
+      }}>
+
+        {/* Decorative sparkles */}
+        <div style={{ position: "relative", marginBottom: "28px" }}>
+          <span style={{ position: "absolute", top: "-18px", left: "-24px", fontSize: "18px", color: "var(--gold)", opacity: 0.6 }}>✦</span>
+          <span style={{ position: "absolute", top: "-8px",  right: "-28px", fontSize: "11px", color: "var(--terracotta)", opacity: 0.5 }}>✦</span>
+          <span style={{ position: "absolute", bottom: "-12px", left: "-10px", fontSize: "9px", color: "var(--gold)", opacity: 0.4 }}>✦</span>
+
+          {/* Check badge */}
+          <div style={{
+            width: "80px", height: "80px", borderRadius: "50%",
+            background: "linear-gradient(135deg, rgba(91,106,63,0.15), rgba(91,106,63,0.05))",
+            border: "1.5px solid rgba(91,106,63,0.3)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 8px 32px rgba(91,106,63,0.15)",
+          }}>
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--olive)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+        </div>
+
+        {/* Heading */}
+        <h1 style={{
+          fontFamily: "'Fraunces', serif", fontWeight: 600,
+          fontSize: "clamp(32px, 5vw, 48px)", letterSpacing: "-0.03em",
+          color: "var(--ink)", marginBottom: "10px", lineHeight: 1.1,
+        }}>
+          You&apos;re all set{" "}
+          <em style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic", color: "var(--terracotta)" }}>✦</em>
+        </h1>
+
+        <p style={{
+          fontFamily: "'Fraunces', serif", fontStyle: "italic",
+          fontWeight: 300, fontSize: "18px", color: "var(--ink-soft)",
+          marginBottom: "36px",
+        }}>
+          Your style profile is ready.
+        </p>
+
+        {/* Profile summary cards */}
+        <div style={{ display: "flex", gap: "12px", marginBottom: "40px", flexWrap: "wrap", justifyContent: "center" }}>
+
+          {/* Photo card */}
+          {savedProfile.profilePhotoUrl && (
+            <div style={{
+              width: "100px", borderRadius: "16px", overflow: "hidden",
+              border: "1.5px solid var(--line)", aspectRatio: "3/4",
+              boxShadow: "0 4px 20px rgba(26,22,18,0.1)",
+            }}>
+              <img src={savedProfile.profilePhotoUrl} alt="Your photo"
+                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            </div>
+          )}
+
+          {/* Info cards */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px", justifyContent: "center" }}>
+
+            {/* Gender card */}
+            <div style={{
+              background: "white", border: "1.5px solid var(--line)", borderRadius: "14px",
+              padding: "14px 20px", textAlign: "left", minWidth: "160px",
+              boxShadow: "0 2px 12px rgba(26,22,18,0.05)",
+            }}>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--muted)", marginBottom: "6px" }}>
+                Gender
+              </div>
+              <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 500, fontSize: "20px", letterSpacing: "-0.01em", color: "var(--ink)" }}>
+                {savedProfile.gender}
+              </div>
+            </div>
+
+            {/* Body shape card */}
+            <div style={{
+              background: "white", border: "1.5px solid var(--line)", borderRadius: "14px",
+              padding: "14px 20px", textAlign: "left",
+              boxShadow: "0 2px 12px rgba(26,22,18,0.05)",
+              display: "flex", alignItems: "center", gap: "14px",
+            }}>
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--muted)", marginBottom: "6px" }}>
+                  Body Shape
+                </div>
+                <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 500, fontSize: "20px", letterSpacing: "-0.01em", color: "var(--ink)" }}>
+                  {bodyLabel}
+                </div>
+              </div>
+              {bodySvg && (
+                <div style={{ color: "var(--terracotta)", opacity: 0.7, flexShrink: 0 }}>
+                  {bodySvg}
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+
+        {/* CTAs */}
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", justifyContent: "center" }}>
+          <button
+            onClick={() => navigate("/wardrobe")}
+            style={{
+              background: "var(--terracotta)", color: "white", border: "none",
+              borderRadius: "100px", padding: "14px 32px", cursor: "pointer",
+              fontFamily: "'Inter Tight', sans-serif", fontSize: "14px", fontWeight: 600,
+              display: "flex", alignItems: "center", gap: "8px",
+              boxShadow: "0 4px 16px rgba(194,86,58,0.35)",
+            }}
+          >
+            Go to My Wardrobe
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
+          <button
+            onClick={() => { localStorage.removeItem("closet_profile"); window.location.reload(); }}
+            style={{
+              background: "none", color: "var(--muted)", border: "1.5px solid var(--line)",
+              borderRadius: "100px", padding: "14px 24px", cursor: "pointer",
+              fontFamily: "'Inter Tight', sans-serif", fontSize: "14px", fontWeight: 500,
+            }}
+          >
+            Redo setup
+          </button>
+        </div>
+
+      </div>
+    );
+  }
 
   function handleFileSelect(e) {
     const file = e.target.files?.[0];

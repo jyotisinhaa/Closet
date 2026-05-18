@@ -36,7 +36,7 @@ const NAV = [
     sub: [],
   },
   {
-    num: "02",
+    num: "",
     key: "wardrobe",
     label: "My Wardrobe",
     path: "/wardrobe",
@@ -55,7 +55,7 @@ const NAV = [
         <polyline points="9 22 9 12 15 12 15 22" />
       </svg>
     ),
-    sub: ["All items", "Add item"],
+    sub: [],
   },
   {
     num: "03",

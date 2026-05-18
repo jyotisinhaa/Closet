@@ -160,6 +160,7 @@ app.post('/api/wardrobe', upload.single('photo'), async (req, res) => {
     const item = {
       id: crypto.randomUUID(),
       image_url: result.secure_url,
+      cloudinary_public_id: result.public_id,
       category: req.body.category || 'top',
       color: req.body.color || '',
       description: req.body.description || '',
@@ -177,8 +178,18 @@ app.post('/api/wardrobe', upload.single('photo'), async (req, res) => {
   }
 })
 
-app.delete('/api/wardrobe/:id', (req, res) => {
+app.delete('/api/wardrobe/:id', async (req, res) => {
   const data = readData()
+  const item = data.wardrobe.find(i => i.id === req.params.id)
+
+  if (item?.cloudinary_public_id) {
+    try {
+      await cloudinary.uploader.destroy(item.cloudinary_public_id, { invalidate: true })
+    } catch (err) {
+      console.error('Cloudinary delete error:', err)
+    }
+  }
+
   data.wardrobe = data.wardrobe.filter(i => i.id !== req.params.id)
   writeData(data)
   res.json({ ok: true })
