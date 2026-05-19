@@ -237,5 +237,166 @@ app.delete('/api/wishlist/:id', (req, res) => {
   res.json({ ok: true })
 })
 
+// ── Perfect Corp helpers ──────────────────────────────────────────────────────
+
+const PERFECT_CORP_BASE = 'https://yce-api-01.makeupar.com/s2s/v2.0'
+
+async function startPerfectCorpRender({ srcFileUrl, srcId, refFileUrl, garmentCategory = 'auto', changeShoes = false }) {
+  const body = { garment_category: garmentCategory, change_shoes: changeShoes, ref_file_url: refFileUrl }
+  if (srcId) body.src_id = srcId
+  else body.src_file_url = srcFileUrl
+
+  const res = await fetch(`${PERFECT_CORP_BASE}/task/cloth`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.PERFECT_CORP_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  })
+  const json = await res.json()
+  if (!json.data?.task_id) throw new Error(`Perfect Corp start failed: ${JSON.stringify(json)}`)
+  return json.data.task_id
+}
+
+async function pollPerfectCorpTask(taskId) {
+  for (let i = 0; i < 20; i++) {
+    await new Promise(r => setTimeout(r, 3000))
+    const res = await fetch(`${PERFECT_CORP_BASE}/task/cloth/${taskId}`, {
+      headers: { Authorization: `Bearer ${process.env.PERFECT_CORP_API_KEY}` },
+    })
+    const json = await res.json()
+    const { task_status, results, error } = json.data || {}
+    if (task_status === 'success') return results.output[0]
+    if (task_status === 'error') throw new Error(`Perfect Corp error: ${error}`)
+  }
+  throw new Error('Perfect Corp render timed out after 60s')
+}
+
+async function perfectCorpRender(params) {
+  const taskId = await startPerfectCorpRender(params)
+  return pollPerfectCorpTask(taskId)
+}
+
+// Chain: first apply new item to profile photo, then layer additional wardrobe items
+async function renderOutfitChain(profilePhotoUrl, newItemUrl, additionalItems = []) {
+  let output = await perfectCorpRender({ srcFileUrl: profilePhotoUrl, refFileUrl: newItemUrl })
+  for (const item of additionalItems) {
+    output = await perfectCorpRender({ srcId: output.dst_id, refFileUrl: item.image_url })
+  }
+  return output.url
+}
+
+// ── Pairing (placeholder — swap in Claude when API key is available) ──────────
+
+function buildPlaceholderPairing(wardrobe) {
+  if (wardrobe.length === 0) {
+    return { combinations: [], honest_assessment: 'Add items to your wardrobe to get outfit pairing suggestions.' }
+  }
+  const shuffled = [...wardrobe].sort(() => Math.random() - 0.5)
+  const group1 = shuffled.slice(0, Math.min(3, shuffled.length))
+  const group2 = shuffled.slice(Math.min(3, shuffled.length), Math.min(6, shuffled.length))
+
+  const combinations = [
+    {
+      name: 'Weekend casual',
+      wardrobe_item_ids: group1.map(i => i.id),
+      styling_note: 'A relaxed pairing that works well with your existing pieces.',
+    },
+  ]
+  if (group2.length > 0) {
+    combinations.push({
+      name: 'Polished everyday',
+      wardrobe_item_ids: group2.map(i => i.id),
+      styling_note: 'Elevated yet comfortable — great for day-to-day wear.',
+    })
+  }
+  return {
+    combinations,
+    honest_assessment: 'This piece complements several items already in your wardrobe.',
+  }
+}
+
+// ── Try-on ────────────────────────────────────────────────────────────────────
+
+app.post('/api/tryon', upload.single('photo'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No photo uploaded' })
+
+    // 1. Upload new item image to Cloudinary
+    const cloudResult = await uploadToCloudinary(req.file.buffer, {
+      folder: 'closet/tryon',
+      resource_type: 'image',
+    })
+    const newItemUrl = cloudResult.secure_url
+
+    // 2. Profile photo + wardrobe
+    const data = readData()
+    const profilePhotoUrl = data.user?.profile_photo_url
+    if (!profilePhotoUrl) {
+      return res.status(400).json({ error: 'No profile photo found. Please complete onboarding first.' })
+    }
+    const wardrobe = data.wardrobe || []
+
+    const { price = '0', category = 'auto', store = '', color = '' } = req.body
+
+    // 3. Pairing analysis
+    const { combinations, honest_assessment } = buildPlaceholderPairing(wardrobe)
+
+    // 4. Solo render (profile + new item only)
+    let soloRenderUrl = null
+    try {
+      soloRenderUrl = await renderOutfitChain(profilePhotoUrl, newItemUrl, [])
+    } catch (err) {
+      console.error('Solo render failed:', err.message)
+    }
+
+    // 5. Combo renders (run in parallel — each combo's chain is sequential internally)
+    const enrichedCombos = await Promise.all(
+      combinations.slice(0, 2).map(async (combo) => {
+        const comboItems = (combo.wardrobe_item_ids || [])
+          .map(id => wardrobe.find(w => w.id === id))
+          .filter(Boolean)
+          .slice(0, 3)
+
+        let compositeUrl = soloRenderUrl
+        try {
+          compositeUrl = await renderOutfitChain(profilePhotoUrl, newItemUrl, comboItems)
+        } catch (err) {
+          console.error(`Combo render failed for "${combo.name}":`, err.message)
+        }
+
+        return {
+          name: combo.name,
+          styling_note: combo.styling_note,
+          wardrobe_item_ids: combo.wardrobe_item_ids,
+          wardrobe_item_details: comboItems.map(w => ({
+            id: w.id,
+            category: w.category,
+            description: w.description || w.category,
+            color: w.color || '',
+            image_url: w.image_url,
+          })),
+          composite_render_url: compositeUrl,
+        }
+      })
+    )
+
+    res.json({
+      new_item_image_url: newItemUrl,
+      price: parseFloat(price) || 0,
+      category,
+      store,
+      color,
+      solo_render_url: soloRenderUrl,
+      honest_assessment,
+      combinations: enrichedCombos,
+    })
+  } catch (err) {
+    console.error('Try-on error:', err)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => console.log(`Closet API running on http://localhost:${PORT}`))

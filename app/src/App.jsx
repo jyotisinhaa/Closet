@@ -9,6 +9,8 @@ import {
 import Login from "./screens/Login";
 import Onboarding from "./screens/Onboarding";
 import Wardrobe from "./screens/Wardrobe";
+import TryOn from "./screens/TryOn";
+import TryOnResult from "./screens/TryOnResult";
 import Profile from "./screens/Profile";
 import Home from "./screens/Home";
 
@@ -58,7 +60,7 @@ const NAV = [
     sub: [],
   },
   {
-    num: "03",
+    num: "",
     key: "tryon",
     label: "Try On",
     path: "/tryon",
@@ -77,7 +79,7 @@ const NAV = [
         <circle cx="12" cy="13" r="4" />
       </svg>
     ),
-    sub: ["Capture item", "Results"],
+    sub: [],
   },
   {
     num: "04",
@@ -447,6 +449,8 @@ function AppShell() {
         <Routes>
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/wardrobe" element={<Wardrobe sidebar />} />
+          <Route path="/tryon" element={<TryOn />} />
+          <Route path="/tryon/result" element={<TryOnResult />} />
           <Route path="/profile" element={<Profile sidebar />} />
           <Route path="*" element={<Home />} />
         </Routes>
