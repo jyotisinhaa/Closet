@@ -82,6 +82,29 @@ const NAV = [
     sub: [],
   },
   {
+    num: "",
+    key: "results",
+    label: "Results",
+    path: "/tryon/result",
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        <line x1="3" y1="9" x2="21" y2="9" />
+        <line x1="9" y1="21" x2="9" y2="9" />
+      </svg>
+    ),
+    sub: [],
+  },
+  {
     num: "04",
     key: "wishlist",
     label: "Wishlist",
@@ -130,7 +153,9 @@ function Sidebar({ collapsed, setCollapsed, openSections, toggleSection }) {
   const location = useLocation();
 
   const activeKey =
-    NAV.find((n) => location.pathname.startsWith(n.path))?.key ?? "wardrobe";
+    NAV.find((n) => location.pathname === n.path)?.key ??
+    NAV.find((n) => n.path !== '/' && location.pathname.startsWith(n.path))?.key ??
+    "wardrobe";
 
   return (
     <aside

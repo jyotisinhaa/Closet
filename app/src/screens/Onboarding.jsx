@@ -247,6 +247,29 @@ export default function Onboarding() {
     setShowCamera(false);
   }
 
+  async function compressPhoto(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const MAX = 1600;
+          let { width, height } = img;
+          if (width > MAX || height > MAX) {
+            if (width > height) { height = Math.round(height * MAX / width); width = MAX; }
+            else { width = Math.round(width * MAX / height); height = MAX; }
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width; canvas.height = height;
+          canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+          canvas.toBlob((blob) => resolve(new File([blob], "photo.jpg", { type: "image/jpeg" })), "image/jpeg", 0.85);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function handleSubmit() {
     if (!photo)    { setError("Please add a photo to continue."); return; }
     if (!gender)   { setError("Please select your gender."); return; }
@@ -255,15 +278,16 @@ export default function Onboarding() {
     setUploading(true);
     setError("");
     try {
+      const compressed = await compressPhoto(photo.file);
       const fd = new FormData();
-      fd.append("photo", photo.file);
+      fd.append("photo", compressed);
       const res = await fetch("/api/profile/photo", { method: "POST", body: fd });
-      if (!res.ok) throw new Error("Upload failed");
-      const { profile_photo_url } = await res.json();
-      localStorage.setItem("closet_profile", JSON.stringify({ gender, bodyType, profilePhotoUrl: profile_photo_url }));
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Upload failed");
+      localStorage.setItem("closet_profile", JSON.stringify({ gender, bodyType, profilePhotoUrl: json.profile_photo_url }));
       navigate("/wardrobe");
-    } catch {
-      setError("Upload failed. Please try again.");
+    } catch (err) {
+      setError(err.message || "Upload failed. Please try again.");
     } finally {
       setUploading(false);
     }

@@ -129,6 +129,7 @@ export default function TryOn() {
       const result = await res.json()
       if (!res.ok) throw new Error(result.error || 'Try-on failed')
 
+      localStorage.setItem('closet_last_result', JSON.stringify(result))
       navigate('/tryon/result', { state: { result, preview: photo.preview } })
     } catch (err) {
       setGenError(err.message)

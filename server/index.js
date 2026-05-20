@@ -10,7 +10,7 @@ const path = require('path')
 const crypto = require('crypto')
 
 const app = express()
-const upload = multer({ storage: multer.memoryStorage() })
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } })
 
 app.use(cors())
 app.use(express.json())
@@ -241,6 +241,20 @@ app.delete('/api/wishlist/:id', (req, res) => {
 
 const PERFECT_CORP_BASE = 'https://yce-api-01.makeupar.com/s2s/v2.0'
 
+const CATEGORY_MAP = {
+  'top': 'upper_body', 'shirt': 'upper_body', 'blouse': 'upper_body', 'tshirt': 'upper_body', 't-shirt': 'upper_body',
+  'jeans': 'lower_body', 'pants': 'lower_body', 'skirt': 'lower_body', 'shorts': 'lower_body', 'bottom': 'lower_body', 'trousers': 'lower_body',
+  'dress': 'full_body',
+  'outerwear': 'upper_body', 'jacket': 'upper_body', 'coat': 'upper_body', 'blazer': 'upper_body',
+  'shoes': 'shoes', 'sneakers': 'shoes', 'boots': 'shoes', 'heels': 'shoes',
+}
+
+function toPerfectCorpCategory(category) {
+  if (!category) return 'auto'
+  const key = category.toLowerCase().trim()
+  return CATEGORY_MAP[key] || 'auto'
+}
+
 async function startPerfectCorpRender({ srcFileUrl, srcId, refFileUrl, garmentCategory = 'auto', changeShoes = false }) {
   const body = { garment_category: garmentCategory, change_shoes: changeShoes, ref_file_url: refFileUrl }
   if (srcId) body.src_id = srcId
@@ -267,7 +281,7 @@ async function pollPerfectCorpTask(taskId) {
     })
     const json = await res.json()
     const { task_status, results, error } = json.data || {}
-    if (task_status === 'success') return results.output[0]
+    if (task_status === 'success') return { url: results.url, dst_id: results.dst_id }
     if (task_status === 'error') throw new Error(`Perfect Corp error: ${error}`)
   }
   throw new Error('Perfect Corp render timed out after 60s')
@@ -279,42 +293,82 @@ async function perfectCorpRender(params) {
 }
 
 // Chain: first apply new item to profile photo, then layer additional wardrobe items
-async function renderOutfitChain(profilePhotoUrl, newItemUrl, additionalItems = []) {
-  let output = await perfectCorpRender({ srcFileUrl: profilePhotoUrl, refFileUrl: newItemUrl })
+async function renderOutfitChain(profilePhotoUrl, newItemUrl, additionalItems = [], garmentCategory = 'auto') {
+  let output = await perfectCorpRender({ srcFileUrl: profilePhotoUrl, refFileUrl: newItemUrl, garmentCategory })
   for (const item of additionalItems) {
-    output = await perfectCorpRender({ srcId: output.dst_id, refFileUrl: item.image_url })
+    const itemCategory = toPerfectCorpCategory(item.category)
+    output = await perfectCorpRender({ srcId: output.dst_id, refFileUrl: item.image_url, garmentCategory: itemCategory })
   }
   return output.url
 }
 
-// ── Pairing (placeholder — swap in Claude when API key is available) ──────────
+// ── Groq pairing ──────────────────────────────────────────────────────────────
 
-function buildPlaceholderPairing(wardrobe) {
+const Groq = require('groq-sdk')
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+
+async function buildPairingWithGroq(newItemUrl, profilePhotoUrl, category, price, color, store, wardrobe) {
   if (wardrobe.length === 0) {
     return { combinations: [], honest_assessment: 'Add items to your wardrobe to get outfit pairing suggestions.' }
   }
-  const shuffled = [...wardrobe].sort(() => Math.random() - 0.5)
-  const group1 = shuffled.slice(0, Math.min(3, shuffled.length))
-  const group2 = shuffled.slice(Math.min(3, shuffled.length), Math.min(6, shuffled.length))
 
-  const combinations = [
+  const wardrobeList = wardrobe.map(item =>
+    `- id=${item.id}, category=${item.category}, color=${item.color || 'unknown'}, description=${item.description || item.category}`
+  ).join('\n')
+
+  const prompt = `You are a personal stylist with sharp visual analysis skills.
+
+Image 1 (above) is the person — this is who will be wearing the item.
+Image 2 (above) is the new garment they are considering buying.
+
+Price: $${price}
+${color ? `Color: ${color}` : ''}
+${store ? `Store: ${store}` : ''}
+
+Their existing wardrobe:
+${wardrobeList}
+
+Your job:
+1. Visually identify the garment — give it a short descriptive name (e.g. "Olive utility jacket", "Floral midi dress").
+2. Identify the correct category from the image (e.g. "Dress", "Jacket", "Top", "Pants", "Skirt", "Outerwear"). Trust the image, not any label provided.
+3. Identify the style tags for the garment (e.g. ["Utility", "Casual"] or ["Formal", "Minimalist"]).
+4. Look at the person and the garment — assess honestly how this item would look on them. Address the user directly as "you". Be specific and kind but truthful.
+5. Check the wardrobe list — count how many similar items they already own (same type/category). Describe it briefly (e.g. "2 jackets", "1 similar dress", "none").
+6. Pick 2 outfit combinations from their wardrobe that would work well with this new item.
+
+Return ONLY valid JSON, no markdown, no code blocks:
+{
+  "item_name": "short descriptive name for the garment",
+  "detected_category": "correct category detected from image",
+  "style_tags": ["tag1", "tag2"],
+  "similar_owned": "e.g. '2 jackets' or 'none'",
+  "combinations": [
     {
-      name: 'Weekend casual',
-      wardrobe_item_ids: group1.map(i => i.id),
-      styling_note: 'A relaxed pairing that works well with your existing pieces.',
-    },
-  ]
-  if (group2.length > 0) {
-    combinations.push({
-      name: 'Polished everyday',
-      wardrobe_item_ids: group2.map(i => i.id),
-      styling_note: 'Elevated yet comfortable — great for day-to-day wear.',
-    })
-  }
-  return {
-    combinations,
-    honest_assessment: 'This piece complements several items already in your wardrobe.',
-  }
+      "name": "short occasion name",
+      "wardrobe_item_ids": ["id1", "id2"],
+      "styling_note": "one sentence on why it works visually"
+    }
+  ],
+  "honest_assessment": "2-3 sentences: how it looks on you (address the user directly as 'you'), and whether it fills a real gap or duplicates something you already own."
+}`
+
+  const response = await groq.chat.completions.create({
+    model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+    messages: [{
+      role: 'user',
+      content: [
+        { type: 'image_url', image_url: { url: profilePhotoUrl } },
+        { type: 'image_url', image_url: { url: newItemUrl } },
+        { type: 'text', text: prompt },
+      ],
+    }],
+    max_tokens: 1024,
+    temperature: 0.7,
+  })
+
+  const text = response.choices[0].message.content.trim()
+  const cleaned = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
+  return JSON.parse(cleaned)
 }
 
 // ── Try-on ────────────────────────────────────────────────────────────────────
@@ -340,13 +394,26 @@ app.post('/api/tryon', upload.single('photo'), async (req, res) => {
 
     const { price = '0', category = 'auto', store = '', color = '' } = req.body
 
-    // 3. Pairing analysis
-    const { combinations, honest_assessment } = buildPlaceholderPairing(wardrobe)
+    // 3. Pairing analysis via Groq
+    let combinations = [], honest_assessment = '', item_name = '', detected_category = '', style_tags = [], similar_owned = ''
+    try {
+      const pairing = await buildPairingWithGroq(newItemUrl, profilePhotoUrl, category, price, color, store, wardrobe)
+      combinations       = pairing.combinations || []
+      honest_assessment  = pairing.honest_assessment || ''
+      item_name          = pairing.item_name || ''
+      detected_category  = pairing.detected_category || ''
+      style_tags         = pairing.style_tags || []
+      similar_owned      = pairing.similar_owned || ''
+    } catch (err) {
+      console.error('Groq pairing failed:', err.message)
+      honest_assessment = 'Style analysis unavailable — check your GROQ_API_KEY.'
+    }
 
     // 4. Solo render (profile + new item only)
+    const pcCategory = toPerfectCorpCategory(detected_category || category)
     let soloRenderUrl = null
     try {
-      soloRenderUrl = await renderOutfitChain(profilePhotoUrl, newItemUrl, [])
+      soloRenderUrl = await renderOutfitChain(profilePhotoUrl, newItemUrl, [], pcCategory)
     } catch (err) {
       console.error('Solo render failed:', err.message)
     }
@@ -361,7 +428,7 @@ app.post('/api/tryon', upload.single('photo'), async (req, res) => {
 
         let compositeUrl = soloRenderUrl
         try {
-          compositeUrl = await renderOutfitChain(profilePhotoUrl, newItemUrl, comboItems)
+          compositeUrl = await renderOutfitChain(profilePhotoUrl, newItemUrl, comboItems, pcCategory)
         } catch (err) {
           console.error(`Combo render failed for "${combo.name}":`, err.message)
         }
@@ -388,6 +455,10 @@ app.post('/api/tryon', upload.single('photo'), async (req, res) => {
       category,
       store,
       color,
+      item_name,
+      detected_category,
+      style_tags,
+      similar_owned,
       solo_render_url: soloRenderUrl,
       honest_assessment,
       combinations: enrichedCombos,
