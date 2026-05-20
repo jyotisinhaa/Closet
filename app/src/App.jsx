@@ -11,6 +11,7 @@ import Onboarding from "./screens/Onboarding";
 import Wardrobe from "./screens/Wardrobe";
 import TryOn from "./screens/TryOn";
 import TryOnResult from "./screens/TryOnResult";
+import TryOnStyled from "./screens/TryOnStyled";
 import Profile from "./screens/Profile";
 import Home from "./screens/Home";
 
@@ -476,6 +477,7 @@ function AppShell() {
           <Route path="/wardrobe" element={<Wardrobe sidebar />} />
           <Route path="/tryon" element={<TryOn />} />
           <Route path="/tryon/result" element={<TryOnResult />} />
+          <Route path="/tryon/result/styled" element={<TryOnStyled />} />
           <Route path="/profile" element={<Profile sidebar />} />
           <Route path="*" element={<Home />} />
         </Routes>

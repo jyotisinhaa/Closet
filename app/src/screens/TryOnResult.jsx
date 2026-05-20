@@ -185,21 +185,19 @@ export default function TryOnResult() {
               Try a different item
             </button>
 
-            {activeTab === 'solo' && (
-              <button onClick={() => setActiveTab('styled')} style={{
-                display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'center',
-                background: 'var(--ink)', color: 'white',
-                border: '1.5px solid var(--ink)', borderRadius: '10px', padding: '11px 20px',
-                cursor: 'pointer',
-                fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', fontWeight: 600,
-                transition: 'all 0.15s',
-              }}>
-                Styled with your closet
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <polyline points="9 18 15 12 9 6"/>
-                </svg>
-              </button>
-            )}
+            <button onClick={() => navigate('/tryon/result/styled')} style={{
+              display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'center',
+              background: 'var(--ink)', color: 'white',
+              border: '1.5px solid var(--ink)', borderRadius: '10px', padding: '11px 20px',
+              cursor: 'pointer',
+              fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', fontWeight: 600,
+              transition: 'all 0.15s',
+            }}>
+              Styled with your closet
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
           </div>
 
           {/* RIGHT — Header + render */}
