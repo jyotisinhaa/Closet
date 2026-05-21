@@ -1,15 +1,5 @@
-import { useRef, useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-
-const CATEGORIES_FEMALE = ['Top', 'Jeans', 'Bottom', 'Dress', 'Skirt', 'Outerwear', 'Shoes', 'Bag', 'Accessory']
-const CATEGORIES_MALE   = ['Top', 'Shirt', 'Jeans', 'Bottom', 'Outerwear', 'Shoes', 'Bag', 'Accessory']
-const CATEGORIES_ALL    = ['Top', 'Shirt', 'Jeans', 'Bottom', 'Dress', 'Skirt', 'Outerwear', 'Shoes', 'Bag', 'Accessory']
-
-function getCategoriesForGender(gender) {
-  if (gender === 'Female') return CATEGORIES_FEMALE
-  if (gender === 'Male')   return CATEGORIES_MALE
-  return CATEGORIES_ALL
-}
+import { useRef, useState } from 'react'
+import { useTryOn } from './useTryOn'
 
 const COLOR_SWATCHES = [
   '#1a1612', '#3a322a', '#c2563a', '#e63946',
@@ -20,43 +10,19 @@ const COLOR_SWATCHES = [
   '#00b4d8', '#7f7f7f', '#e8d5b7', '#fbf8f1',
 ]
 
-const GENERATE_STATUSES = [
-  'Uploading photo…',
-  'Analysing your wardrobe…',
-  'Rendering your look…',
-  'Creating outfit pairings…',
-  'Almost there…',
-]
-
 export default function TryOn() {
-  const navigate     = useNavigate()
   const fileInputRef = useRef(null)
   const videoRef     = useRef(null)
   const streamRef    = useRef(null)
 
+  const { categories, category, setCategory, generating, genStatus, genError, generate } = useTryOn()
+
   const [photo,       setPhoto]       = useState(null)
   const [showCamera,  setShowCamera]  = useState(false)
   const [price,       setPrice]       = useState('')
-  const [category,    setCategory]    = useState('')
   const [store,       setStore]       = useState('')
   const [color,       setColor]       = useState('')
-  const [generating,  setGenerating]  = useState(false)
-  const [genStatus,   setGenStatus]   = useState('')
-  const [genError,    setGenError]    = useState('')
   const [dragOver,    setDragOver]    = useState(false)
-  const [categories,  setCategories]  = useState(CATEGORIES_ALL)
-
-  useEffect(() => {
-    try {
-      const profile = JSON.parse(localStorage.getItem('closet_profile') || '{}')
-      const cats = getCategoriesForGender(profile.gender)
-      setCategories(cats)
-      setCategory(cats[0])
-    } catch {
-      setCategories(CATEGORIES_ALL)
-      setCategory(CATEGORIES_ALL[0])
-    }
-  }, [])
 
   function handleFileSelect(e) {
     const file = e.target.files?.[0]
@@ -100,43 +66,6 @@ export default function TryOn() {
     streamRef.current?.getTracks().forEach(t => t.stop())
     streamRef.current = null
     setShowCamera(false)
-  }
-
-  useEffect(() => {
-    if (!generating) return
-    let i = 0
-    setGenStatus(GENERATE_STATUSES[0])
-    const id = setInterval(() => {
-      i = (i + 1) % GENERATE_STATUSES.length
-      setGenStatus(GENERATE_STATUSES[i])
-    }, 5000)
-    return () => clearInterval(id)
-  }, [generating])
-
-  async function handleGenerate() {
-    if (!photo) return
-    setGenerating(true)
-    setGenError('')
-    try {
-      const formData = new FormData()
-      formData.append('photo', photo.file)
-      formData.append('price', price)
-      formData.append('category', category)
-      formData.append('store', store)
-      formData.append('color', color)
-
-      const res = await fetch('/api/tryon', { method: 'POST', body: formData })
-      const result = await res.json()
-      if (!res.ok) throw new Error(result.error || 'Try-on failed')
-
-      localStorage.setItem('closet_last_result', JSON.stringify(result))
-      navigate('/tryon/result', { state: { result, preview: photo.preview } })
-    } catch (err) {
-      setGenError(err.message)
-    } finally {
-      setGenerating(false)
-      setGenStatus('')
-    }
   }
 
   const priceNum     = parseFloat(price) || 0
@@ -421,7 +350,7 @@ export default function TryOn() {
               </div>
 
               <button
-                onClick={handleGenerate}
+                onClick={() => generate({ photo, price, store, color })}
                 disabled={generating || !photo}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '8px',

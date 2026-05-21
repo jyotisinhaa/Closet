@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useOnboarding } from "./useOnboarding";
 
 const BODY_TYPES = [
   {
@@ -55,16 +56,13 @@ export default function Onboarding() {
   const videoRef     = useRef(null);
   const streamRef    = useRef(null);
 
-  const savedProfile = JSON.parse(localStorage.getItem("closet_profile") || "{}");
-  const isComplete   = !!(savedProfile.gender && savedProfile.bodyType && savedProfile.profilePhotoUrl);
+  const { savedProfile, isComplete, uploading, error, setError, submit, resetProfile } = useOnboarding();
 
   const [gender,      setGender]      = useState("");
   const [bodyType,    setBodyType]    = useState("");
   const [photo,       setPhoto]       = useState(null);
   const [hoveredBody, setHoveredBody] = useState("");
   const [showCamera,  setShowCamera]  = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [error,     setError]     = useState("");
 
   if (isComplete) {
     const bodyLabel = BODY_TYPES.find(b => b.key === savedProfile.bodyType)?.label ?? savedProfile.bodyType;
@@ -191,7 +189,7 @@ export default function Onboarding() {
             </svg>
           </button>
           <button
-            onClick={() => { localStorage.removeItem("closet_profile"); window.location.reload(); }}
+            onClick={resetProfile}
             style={{
               background: "none", color: "var(--muted)", border: "1.5px solid var(--line)",
               borderRadius: "100px", padding: "14px 24px", cursor: "pointer",
@@ -245,52 +243,6 @@ export default function Onboarding() {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
     setShowCamera(false);
-  }
-
-  async function compressPhoto(file) {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const MAX = 1600;
-          let { width, height } = img;
-          if (width > MAX || height > MAX) {
-            if (width > height) { height = Math.round(height * MAX / width); width = MAX; }
-            else { width = Math.round(width * MAX / height); height = MAX; }
-          }
-          const canvas = document.createElement("canvas");
-          canvas.width = width; canvas.height = height;
-          canvas.getContext("2d").drawImage(img, 0, 0, width, height);
-          canvas.toBlob((blob) => resolve(new File([blob], "photo.jpg", { type: "image/jpeg" })), "image/jpeg", 0.85);
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  async function handleSubmit() {
-    if (!photo)    { setError("Please add a photo to continue."); return; }
-    if (!gender)   { setError("Please select your gender."); return; }
-    if (!bodyType) { setError("Please select your body type."); return; }
-
-    setUploading(true);
-    setError("");
-    try {
-      const compressed = await compressPhoto(photo.file);
-      const fd = new FormData();
-      fd.append("photo", compressed);
-      const res = await fetch("/api/profile/photo", { method: "POST", body: fd });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Upload failed");
-      localStorage.setItem("closet_profile", JSON.stringify({ gender, bodyType, profilePhotoUrl: json.profile_photo_url }));
-      navigate("/wardrobe");
-    } catch (err) {
-      setError(err.message || "Upload failed. Please try again.");
-    } finally {
-      setUploading(false);
-    }
   }
 
   return (
@@ -420,7 +372,7 @@ export default function Onboarding() {
           )}
 
           {/* Submit */}
-          <button onClick={handleSubmit} disabled={uploading} style={{
+          <button onClick={() => submit({ photo, gender, bodyType })} disabled={uploading} style={{
             width: "100%", background: "var(--terracotta)", color: "var(--paper)", border: "none",
             borderRadius: "12px", padding: "16px",
             fontFamily: "'Inter Tight', sans-serif", fontSize: "15px", fontWeight: 600,
@@ -479,19 +431,6 @@ export default function Onboarding() {
       </div>
     )}
     </>
-  );
-}
-
-function Section({ children }) {
-  return (
-    <div style={{ marginBottom: "36px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
-        <div style={{ flex: 1, height: "1px", background: "var(--line)" }} />
-      </div>
-      <div style={{ marginBottom: "16px" }}>
-      </div>
-      {children}
-    </div>
   );
 }
 

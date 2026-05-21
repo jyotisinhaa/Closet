@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useHome } from './useHome'
 
 const SECTIONS = [
   {
@@ -78,14 +78,7 @@ const SECTIONS = [
 
 export default function Home() {
   const navigate = useNavigate()
-  const [profile, setProfile] = useState(null)
-  const [itemCount, setItemCount] = useState(null)
-
-  useEffect(() => {
-    const saved = localStorage.getItem('closet_profile')
-    if (saved) setProfile(JSON.parse(saved))
-    fetch('/api/wardrobe').then(r => r.json()).then(d => setItemCount(d.length)).catch(() => {})
-  }, [])
+  const { profile, itemCount } = useHome()
 
   return (
     <div style={{ flex: 1, overflowY: 'auto', background: 'var(--cream)' }}>

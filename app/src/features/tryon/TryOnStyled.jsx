@@ -1,12 +1,11 @@
 import { useLocation, useNavigate } from 'react-router-dom'
+import { getLastResult } from '../../lib/session'
 
 export default function TryOnStyled() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const result = location.state?.result ?? (() => {
-    try { return JSON.parse(localStorage.getItem('closet_last_result') || 'null') } catch { return null }
-  })()
+  const result = location.state?.result ?? getLastResult()
 
   if (!result) {
     return (

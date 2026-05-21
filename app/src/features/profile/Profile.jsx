@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useProfile } from './useProfile'
 
 const STYLE_LABELS = {
   casual: 'Casual', formal: 'Formal', minimalist: 'Minimalist',
@@ -50,7 +50,6 @@ function RadarChart({ prefs = [] }) {
     return [cx + rv * Math.cos(angle), cy + rv * Math.sin(angle)]
   }
 
-  const bgPoints = angles.map(a => pt(a, 100))
   const scorePoints = angles.map((a, i) => pt(a, scores[i]))
 
   return (
@@ -121,14 +120,7 @@ function styleScore(prefs) {
 
 export default function Profile() {
   const navigate = useNavigate()
-  const [profile, setProfile] = useState(null)
-  const [wardrobeCount, setWardrobeCount] = useState(null)
-
-  useEffect(() => {
-    const saved = localStorage.getItem('closet_profile')
-    if (saved) setProfile(JSON.parse(saved))
-    fetch('/api/wardrobe').then(r => r.json()).then(items => setWardrobeCount(items.length)).catch(() => {})
-  }, [])
+  const { profile, wardrobeCount } = useProfile()
 
   const p = profile || {}
   const colors = PALETTE_COLORS[p.colorPalette] || null

@@ -1,27 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
-
-const CATEGORIES_FEMALE  = ['Top', 'Jeans', 'Bottom', 'Dress', 'Skirt', 'Outerwear', 'Shoes', 'Bag', 'Accessory']
-const CATEGORIES_MALE    = ['Top', 'Shirt', 'Jeans', 'Bottom', 'Outerwear', 'Shoes', 'Bag', 'Accessory']
-const CATEGORIES_ALL     = ['Top', 'Shirt', 'Jeans', 'Bottom', 'Dress', 'Skirt', 'Outerwear', 'Shoes', 'Bag', 'Accessory']
-
-function getCategoriesForGender(gender) {
-  if (gender === 'Female')  return CATEGORIES_FEMALE
-  if (gender === 'Male')    return CATEGORIES_MALE
-  return CATEGORIES_ALL
-}
-
-const TAG_COLORS = {
-  Top:       { bg: '#EBE3D4', fg: '#3A322A' },
-  Shirt:     { bg: '#D4CBB8', fg: '#3A322A' },
-  Jeans:     { bg: '#4A6B8A', fg: '#FBF8F1' },
-  Bottom:    { bg: '#1A1612', fg: '#FBF8F1' },
-  Dress:     { bg: '#C2563A', fg: '#FBF8F1' },
-  Skirt:     { bg: '#9A3E26', fg: '#FBF8F1' },
-  Outerwear: { bg: '#5B6A3F', fg: '#FBF8F1' },
-  Shoes:     { bg: '#C9A961', fg: '#1A1612' },
-  Bag:       { bg: '#8C8273', fg: '#FBF8F1' },
-  Accessory: { bg: '#3A322A', fg: '#FBF8F1' },
-}
+import { useRef, useState } from 'react'
+import { TAG_COLORS } from '../../lib/categories'
+import { useWardrobe } from './useWardrobe'
 
 function ItemCard({ item, onDelete }) {
   const [hover, setHover] = useState(false)
@@ -86,13 +65,8 @@ function ItemCard({ item, onDelete }) {
 
 export default function Wardrobe() {
   const fileInputRef = useRef(null)
+  const { items, loading, filter, setFilter, categories: CATEGORIES, visible, counts, addItem, deleteItem } = useWardrobe()
 
-  const profile    = JSON.parse(localStorage.getItem('closet_profile') || '{}')
-  const CATEGORIES = getCategoriesForGender(profile.gender)
-
-  const [items,      setItems]      = useState([])
-  const [loading,    setLoading]    = useState(true)
-  const [filter,     setFilter]     = useState('All')
   const [showAdd,    setShowAdd]    = useState(false)
   const [uploading,  setUploading]  = useState(false)
   const [addError,   setAddError]   = useState('')
@@ -101,12 +75,6 @@ export default function Wardrobe() {
   const [newPhoto,    setNewPhoto]    = useState(null)
   const [newCategory, setNewCategory] = useState('')
   const [newDesc,     setNewDesc]     = useState('')
-
-  useEffect(() => {
-    fetch('/api/wardrobe').then(r => r.json())
-      .then(setItems).catch(console.error)
-      .finally(() => setLoading(false))
-  }, [])
 
   function openAdd() {
     setNewPhoto(null); setNewCategory(''); setNewDesc(''); setAddError('')
@@ -125,14 +93,7 @@ export default function Wardrobe() {
     if (!newCategory) { setAddError('Please select a category.'); return }
     setUploading(true); setAddError('')
     try {
-      const fd = new FormData()
-      fd.append('photo', newPhoto.file)
-      fd.append('category', newCategory)
-      fd.append('description', newDesc)
-      const res = await fetch('/api/wardrobe', { method: 'POST', body: fd })
-      if (!res.ok) throw new Error('Upload failed')
-      const item = await res.json()
-      setItems(prev => [item, ...prev])
+      await addItem({ file: newPhoto.file, category: newCategory, description: newDesc })
       closeAdd()
     } catch {
       setAddError('Upload failed. Please try again.')
@@ -140,14 +101,6 @@ export default function Wardrobe() {
       setUploading(false)
     }
   }
-
-  async function handleDelete(id) {
-    await fetch(`/api/wardrobe/${id}`, { method: 'DELETE' })
-    setItems(prev => prev.filter(i => i.id !== id))
-  }
-
-  const visible = filter === 'All' ? items : items.filter(i => i.category === filter)
-  const counts  = items.reduce((acc, i) => { acc[i.category] = (acc[i.category] || 0) + 1; return acc }, {})
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--paper)' }}>
@@ -290,7 +243,7 @@ export default function Wardrobe() {
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '12px' }}>
-            {visible.map(item => <ItemCard key={item.id} item={item} onDelete={handleDelete} />)}
+            {visible.map(item => <ItemCard key={item.id} item={item} onDelete={deleteItem} />)}
           </div>
         )}
       </div>
