@@ -18,10 +18,13 @@ function toPerfectCorpCategory(category) {
   return CATEGORY_MAP[key] || 'auto'
 }
 
-async function startPerfectCorpRender({ srcFileUrl, srcId, refFileUrl, garmentCategory = 'auto', changeShoes = false }) {
-  const body = { garment_category: garmentCategory, change_shoes: changeShoes, ref_file_url: refFileUrl }
-  if (srcId) body.src_id = srcId
-  else body.src_file_url = srcFileUrl
+async function startPerfectCorpRender({ srcFileUrl, refFileUrl, garmentCategory = 'auto', changeShoes = false }) {
+  const body = {
+    garment_category: garmentCategory,
+    change_shoes: changeShoes,
+    ref_file_url: refFileUrl,
+    src_file_url: srcFileUrl,
+  }
 
   const res = await fetch(`${PERFECT_CORP_BASE}/task/cloth`, {
     method: 'POST',
@@ -55,12 +58,13 @@ async function perfectCorpRender(params) {
   return pollPerfectCorpTask(taskId)
 }
 
-// Chain: first apply new item to profile photo, then layer additional wardrobe items
+// Chain: apply the new item to the profile photo, then layer each additional
+// wardrobe item by feeding the previous render's URL back in as the source.
 async function renderOutfitChain(profilePhotoUrl, newItemUrl, additionalItems = [], garmentCategory = 'auto') {
   let output = await perfectCorpRender({ srcFileUrl: profilePhotoUrl, refFileUrl: newItemUrl, garmentCategory })
   for (const item of additionalItems) {
     const itemCategory = toPerfectCorpCategory(item.category)
-    output = await perfectCorpRender({ srcId: output.dst_id, refFileUrl: item.image_url, garmentCategory: itemCategory })
+    output = await perfectCorpRender({ srcFileUrl: output.url, refFileUrl: item.image_url, garmentCategory: itemCategory })
   }
   return output.url
 }

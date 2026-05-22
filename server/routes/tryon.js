@@ -111,4 +111,44 @@ router.post('/quick', async (req, res) => {
   }
 })
 
+// POST /api/tryon/combine — render the new item layered with user-chosen
+// wardrobe items (manual "build your own look"). Stateless; reuses the chain.
+router.post('/combine', async (req, res) => {
+  try {
+    const { new_item_image_url, garment_category, wardrobe_item_ids = [] } = req.body
+    if (!new_item_image_url) return res.status(400).json({ error: 'new_item_image_url is required' })
+
+    const { rows: profileRows } = await pool.query(`SELECT profile_photo_url FROM profile WHERE id = 'demo-user-1'`)
+    const profilePhotoUrl = profileRows[0]?.profile_photo_url
+    if (!profilePhotoUrl) {
+      return res.status(400).json({ error: 'No profile photo found. Please complete onboarding first.' })
+    }
+
+    const { rows: wardrobe } = await pool.query('SELECT * FROM wardrobe_items ORDER BY created_at DESC')
+
+    // Resolve selected wardrobe items (max 3), preserving the user's order.
+    const items = wardrobe_item_ids
+      .map(id => wardrobe.find(w => w.id === id))
+      .filter(Boolean)
+      .slice(0, 3)
+
+    const pcCategory = toPerfectCorpCategory(garment_category)
+    const composite_render_url = await renderOutfitChain(profilePhotoUrl, new_item_image_url, items, pcCategory)
+
+    res.json({
+      composite_render_url,
+      wardrobe_item_details: items.map(w => ({
+        id: w.id,
+        category: w.category,
+        description: w.description || w.category,
+        color: w.color || '',
+        image_url: w.image_url,
+      })),
+    })
+  } catch (err) {
+    console.error('Combine try-on error:', err)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 module.exports = router
