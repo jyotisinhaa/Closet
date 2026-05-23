@@ -56,13 +56,21 @@ export default function Onboarding() {
   const videoRef     = useRef(null);
   const streamRef    = useRef(null);
 
-  const { savedProfile, isComplete, uploading, error, setError, submit, resetProfile } = useOnboarding();
+  const { savedProfile, isComplete, dbChecked, uploading, error, setError, submit, resetProfile } = useOnboarding();
 
   const [gender,      setGender]      = useState("");
   const [bodyType,    setBodyType]    = useState("");
   const [photo,       setPhoto]       = useState(null);
   const [hoveredBody, setHoveredBody] = useState("");
   const [showCamera,  setShowCamera]  = useState(false);
+
+  if (!dbChecked) {
+    return (
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--paper)' }}>
+        <div style={{ fontFamily: "'Fraunces', serif", fontSize: '18px', color: 'var(--muted)' }}>Loading profile…</div>
+      </div>
+    )
+  }
 
   if (isComplete) {
     const bodyLabel = BODY_TYPES.find(b => b.key === savedProfile.bodyType)?.label ?? savedProfile.bodyType;

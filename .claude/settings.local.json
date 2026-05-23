@@ -20,7 +20,16 @@
       "PowerShell(Get-ChildItem \"C:\\\\Users\\\\jyoti\\\\Downloads\" -Force -ErrorAction SilentlyContinue | Select-Object Name, @{N=\"Size \\(MB\\)\";E={[math]::Round\\($_.Length / 1MB, 1\\)}}, LastWriteTime | Format-Table -AutoSize)",
       "Bash(curl *)",
       "PowerShell($free = [math]::Round\\(\\(Get-PSDrive C\\).Free / 1GB, 2\\); Write-Output \"Free space on C: $free GB\")",
-      "PowerShell(Get-PSDrive C | Select-Object Used, Free, @{N='UsedGB';E={[math]::Round\\($_.Used/1GB,2\\)}}, @{N='FreeGB';E={[math]::Round\\($_.Free/1GB,2\\)}}, @{N='TotalGB';E={[math]::Round\\(\\($_.Used+$_.Free\\)/1GB,2\\)}})"
+      "PowerShell(Get-PSDrive C | Select-Object Used, Free, @{N='UsedGB';E={[math]::Round\\($_.Used/1GB,2\\)}}, @{N='FreeGB';E={[math]::Round\\($_.Free/1GB,2\\)}}, @{N='TotalGB';E={[math]::Round\\(\\($_.Used+$_.Free\\)/1GB,2\\)}})",
+      "Bash(git merge *)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git checkout *)",
+      "Bash(node -e \"const {readData,writeData}=require\\('./lib/db'\\); const d=readData\\(\\); console.log\\('keys:', Object.keys\\(d\\)\\); console.log\\('wishlist end line exists:', !!d.wishlist\\)\")",
+      "Bash(node -e ' *)",
+      "WebFetch(domain:unsplash.com)"
     ]
   }
 }
