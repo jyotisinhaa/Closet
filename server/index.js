@@ -1,3 +1,4 @@
+
 // App bootstrap: load + validate config, wire middleware, mount routers, listen.
 const config = require('./config')
 const express = require('express')
@@ -11,8 +12,9 @@ const tryonRouter = require('./routes/tryon')
 
 const app = express()
 
-app.use(cors())
-app.use(express.json())
+app.use(cors());
+app.use(express.json());
+
 
 app.use('/api', authRouter)          // /api/register, /api/login, /api/me
 app.use('/api/profile', profileRouter)

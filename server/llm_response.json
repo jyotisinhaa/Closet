@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-05-22T07:13:30.965Z",
+  "raw": "{\n  \"item_name\": \"Polka Dot Maxi Dress\",\n  \"detected_category\": \"Dress\",\n  \"style_tags\": [\"Feminine\", \"Playful\", \"Summer\"],\n  \"similar_owned\": \"2 dresses\",\n  \"combinations\": [\n    {\n      \"name\": \"Casual Day\",\n      \"wardrobe_item_ids\": [\"343f2720-5481-4cf6-960e-7cba8a1254a7\"],\n      \"styling_note\": \"The contrast between the purple dress and the bright polka dot dress creates a fun and playful look.\"\n    },\n    {\n      \"name\": \"Elegant Evening\",\n      \"wardrobe_item_ids\": [\"ae22d1ba-5c37-4b9e-93c1-a76c5798303e\"],\n      \"styling_note\": \"The sleek black bodycon dress pairs well with the bold polka dot dress for a chic evening look.\"\n    }\n  ],\n  \"honest_assessment\": \"You have a fair skin tone, and the bright color of the dress might make your skin appear even fairer. The polka dot pattern adds a playful touch, but it may not be the most flattering choice if you're looking for something more understated. You already own two dresses, so consider whether this one fills a specific gap in your wardrobe or duplicates something you already have.\"\n}",
+  "parsed": {
+    "item_name": "Polka Dot Maxi Dress",
+    "detected_category": "Dress",
+    "style_tags": [
+      "Feminine",
+      "Playful",
+      "Summer"
+    ],
+    "similar_owned": "2 dresses",
+    "combinations": [
+      {
+        "name": "Casual Day",
+        "wardrobe_item_ids": [
+          "343f2720-5481-4cf6-960e-7cba8a1254a7"
+        ],
+        "styling_note": "The contrast between the purple dress and the bright polka dot dress creates a fun and playful look."
+      },
+      {
+        "name": "Elegant Evening",
+        "wardrobe_item_ids": [
+          "ae22d1ba-5c37-4b9e-93c1-a76c5798303e"
+        ],
+        "styling_note": "The sleek black bodycon dress pairs well with the bold polka dot dress for a chic evening look."
+      }
+    ],
+    "honest_assessment": "You have a fair skin tone, and the bright color of the dress might make your skin appear even fairer. The polka dot pattern adds a playful touch, but it may not be the most flattering choice if you're looking for something more understated. You already own two dresses, so consider whether this one fills a specific gap in your wardrobe or duplicates something you already have."
+  }
+}

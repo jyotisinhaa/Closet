@@ -1,10 +1,5 @@
 import { useState } from "react";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  useLocation,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Sidebar from "./components/layout/Sidebar";
 import Login from "./features/auth/Login";
 import Onboarding from "./features/onboarding/Onboarding";
@@ -14,6 +9,7 @@ import TryOnResult from "./features/tryon/TryOnResult";
 import TryOnStyled from "./features/tryon/TryOnStyled";
 import Profile from "./features/profile/Profile";
 import Home from "./features/home/Home";
+import Wishlist from "./features/tryon/Wishlist";
 
 function AppShell() {
   const location = useLocation();
@@ -64,6 +60,7 @@ function AppShell() {
           <Route path="/tryon" element={<TryOn />} />
           <Route path="/tryon/result" element={<TryOnResult />} />
           <Route path="/tryon/result/styled" element={<TryOnStyled />} />
+          <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/profile" element={<Profile sidebar />} />
           <Route path="*" element={<Home />} />
         </Routes>

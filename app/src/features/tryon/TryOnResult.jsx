@@ -37,11 +37,14 @@ export default function TryOnResult() {
   }
 
   const { solo_render_url, new_item_image_url, honest_assessment, combinations, price, store, category, color, item_name, detected_category, style_tags, similar_owned } = result
+  console.log('[TryOnResult] full result from API:', result)
+  console.log('[TryOnResult] category:', category, '| detected_category:', detected_category, '| item_name:', item_name)
   const displayCategory = detected_category || category
   const activeCombo  = combinations?.[0]
   const renderSrc    = activeTab === 'styled'
     ? (activeCombo?.composite_render_url || solo_render_url || preview || new_item_image_url)
     : (solo_render_url || preview || new_item_image_url)
+
 
   return (
     <div style={{ flex: 1, background: 'var(--paper)', overflowY: 'auto', padding: 'clamp(40px, 6vw, 72px) clamp(24px, 6vw, 80px) 80px' }}>
