@@ -8,13 +8,15 @@ import { getLastResult } from '../../lib/session'
 export function useTryOnResult() {
   const location = useLocation()
   const [saving, setSaving] = useState(false)
-  const [saved,  setSaved]  = useState(false)
 
   const result  = location.state?.result ?? getLastResult()
   const preview = location.state?.preview
 
+  const savedKey = result?.new_item_image_url ? `wl_saved_${result.new_item_image_url}` : null
+  const [saved, setSaved] = useState(() => !!(savedKey && sessionStorage.getItem(savedKey)))
+
   async function saveToWishlist() {
-    if (!result) return
+    if (!result || saved) return
     const { new_item_image_url, category, price, store, solo_render_url, combinations, honest_assessment } = result
     setSaving(true)
     try {
@@ -23,6 +25,7 @@ export function useTryOnResult() {
         solo_render_url, combinations, honest_assessment,
         description: category,
       })
+      if (savedKey) sessionStorage.setItem(savedKey, '1')
       setSaved(true)
     } finally {
       setSaving(false)

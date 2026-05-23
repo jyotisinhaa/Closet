@@ -37,37 +37,25 @@ export default function Wishlist() {
   const [activeTab, setActiveTab] = useState('All')
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('closet_wishlist')
-      setItems(raw ? JSON.parse(raw) : [])
-    } catch { setItems([]) }
+    fetch('/api/wishlist')
+      .then(r => r.json())
+      .then(data => setItems(Array.isArray(data) ? data : []))
+      .catch(() => setItems([]))
   }, [])
 
   async function markBought(id) {
     const item = items.find(it => it.id === id)
     if (item) {
       try {
-        await fetch('/api/wardrobe/from-url', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            image_url: item.new_item_image_url || item.solo_render_url,
-            category: item.category,
-            description: item.item_name || item.category,
-            color: item.color || '',
-          }),
-        })
+        await fetch(`/api/wishlist/${id}/purchase`, { method: 'POST' })
       } catch {}
     }
-    const updated = items.filter(it => it.id !== id)
-    setItems(updated)
-    localStorage.setItem('closet_wishlist', JSON.stringify(updated))
+    setItems(prev => prev.filter(it => it.id !== id))
   }
 
-  function removeItem(id) {
-    const updated = items.filter(it => it.id !== id)
-    setItems(updated)
-    localStorage.setItem('closet_wishlist', JSON.stringify(updated))
+  async function removeItem(id) {
+    try { await fetch(`/api/wishlist/${id}`, { method: 'DELETE' }) } catch {}
+    setItems(prev => prev.filter(it => it.id !== id))
   }
 
   const categories = ['All', ...Array.from(new Set(items.map(it => it.category).filter(Boolean)))]
@@ -81,7 +69,7 @@ export default function Wishlist() {
   const aiBuyCount      = notBought.filter(it => deriveVerdict(it.honest_assessment) !== 'skip').length
 
   const oldestMs = notBought.reduce((min, it) => {
-    const t = new Date(it.addedAt).getTime()
+    const t = new Date(it.added_at || it.addedAt).getTime()
     return t < min ? t : min
   }, Date.now())
   const daysSince = Math.max(1, Math.round((Date.now() - oldestMs) / 86400000))
@@ -210,7 +198,7 @@ function WishlistCard({ item, onBought, onRemove }) {
   const combosCount = item.combinations?.length || 0
   const name        = item.item_name || item.category || 'Item'
   const price       = parseFloat(item.price)
-  const days        = getDaysSaved(item.addedAt)
+  const days        = getDaysSaved(item.added_at || item.addedAt)
   const timeNudge   = getTimeNudge(days)
   const excerpt     = item.honest_assessment
     ? `"${item.honest_assessment.slice(0, 65).trimEnd()}…"`
@@ -372,8 +360,8 @@ const dropItemStyle = (active) => ({
 
 const boughtBtn = {
   flex: 1, fontFamily: "'Inter Tight', sans-serif", fontSize: '12px', fontWeight: 600,
-  color: 'var(--ink)', background: 'var(--cream-deep)',
-  border: '1px solid var(--line)', borderRadius: '8px', padding: '7px 0',
+  color: '#fff', background: '#2D6A4F',
+  border: '1px solid #2D6A4F', borderRadius: '8px', padding: '7px 0',
   cursor: 'pointer', transition: 'all 0.15s',
 }
 

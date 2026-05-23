@@ -10,6 +10,16 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   const { item_name, new_item_image_url, category, price, store, color, solo_render_url, combinations, honest_assessment } = req.body
+
+  // Deduplicate by image URL — return existing row if already saved
+  if (new_item_image_url) {
+    const { rows: existing } = await pool.query(
+      'SELECT * FROM wishlist_items WHERE new_item_image_url = $1 LIMIT 1',
+      [new_item_image_url]
+    )
+    if (existing.length > 0) return res.json(existing[0])
+  }
+
   const { rows } = await pool.query(
     `INSERT INTO wishlist_items (item_name, new_item_image_url, category, price, store, color, solo_render_url, combinations, honest_assessment)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
