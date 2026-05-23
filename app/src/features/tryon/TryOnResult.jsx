@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { useTryOnResult } from './useTryOnResult'
 
 const COLOR_NAMES = {
   '#1a1612': 'Espresso', '#3a322a': 'Dark Brown', '#c2563a': 'Terracotta',
@@ -17,17 +17,11 @@ function colorLabel(hex) {
 }
 
 export default function TryOnResult() {
-  const location = useLocation()
-  const navigate  = useNavigate()
-  const stateResult = location.state?.result
-  const preview     = location.state?.preview
-  const result      = stateResult ?? (() => {
-    try { return JSON.parse(localStorage.getItem('closet_last_result') || 'null') } catch { return null }
-  })()
+  const navigate = useNavigate()
+  const { result, preview, saving, saved, saveToWishlist } = useTryOnResult()
 
-  const [activeTab, setActiveTab] = useState('solo')
-  const [saving,    setSaving]    = useState(false)
-  const [saved,     setSaved]     = useState(false)
+  // Only the solo view is currently wired up.
+  const activeTab = 'solo'
 
   if (!result) {
     return (
@@ -51,34 +45,6 @@ export default function TryOnResult() {
     ? (activeCombo?.composite_render_url || solo_render_url || preview || new_item_image_url)
     : (solo_render_url || preview || new_item_image_url)
 
-  const styleTags = [color, category, store].filter(Boolean)
-
-  async function saveToWishlist() {
-    setSaving(true)
-    try {
-      const localEntry = {
-        id: Date.now().toString(),
-        addedAt: new Date().toISOString(),
-        item_name, new_item_image_url, category, price, store, solo_render_url, combinations, honest_assessment,
-      }
-      try {
-        const res = await fetch('/api/wishlist', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(localEntry),
-        })
-        if (res.ok) {
-          const serverItem = await res.json()
-          localEntry.serverId = serverItem.id
-        }
-      } catch {}
-      const existing = (() => { try { return JSON.parse(localStorage.getItem('closet_wishlist') || '[]') } catch { return [] } })()
-      localStorage.setItem('closet_wishlist', JSON.stringify([localEntry, ...existing]))
-      setSaved(true)
-    } finally {
-      setSaving(false)
-    }
-  }
 
   return (
     <div style={{ flex: 1, background: 'var(--paper)', overflowY: 'auto', padding: 'clamp(40px, 6vw, 72px) clamp(24px, 6vw, 80px) 80px' }}>

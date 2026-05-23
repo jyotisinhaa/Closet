@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import loginHero from '../assets/login-hero.png'
+import loginHero from '../../assets/login-hero.png'
+import { useAuth } from './useAuth'
 
 const FEATURES = [
   {
@@ -51,40 +52,16 @@ const inputStyle = {
 
 export default function Login() {
   const navigate = useNavigate()
+  const { error, setError, loading, submit } = useAuth()
   const [isSignUp, setIsSignUp]  = useState(false)
   const [name, setName]          = useState('')
   const [email, setEmail]        = useState('')
   const [password, setPassword]  = useState('')
   const [showPw, setShowPw]      = useState(false)
-  const [error, setError]        = useState('')
-  const [loading, setLoading]    = useState(false)
 
-  async function handleSubmit(e) {
+  function handleSubmit(e) {
     e.preventDefault()
-    if (!email.trim())  { setError('Please enter your email.'); return }
-    if (!password)      { setError('Please enter your password.'); return }
-    setError(''); setLoading(true)
-    try {
-      const endpoint = isSignUp ? '/api/register' : '/api/login'
-      const body = isSignUp
-        ? { email: email.trim(), password, name: name.trim() }
-        : { email: email.trim(), password }
-
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Something went wrong'); setLoading(false); return }
-
-      localStorage.setItem('closet_token', data.token)
-      localStorage.setItem('closet_user', JSON.stringify(data.user))
-      navigate(isSignUp ? '/onboarding' : '/wardrobe')
-    } catch {
-      setError('Could not connect to server. Is it running?')
-      setLoading(false)
-    }
+    submit({ isSignUp, name, email, password })
   }
 
   function switchMode() {
