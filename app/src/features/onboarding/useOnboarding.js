@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiUpload } from '../../api/client'
 import { getProfile, setProfile, clearProfile } from '../../lib/session'
@@ -32,7 +32,29 @@ function compressPhoto(file) {
 export function useOnboarding() {
   const navigate = useNavigate()
   const savedProfile = getProfile() || {}
-  const isComplete   = !!(savedProfile.gender && savedProfile.bodyType && savedProfile.profilePhotoUrl)
+  const localComplete = !!(savedProfile.gender && savedProfile.bodyType && savedProfile.profilePhotoUrl)
+
+  // Verify DB has the profile photo — localStorage may be stale after a DB reset
+  const [dbChecked,  setDbChecked]  = useState(false)
+  const [isComplete, setIsComplete] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/profile')
+      .then(r => r.json())
+      .then(profile => {
+        if (!profile.profile_photo_url) {
+          clearProfile()
+          setIsComplete(false)
+        } else {
+          setIsComplete(localComplete)
+        }
+        setDbChecked(true)
+      })
+      .catch(() => {
+        setIsComplete(localComplete)
+        setDbChecked(true)
+      })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const [uploading, setUploading] = useState(false)
   const [error,     setError]     = useState('')
@@ -57,10 +79,11 @@ export function useOnboarding() {
     }
   }
 
-  function resetProfile() {
+  async function resetProfile() {
+    try { await fetch('/api/profile', { method: 'DELETE' }) } catch {}
     clearProfile()
     window.location.reload()
   }
 
-  return { savedProfile, isComplete, uploading, error, setError, submit, resetProfile }
+  return { savedProfile, isComplete, dbChecked, uploading, error, setError, submit, resetProfile }
 }

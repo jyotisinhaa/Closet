@@ -18,6 +18,8 @@ const REQUIRED = [
   'CLOUDINARY_API_SECRET',
   'PERFECT_CORP_API_KEY',
   'GROQ_API_KEY',
+  'JINA_API_KEY',
+  'DATABASE_URL',
 ]
 
 const missing = REQUIRED.filter((k) => !process.env[k])

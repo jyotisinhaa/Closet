@@ -1,18 +1,36 @@
 const express = require('express')
-const crypto = require('crypto')
-const upload = require('../middleware/upload')
-const { readData, writeData } = require('../lib/db')
+const upload  = require('../middleware/upload')
+const pool    = require('../db/client')
 const { uploadToCloudinary, destroyFromCloudinary } = require('../services/cloudinary')
+const { getImageEmbedding } = require('../services/fashionclip')
 
 const router = express.Router()
 
-// GET /api/wardrobe
-router.get('/', (req, res) => {
-  const data = readData()
-  res.json(data.wardrobe || [])
+router.get('/', async (req, res) => {
+  const { rows } = await pool.query('SELECT * FROM wardrobe_items ORDER BY created_at DESC')
+  res.json(rows)
 })
 
-// POST /api/wardrobe
+// Add from image URL (used by "Bought it" in wishlist)
+router.post('/from-url', async (req, res) => {
+  const { image_url, category, description, color } = req.body
+  if (!image_url) return res.status(400).json({ error: 'image_url required' })
+
+  const { rows } = await pool.query(
+    `INSERT INTO wardrobe_items (image_url, category, description, color)
+     VALUES ($1, $2, $3, $4) RETURNING *`,
+    [image_url, category || 'Uncategorized', description || category || '', color || '']
+  )
+  const item = rows[0]
+
+  // Embed in background — don't block the response
+  getImageEmbedding(image_url)
+    .then(emb => pool.query('UPDATE wardrobe_items SET embedding = $1 WHERE id = $2', [`[${emb.join(',')}]`, item.id]))
+    .catch(err => console.error('Wardrobe embed failed:', err.message))
+
+  res.json(item)
+})
+
 router.post('/', upload.single('photo'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' })
@@ -22,19 +40,17 @@ router.post('/', upload.single('photo'), async (req, res) => {
       resource_type: 'image',
     })
 
-    const item = {
-      id: crypto.randomUUID(),
-      image_url: result.secure_url,
-      cloudinary_public_id: result.public_id,
-      category: req.body.category || 'top',
-      color: req.body.color || '',
-      description: req.body.description || '',
-      created_at: new Date().toISOString(),
-    }
+    const { rows } = await pool.query(
+      `INSERT INTO wardrobe_items (image_url, cloudinary_public_id, category, color, description)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [result.secure_url, result.public_id, req.body.category || 'top', req.body.color || '', req.body.description || '']
+    )
+    const item = rows[0]
 
-    const data = readData()
-    data.wardrobe.push(item)
-    writeData(data)
+    // Embed in background — don't block the response
+    getImageEmbedding(result.secure_url)
+      .then(emb => pool.query('UPDATE wardrobe_items SET embedding = $1 WHERE id = $2', [`[${emb.join(',')}]`, item.id]))
+      .catch(err => console.error('Wardrobe embed failed:', err.message))
 
     res.json(item)
   } catch (err) {
@@ -43,21 +59,15 @@ router.post('/', upload.single('photo'), async (req, res) => {
   }
 })
 
-// DELETE /api/wardrobe/:id
 router.delete('/:id', async (req, res) => {
-  const data = readData()
-  const item = data.wardrobe.find(i => i.id === req.params.id)
+  const { rows } = await pool.query('SELECT cloudinary_public_id FROM wardrobe_items WHERE id = $1', [req.params.id])
+  const item = rows[0]
 
   if (item?.cloudinary_public_id) {
-    try {
-      await destroyFromCloudinary(item.cloudinary_public_id, { invalidate: true })
-    } catch (err) {
-      console.error('Cloudinary delete error:', err)
-    }
+    try { await destroyFromCloudinary(item.cloudinary_public_id, { invalidate: true }) } catch {}
   }
 
-  data.wardrobe = data.wardrobe.filter(i => i.id !== req.params.id)
-  writeData(data)
+  await pool.query('DELETE FROM wardrobe_items WHERE id = $1', [req.params.id])
   res.json({ ok: true })
 })
 

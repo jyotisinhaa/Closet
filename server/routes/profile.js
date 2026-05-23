@@ -1,11 +1,10 @@
 const express = require('express')
-const upload = require('../middleware/upload')
-const { readData, writeData } = require('../lib/db')
+const upload  = require('../middleware/upload')
+const pool    = require('../db/client')
 const { uploadToCloudinary } = require('../services/cloudinary')
 
 const router = express.Router()
 
-// POST /api/profile/photo
 router.post('/photo', upload.single('photo'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' })
@@ -17,9 +16,11 @@ router.post('/photo', upload.single('photo'), async (req, res) => {
       resource_type: 'image',
     })
 
-    const data = readData()
-    data.user = { id: 'demo-user-1', profile_photo_url: result.secure_url }
-    writeData(data)
+    await pool.query(
+      `INSERT INTO profile (id, profile_photo_url) VALUES ('demo-user-1', $1)
+       ON CONFLICT (id) DO UPDATE SET profile_photo_url = $1, updated_at = NOW()`,
+      [result.secure_url]
+    )
 
     res.json({ profile_photo_url: result.secure_url })
   } catch (err) {
@@ -28,10 +29,14 @@ router.post('/photo', upload.single('photo'), async (req, res) => {
   }
 })
 
-// GET /api/profile
-router.get('/', (req, res) => {
-  const data = readData()
-  res.json(data.user || {})
+router.get('/', async (req, res) => {
+  const { rows } = await pool.query(`SELECT * FROM profile WHERE id = 'demo-user-1'`)
+  res.json(rows[0] || {})
+})
+
+router.delete('/', async (req, res) => {
+  await pool.query(`DELETE FROM profile WHERE id = 'demo-user-1'`)
+  res.json({ ok: true })
 })
 
 module.exports = router

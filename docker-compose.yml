@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: closet_db
+    environment:
+      POSTGRES_DB: closet
+      POSTGRES_USER: closet
+      POSTGRES_PASSWORD: closet123
+    ports:
+      - "5432:5432"
+    volumes:
+      - closet_pgdata:/var/lib/postgresql/data
+
+volumes:
+  closet_pgdata:
