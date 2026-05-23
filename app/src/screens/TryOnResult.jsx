@@ -43,6 +43,8 @@ export default function TryOnResult() {
   }
 
   const { solo_render_url, new_item_image_url, honest_assessment, combinations, price, store, category, color, item_name, detected_category, style_tags, similar_owned } = result
+  console.log('[TryOnResult] full result from API:', result)
+  console.log('[TryOnResult] category:', category, '| detected_category:', detected_category, '| item_name:', item_name)
   const displayCategory = detected_category || category
   const activeCombo  = combinations?.[0]
   const renderSrc    = activeTab === 'styled'
@@ -54,11 +56,24 @@ export default function TryOnResult() {
   async function saveToWishlist() {
     setSaving(true)
     try {
-      await fetch('/api/wishlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ new_item_image_url, category, price, store, solo_render_url, combinations, honest_assessment, description: category }),
-      })
+      const localEntry = {
+        id: Date.now().toString(),
+        addedAt: new Date().toISOString(),
+        item_name, new_item_image_url, category, price, store, solo_render_url, combinations, honest_assessment,
+      }
+      try {
+        const res = await fetch('/api/wishlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(localEntry),
+        })
+        if (res.ok) {
+          const serverItem = await res.json()
+          localEntry.serverId = serverItem.id
+        }
+      } catch {}
+      const existing = (() => { try { return JSON.parse(localStorage.getItem('closet_wishlist') || '[]') } catch { return [] } })()
+      localStorage.setItem('closet_wishlist', JSON.stringify([localEntry, ...existing]))
       setSaved(true)
     } finally {
       setSaving(false)

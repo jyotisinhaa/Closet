@@ -14,6 +14,7 @@ import TryOnResult from "./screens/TryOnResult";
 import TryOnStyled from "./screens/TryOnStyled";
 import Profile from "./screens/Profile";
 import Home from "./screens/Home";
+import Wishlist from "./screens/Wishlist";
 
 const NAV = [
   {
@@ -106,7 +107,7 @@ const NAV = [
     sub: [],
   },
   {
-    num: "04",
+    num: "",
     key: "wishlist",
     label: "Wishlist",
     path: "/wishlist",
@@ -124,10 +125,10 @@ const NAV = [
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
       </svg>
     ),
-    sub: ["Saved items", "Bought"],
+    sub: [],
   },
   {
-    num: "05",
+    num: "06",
     key: "profile",
     label: "My Profile",
     path: "/profile",
@@ -478,6 +479,7 @@ function AppShell() {
           <Route path="/tryon" element={<TryOn />} />
           <Route path="/tryon/result" element={<TryOnResult />} />
           <Route path="/tryon/result/styled" element={<TryOnStyled />} />
+          <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/profile" element={<Profile sidebar />} />
           <Route path="*" element={<Home />} />
         </Routes>
