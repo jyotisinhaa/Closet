@@ -1,7 +1,7 @@
 const express = require('express')
 const upload  = require('../middleware/upload')
 const pool    = require('../db/client')
-const { uploadToCloudinary }               = require('../services/cloudinary')
+const { uploadToCloudinary, ensureCloudinaryUrl } = require('../services/cloudinary')
 const { renderOutfitChain }                = require('../services/perfectCorp')
 const { buildPairingWithGroq }             = require('../services/groq')
 
@@ -57,9 +57,17 @@ router.post('/', upload.single('photo'), async (req, res) => {
           .filter(w => w.category !== 'Scarf') // scarves get erased by the clothes layer — never pair them
           .slice(0, 3)
 
+        // Ensure all wardrobe item images are on Cloudinary before passing to Perfect Corp
+        const safeComboItems = await Promise.all(
+          comboItems.map(async (item) => ({
+            ...item,
+            image_url: await ensureCloudinaryUrl(item.image_url).catch(() => item.image_url),
+          }))
+        )
+
         let compositeUrl = soloRenderUrl
         try {
-          compositeUrl = await renderOutfitChain(profilePhotoUrl, newItemUrl, comboItems, renderCategory, gender, style)
+          compositeUrl = await renderOutfitChain(profilePhotoUrl, newItemUrl, safeComboItems, renderCategory, gender, style)
         } catch (err) {
           console.error(`Combo render failed for "${combo.name}":`, err.message)
         }
@@ -68,7 +76,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
           name: combo.name,
           styling_note: combo.styling_note,
           wardrobe_item_ids: combo.wardrobe_item_ids,
-          wardrobe_item_details: comboItems.map(w => ({
+          wardrobe_item_details: safeComboItems.map(w => ({
             id: w.id, category: w.category,
             description: w.description || w.category,
             color: w.color || '', image_url: w.image_url,
@@ -93,17 +101,42 @@ router.post('/', upload.single('photo'), async (req, res) => {
   }
 })
 
-// POST /api/tryon/quick — try a catalog item (by URL) onto the profile photo, no Groq, no Cloudinary
+// POST /api/tryon/quick — try a recommended catalog item on the profile photo,
+// optionally paired with one of the user's wardrobe items. The catalog item is
+// the focus (rendered last/on top). Falls back to catalog-only if the wardrobe
+// layer fails (e.g. a lifestyle photo that can't be processed).
 router.post('/quick', async (req, res) => {
   try {
-    const { image_url, category, gender = '' } = req.body
+    const { image_url, category, wardrobe_image_url, wardrobe_category, gender = '' } = req.body
     if (!image_url) return res.status(400).json({ error: 'image_url required' })
 
     const { rows } = await pool.query(`SELECT profile_photo_url FROM profile WHERE id = 'demo-user-1'`)
     const profilePhotoUrl = rows[0]?.profile_photo_url
     if (!profilePhotoUrl) return res.status(400).json({ error: 'No profile photo found. Complete onboarding first.' })
 
-    const renderUrl = await renderOutfitChain(profilePhotoUrl, image_url, [], category || 'auto', gender)
+    // External catalog images (e.g. Unsplash) must be mirrored to Cloudinary so
+    // Perfect Corp can reliably fetch them.
+    const safeImageUrl = await ensureCloudinaryUrl(image_url)
+
+    let renderUrl
+    if (wardrobe_image_url) {
+      try {
+        const safeWardrobeUrl = await ensureCloudinaryUrl(wardrobe_image_url)
+        renderUrl = await renderOutfitChain(
+          profilePhotoUrl,
+          safeImageUrl,
+          [{ image_url: safeWardrobeUrl, category: wardrobe_category }],
+          category || 'auto',
+          gender,
+        )
+      } catch (err) {
+        console.warn('[quick try-on] wardrobe layer failed:', err.message)
+        renderUrl = await renderOutfitChain(profilePhotoUrl, safeImageUrl, [], category || 'auto', gender)
+      }
+    } else {
+      renderUrl = await renderOutfitChain(profilePhotoUrl, safeImageUrl, [], category || 'auto', gender)
+    }
+
     res.json({ render_url: renderUrl })
   } catch (err) {
     console.error('Quick try-on error:', err)

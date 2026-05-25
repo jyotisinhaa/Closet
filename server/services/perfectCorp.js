@@ -22,7 +22,7 @@ const POLL_TIMEOUT_MS   = 4 * 60 * 1000
 const CLOTH_CATEGORY_MAP = {
   'top': 'upper_body', 'shirt': 'upper_body', 'blouse': 'upper_body', 'tshirt': 'upper_body', 't-shirt': 'upper_body', 'sweater': 'upper_body', 'knit': 'upper_body',
   'jeans': 'lower_body', 'pants': 'lower_body', 'skirt': 'lower_body', 'shorts': 'lower_body', 'bottom': 'lower_body', 'trousers': 'lower_body', 'leggings': 'lower_body',
-  'dress': 'full_body', 'jumpsuit': 'full_body',
+  'dress': 'auto', 'jumpsuit': 'full_body',
   'outerwear': 'upper_body', 'jacket': 'upper_body', 'coat': 'upper_body', 'blazer': 'upper_body',
 }
 

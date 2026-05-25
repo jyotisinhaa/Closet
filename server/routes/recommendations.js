@@ -1,6 +1,7 @@
 const express = require('express')
 const pool    = require('../db/client')
 const { getImageEmbedding } = require('../services/fashionclip')
+const { rankCandidatesWithGroq } = require('../services/groq')
 
 const router = express.Router()
 
@@ -90,11 +91,13 @@ router.get('/recommendations', async (req, res) => {
         w.id              AS wardrobe_id,
         w.image_url       AS wardrobe_image_url,
         w.category        AS wardrobe_category,
+        w.color           AS wardrobe_color,
         w.description     AS wardrobe_description,
         c.id              AS catalog_id,
         c.brand,
         c.name,
         c.category        AS catalog_category,
+        c.color           AS catalog_color,
         c.price,
         c.image_url       AS catalog_image_url,
         c.store_url,
@@ -104,6 +107,8 @@ router.get('/recommendations', async (req, res) => {
       CROSS JOIN LATERAL (
         SELECT * FROM catalog_items c
         WHERE c.embedding IS NOT NULL
+
+          -- Must be a different clothing group
           AND (
             CASE WHEN LOWER(c.category) IN ('jeans','shorts','skirt','bottom','trousers','pants') THEN 'bottoms'
                  WHEN LOWER(c.category) IN ('top','shirt','blouse','tshirt','t-shirt','knitwear','sweater') THEN 'tops'
@@ -119,40 +124,116 @@ router.get('/recommendations', async (req, res) => {
                  WHEN LOWER(w.category) IN ('shoes','sneakers','boots','heels','sandals') THEN 'shoes'
                  ELSE LOWER(w.category) END
           )
-        ORDER BY c.embedding <=> w.embedding
-        LIMIT 1
+
+          -- Dress is a full outfit: only pair with outerwear or shoes, never tops/bottoms
+          AND NOT (
+            LOWER(w.category) = 'dress'
+            AND LOWER(c.category) NOT IN ('outerwear','jacket','coat','blazer','shoes','sneakers','boots','heels','sandals')
+          )
+          AND NOT (
+            LOWER(c.category) = 'dress'
+            AND LOWER(w.category) NOT IN ('outerwear','jacket','coat','blazer','shoes','sneakers','boots','heels','sandals')
+          )
+
+          -- Skip same-color pairings (visual similarity pulls matching colors to the top)
+          AND NOT (
+            w.color != '' AND c.color != ''
+            AND LOWER(w.color) = LOWER(c.color)
+          )
+
+        ORDER BY (c.embedding <=> w.embedding) + (RANDOM() * 0.18)
+        LIMIT 15
       ) c
       WHERE w.embedding IS NOT NULL
-      ORDER BY similarity_score DESC
+      ORDER BY w.id, similarity_score DESC
     `)
 
-    // Deduplicate: each catalog item appears only once
-    const seen = new Set()
-    const unique = rows.filter(r => {
-      if (seen.has(r.catalog_id)) return false
-      seen.add(r.catalog_id)
-      return true
-    })
+    // Group top-15 candidates by wardrobe item
+    const grouped = new Map()
+    for (const r of rows) {
+      if (!grouped.has(r.wardrobe_id)) {
+        grouped.set(r.wardrobe_id, { wardrobe: r, candidates: [] })
+      }
+      grouped.get(r.wardrobe_id).candidates.push(r)
+    }
 
-    const recommendations = unique.map(r => ({
-      wardrobe_item: {
-        id: r.wardrobe_id,
-        image_url: r.wardrobe_image_url,
-        category: r.wardrobe_category,
-        description: r.wardrobe_description,
-      },
-      catalog_item: {
-        id: r.catalog_id,
-        brand: r.brand,
-        name: r.name,
-        category: r.catalog_category,
-        price: r.price,
-        image_url: r.catalog_image_url,
-        store_url: r.store_url,
-        style_tags: r.style_tags,
-      },
-      similarity_score: parseInt(r.similarity_score),
-    }))
+    // Groq reranking: run in parallel, fall back to top vector result on failure
+    const reranked = await Promise.all(
+      Array.from(grouped.values()).map(async ({ wardrobe, candidates }) => {
+        let chosen = candidates[0]
+        let styleReason = ''
+        try {
+          const wardrobeItem = {
+            category: wardrobe.wardrobe_category,
+            color: wardrobe.wardrobe_color || '',
+            description: wardrobe.wardrobe_description || '',
+          }
+          const catalogCandidates = candidates.map(c => ({
+            id: c.catalog_id,
+            brand: c.brand,
+            name: c.name,
+            category: c.catalog_category,
+            color: c.catalog_color || '',
+          }))
+          const { index, reason, styleScore } = await rankCandidatesWithGroq(wardrobeItem, catalogCandidates)
+          chosen = candidates[index]
+          styleReason = reason
+          if (styleScore) chosen = { ...chosen, ai_style_score: styleScore }
+        } catch (err) {
+          console.error('Groq rerank failed, using top vector result:', err.message)
+        }
+        return { chosen, styleReason }
+      })
+    )
+
+    // Build top-5 results: Groq-chosen picks first, then vector-similarity runners-up
+    const seen = new Set()
+    const results = []
+
+    for (const { chosen, styleReason } of reranked) {
+      if (!seen.has(chosen.catalog_id)) {
+        seen.add(chosen.catalog_id)
+        results.push({ chosen, styleReason })
+      }
+    }
+
+    if (results.length < 8) {
+      const runnerUps = []
+      for (const { candidates } of grouped.values()) {
+        for (const c of candidates) {
+          if (!seen.has(c.catalog_id)) runnerUps.push(c)
+        }
+      }
+      runnerUps.sort((a, b) => b.similarity_score - a.similarity_score)
+      for (const c of runnerUps) {
+        if (results.length >= 8) break
+        if (!seen.has(c.catalog_id)) {
+          seen.add(c.catalog_id)
+          results.push({ chosen: c, styleReason: '' })
+        }
+      }
+    }
+
+    const recommendations = results.slice(0, 8).map(({ chosen: r, styleReason }) => ({
+        wardrobe_item: {
+          id: r.wardrobe_id,
+          image_url: r.wardrobe_image_url,
+          category: r.wardrobe_category,
+          description: r.wardrobe_description,
+        },
+        catalog_item: {
+          id: r.catalog_id,
+          brand: r.brand,
+          name: r.name,
+          category: r.catalog_category,
+          price: r.price,
+          image_url: r.catalog_image_url,
+          store_url: r.store_url,
+          style_tags: r.style_tags,
+        },
+        similarity_score: r.ai_style_score ?? parseInt(r.similarity_score),
+        style_reason: styleReason,
+      }))
 
     res.json(recommendations)
   } catch (err) {
