@@ -5,16 +5,14 @@ const { GROQ_API_KEY } = require('../config')
 
 const groq = new Groq({ apiKey: GROQ_API_KEY })
 
-async function buildPairingWithGroq(newItemUrl, profilePhotoUrl, category, price, color, store, wardrobe) {
-  if (wardrobe.length === 0) {
-    return { combinations: [], honest_assessment: 'Add items to your wardrobe to get outfit pairing suggestions.' }
-  }
-
+// Shared stylist prompt — used by both the Groq and the Crusoe/Nemotron pairing
+// calls so the two providers stay in lockstep.
+function buildStylistPrompt(category, price, color, store, wardrobe) {
   const wardrobeList = wardrobe.map(item =>
     `- id=${item.id}, category=${item.category}, color=${item.color || 'unknown'}, description=${item.description || item.category}`
   ).join('\n')
 
-  const prompt = `You are a personal stylist with sharp visual analysis skills.
+  return `You are a personal stylist with sharp visual analysis skills.
 
 Image 1 (above) is the person — this is who will be wearing the item.
 Image 2 (above) is the new garment they are considering buying.
@@ -49,6 +47,28 @@ Return ONLY valid JSON, no markdown, no code blocks:
   ],
   "honest_assessment": "2-3 sentences: how it looks on you (address the user directly as 'you'), and whether it fills a real gap or duplicates something you already own."
 }`
+}
+
+// Robustly parse the stylist JSON from a model reply. Handles code fences and
+// reasoning-model output that may wrap the JSON object in prose.
+function parseStylistJson(text) {
+  const cleaned = (text || '').trim().replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
+  try {
+    return JSON.parse(cleaned)
+  } catch {
+    const start = cleaned.indexOf('{')
+    const end = cleaned.lastIndexOf('}')
+    if (start !== -1 && end > start) return JSON.parse(cleaned.slice(start, end + 1))
+    throw new Error('Stylist response was not valid JSON')
+  }
+}
+
+async function buildPairingWithGroq(newItemUrl, profilePhotoUrl, category, price, color, store, wardrobe) {
+  if (wardrobe.length === 0) {
+    return { combinations: [], honest_assessment: 'Add items to your wardrobe to get outfit pairing suggestions.' }
+  }
+
+  const prompt = buildStylistPrompt(category, price, color, store, wardrobe)
 
   const response = await groq.chat.completions.create({
     model: 'meta-llama/llama-4-scout-17b-16e-instruct',
@@ -64,9 +84,7 @@ Return ONLY valid JSON, no markdown, no code blocks:
     temperature: 0.7,
   })
 
-  const text = response.choices[0].message.content.trim()
-  const cleaned = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
-  return JSON.parse(cleaned)
+  return parseStylistJson(response.choices[0].message.content)
 }
 
 // Given a wardrobe item and up to 5 vector candidates, pick the best outfit pair
@@ -113,4 +131,4 @@ style_score is how well the best pick pairs with the wardrobe item as a complete
   }
 }
 
-module.exports = { buildPairingWithGroq, rankCandidatesWithGroq }
+module.exports = { buildPairingWithGroq, rankCandidatesWithGroq, buildStylistPrompt, parseStylistJson }

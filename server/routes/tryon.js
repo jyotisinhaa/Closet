@@ -4,6 +4,7 @@ const pool    = require('../db/client')
 const { uploadToCloudinary, ensureCloudinaryUrl } = require('../services/cloudinary')
 const { renderOutfitChain }                = require('../services/perfectCorp')
 const { buildPairingWithGroq }             = require('../services/groq')
+const { buildPairingWithCrusoe, isCrusoeEnabled } = require('../services/crusoe')
 
 const router = express.Router()
 
@@ -24,10 +25,21 @@ router.post('/', upload.single('photo'), async (req, res) => {
 
     const { price = '0', category = 'auto', store = '', color = '', gender = '', style = '' } = req.body
 
-    // 3. Pairing analysis via Groq
+    // 3. Stylist analysis — NVIDIA Nemotron on Crusoe Managed Inference, with an
+    //    automatic fall back to Groq if Crusoe is unset or errors.
     let combinations = [], honest_assessment = '', item_name = '', detected_category = '', style_tags = [], similar_owned = ''
     try {
-      const pairing    = await buildPairingWithGroq(newItemUrl, profilePhotoUrl, category, price, color, store, wardrobe)
+      let pairing
+      if (isCrusoeEnabled()) {
+        try {
+          pairing = await buildPairingWithCrusoe(newItemUrl, profilePhotoUrl, category, price, color, store, wardrobe)
+        } catch (err) {
+          console.error('Crusoe (Nemotron) pairing failed, falling back to Groq:', err.message)
+          pairing = await buildPairingWithGroq(newItemUrl, profilePhotoUrl, category, price, color, store, wardrobe)
+        }
+      } else {
+        pairing = await buildPairingWithGroq(newItemUrl, profilePhotoUrl, category, price, color, store, wardrobe)
+      }
       combinations     = pairing.combinations || []
       honest_assessment = pairing.honest_assessment || ''
       item_name        = pairing.item_name || ''
@@ -35,8 +47,8 @@ router.post('/', upload.single('photo'), async (req, res) => {
       style_tags       = pairing.style_tags || []
       similar_owned    = pairing.similar_owned || ''
     } catch (err) {
-      console.error('Groq pairing failed:', err.message)
-      honest_assessment = 'Style analysis unavailable — check your GROQ_API_KEY.'
+      console.error('Stylist analysis failed:', err.message)
+      honest_assessment = 'Style analysis unavailable — check your CRUSOE_API_KEY / GROQ_API_KEY.'
     }
 
     // 4. Solo render (dispatched by category: clothes vs hat/scarf/bag/shoes)

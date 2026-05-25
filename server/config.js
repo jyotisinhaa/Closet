@@ -42,4 +42,9 @@ module.exports = {
   PORT: process.env.PORT || 3001,
   PERFECT_CORP_API_KEY: process.env.PERFECT_CORP_API_KEY,
   GROQ_API_KEY: process.env.GROQ_API_KEY,
+  // Crusoe Managed Inference (NVIDIA Nemotron). Optional: when CRUSOE_API_KEY is
+  // set, the stylist reasoning runs on Nemotron and falls back to Groq on error.
+  CRUSOE_API_KEY: process.env.CRUSOE_API_KEY,
+  CRUSOE_BASE_URL: process.env.CRUSOE_BASE_URL || 'https://api.inference.crusoecloud.com/v1',
+  CRUSOE_MODEL: process.env.CRUSOE_MODEL || 'nvidia/Nemotron-3-Nano-Omni-Reasoning-30B-A3B',
 }

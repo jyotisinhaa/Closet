@@ -5,10 +5,10 @@ import { getProfile, setLastResult } from '../../lib/session'
 import { getCategoriesForGender } from '../../lib/categories'
 
 const GENERATE_STATUSES = [
-  'Uploading photo…',
-  'Analysing your wardrobe…',
-  'Rendering your look…',
-  'Creating outfit pairings…',
+  'Uploading your photo…',
+  'Calling Nemotron on Crusoe to analyse your style…',
+  'Rendering your look with Perfect Corp…',
+  'Composing your outfit pairings…',
   'Almost there…',
 ]
 
