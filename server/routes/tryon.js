@@ -1,8 +1,8 @@
 const express = require('express')
 const upload  = require('../middleware/upload')
 const pool    = require('../db/client')
-const { uploadToCloudinary }               = require('../services/cloudinary')
-const { toPerfectCorpCategory, renderOutfitChain } = require('../services/perfectCorp')
+const { uploadToCloudinary, ensureCloudinaryUrl } = require('../services/cloudinary')
+const { toPerfectCorpCategory, perfectCorpRender, renderOutfitChain } = require('../services/perfectCorp')
 const { buildPairingWithGroq }             = require('../services/groq')
 
 const router = express.Router()
@@ -56,9 +56,17 @@ router.post('/', upload.single('photo'), async (req, res) => {
           .filter(Boolean)
           .slice(0, 3)
 
+        // Ensure all wardrobe item images are on Cloudinary before passing to Perfect Corp
+        const safeComboItems = await Promise.all(
+          comboItems.map(async (item) => ({
+            ...item,
+            image_url: await ensureCloudinaryUrl(item.image_url).catch(() => item.image_url),
+          }))
+        )
+
         let compositeUrl = soloRenderUrl
         try {
-          compositeUrl = await renderOutfitChain(profilePhotoUrl, newItemUrl, comboItems, pcCategory)
+          compositeUrl = await renderOutfitChain(profilePhotoUrl, newItemUrl, safeComboItems, pcCategory)
         } catch (err) {
           console.error(`Combo render failed for "${combo.name}":`, err.message)
         }
@@ -67,7 +75,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
           name: combo.name,
           styling_note: combo.styling_note,
           wardrobe_item_ids: combo.wardrobe_item_ids,
-          wardrobe_item_details: comboItems.map(w => ({
+          wardrobe_item_details: safeComboItems.map(w => ({
             id: w.id, category: w.category,
             description: w.description || w.category,
             color: w.color || '', image_url: w.image_url,
@@ -92,10 +100,12 @@ router.post('/', upload.single('photo'), async (req, res) => {
   }
 })
 
-// POST /api/tryon/quick — try a catalog item (by URL) onto the profile photo, no Groq, no Cloudinary
+// POST /api/tryon/quick — try the recommended outfit on the profile photo.
+// Order: wardrobe item first (base layer) → catalog item on top.
+// Falls back to catalog-only if wardrobe layer fails (lifestyle photo).
 router.post('/quick', async (req, res) => {
   try {
-    const { image_url, category } = req.body
+    const { image_url, category, wardrobe_image_url, wardrobe_category } = req.body
     if (!image_url) return res.status(400).json({ error: 'image_url required' })
 
     const { rows } = await pool.query(`SELECT profile_photo_url FROM profile WHERE id = 'demo-user-1'`)
@@ -103,7 +113,31 @@ router.post('/quick', async (req, res) => {
     if (!profilePhotoUrl) return res.status(400).json({ error: 'No profile photo found. Complete onboarding first.' })
 
     const pcCategory = toPerfectCorpCategory(category || 'auto')
-    const renderUrl = await renderOutfitChain(profilePhotoUrl, image_url, [], pcCategory)
+    const safeImageUrl = await ensureCloudinaryUrl(image_url)
+
+    let renderUrl
+    if (wardrobe_image_url) {
+      let safeWardrobeUrl = null
+      const wardrobePcCategory = toPerfectCorpCategory(wardrobe_category || 'auto')
+      try {
+        safeWardrobeUrl = await ensureCloudinaryUrl(wardrobe_image_url)
+        console.log(`[quick try-on] wardrobe: ${wardrobe_category} → ${wardrobePcCategory} | catalog: ${category} → ${pcCategory}`)
+        console.log(`[quick try-on] wardrobe url: ${safeWardrobeUrl}`)
+        console.log(`[quick try-on] catalog url: ${safeImageUrl}`)
+        renderUrl = await renderOutfitChain(
+          profilePhotoUrl,
+          safeWardrobeUrl,
+          [{ image_url: safeImageUrl, category }],
+          wardrobePcCategory
+        )
+      } catch (err) {
+        console.warn(`[quick try-on] wardrobe layer failed (${wardrobe_category} → ${wardrobePcCategory}):`, err.message)
+        renderUrl = await renderOutfitChain(profilePhotoUrl, safeImageUrl, [], pcCategory)
+      }
+    } else {
+      renderUrl = await renderOutfitChain(profilePhotoUrl, safeImageUrl, [], pcCategory)
+    }
+
     res.json({ render_url: renderUrl })
   } catch (err) {
     console.error('Quick try-on error:', err)

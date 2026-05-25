@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { NAV } from "./nav";
+import { clearAll } from "../../lib/session";
 
 export default function Sidebar({ collapsed, setCollapsed, openSections, toggleSection }) {
   const navigate = useNavigate();
@@ -254,29 +255,54 @@ export default function Sidebar({ collapsed, setCollapsed, openSections, toggleS
         })}
       </div>
 
-      {/* Bottom: Settings */}
-      {!collapsed && (
-        <div
+      {/* Bottom: Logout */}
+      <div
+        style={{
+          padding: collapsed ? "12px 0" : "12px 16px",
+          borderTop: "1px solid var(--line)",
+          flexShrink: 0,
+          display: "flex",
+          flexDirection: "column",
+          gap: "8px",
+        }}
+      >
+        <button
+          onClick={() => { clearAll(); navigate("/"); }}
+          title="Log out"
           style={{
-            padding: "12px 16px",
-            borderTop: "1px solid var(--line)",
-            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            padding: collapsed ? "8px 0" : "8px 10px",
+            justifyContent: collapsed ? "center" : "flex-start",
+            width: "100%",
+            background: "transparent",
+            border: "1px solid var(--line)",
+            borderRadius: "8px",
+            cursor: "pointer",
+            color: "var(--ink-soft)",
+            transition: "background 0.15s, color 0.15s",
           }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(194,86,58,0.07)"; e.currentTarget.style.color = "var(--terracotta)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--ink-soft)"; }}
         >
-          <div
-            style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: "8px",
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: "var(--muted)",
-              marginBottom: "4px",
-            }}
-          >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          {!collapsed && (
+            <span style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: "13px", fontWeight: 500 }}>
+              Log out
+            </span>
+          )}
+        </button>
+        {!collapsed && (
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--muted)" }}>
             v1.0 · Hackathon 2026
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </aside>
   );
 }

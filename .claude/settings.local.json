@@ -29,7 +29,8 @@
       "Bash(git checkout *)",
       "Bash(node -e \"const {readData,writeData}=require\\('./lib/db'\\); const d=readData\\(\\); console.log\\('keys:', Object.keys\\(d\\)\\); console.log\\('wishlist end line exists:', !!d.wishlist\\)\")",
       "Bash(node -e ' *)",
-      "WebFetch(domain:unsplash.com)"
+      "WebFetch(domain:unsplash.com)",
+      "WebFetch(domain:www.uniqlo.com)"
     ]
   }
 }
