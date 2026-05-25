@@ -23,3 +23,5 @@ export const clearProfile = () => localStorage.removeItem(PROFILE)
 
 export const getLastResult = () => readJSON(LAST_RESULT)
 export const setLastResult = (r) => localStorage.setItem(LAST_RESULT, JSON.stringify(r))
+
+export const clearAll = () => [TOKEN, USER, PROFILE, LAST_RESULT].forEach(k => localStorage.removeItem(k))

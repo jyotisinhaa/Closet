@@ -30,8 +30,18 @@ router.post('/photo', upload.single('photo'), async (req, res) => {
 })
 
 router.get('/', async (req, res) => {
-  const { rows } = await pool.query(`SELECT * FROM profile WHERE id = 'demo-user-1'`)
+  const { rows } = await pool.query(`SELECT id, profile_photo_url, gender, body_type FROM profile WHERE id = 'demo-user-1'`)
   res.json(rows[0] || {})
+})
+
+router.patch('/preferences', async (req, res) => {
+  const { gender, bodyType } = req.body
+  await pool.query(
+    `INSERT INTO profile (id, gender, body_type) VALUES ('demo-user-1', $1, $2)
+     ON CONFLICT (id) DO UPDATE SET gender = $1, body_type = $2, updated_at = NOW()`,
+    [gender || null, bodyType || null]
+  )
+  res.json({ ok: true })
 })
 
 router.delete('/', async (req, res) => {

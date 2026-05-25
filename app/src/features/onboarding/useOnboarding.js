@@ -31,27 +31,35 @@ function compressPhoto(file) {
 // persist the profile, and route into the wardrobe.
 export function useOnboarding() {
   const navigate = useNavigate()
-  const savedProfile = getProfile() || {}
-  const localComplete = !!(savedProfile.gender && savedProfile.bodyType && savedProfile.profilePhotoUrl)
+  const [savedProfile, setSavedProfile] = useState(getProfile() || {})
 
   // Verify DB has the profile photo — localStorage may be stale after a DB reset
   const [dbChecked,  setDbChecked]  = useState(false)
   const [isComplete, setIsComplete] = useState(false)
 
   useEffect(() => {
+    const local = getProfile() || {}
     fetch('/api/profile')
       .then(r => r.json())
       .then(profile => {
         if (!profile.profile_photo_url) {
           clearProfile()
+          setSavedProfile({})
           setIsComplete(false)
         } else {
-          setIsComplete(localComplete)
+          const restored = {
+            profilePhotoUrl: profile.profile_photo_url,
+            gender:   profile.gender    || local.gender   || '',
+            bodyType: profile.body_type || local.bodyType || '',
+          }
+          setProfile(restored)
+          setSavedProfile(restored)
+          setIsComplete(true)
         }
         setDbChecked(true)
       })
       .catch(() => {
-        setIsComplete(localComplete)
+        setIsComplete(!!(local.gender && local.bodyType && local.profilePhotoUrl))
         setDbChecked(true)
       })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -70,6 +78,11 @@ export function useOnboarding() {
       const fd = new FormData()
       fd.append('photo', compressed)
       const json = await apiUpload('/profile/photo', fd)
+      await fetch('/api/profile/preferences', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gender, bodyType }),
+      })
       setProfile({ gender, bodyType, profilePhotoUrl: json.profile_photo_url })
       navigate('/wardrobe')
     } catch (err) {

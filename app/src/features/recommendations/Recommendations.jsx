@@ -67,7 +67,7 @@ function RecommendationCard({ rec }) {
   const [renderUrl, setRenderUrl] = useState(null)
   const [tryOnError, setTryOnError] = useState(null)
 
-  const { wardrobe_item, catalog_item, similarity_score } = rec
+  const { wardrobe_item, catalog_item, similarity_score, style_reason } = rec
 
   async function handleTryOn() {
     setTryingOn(true)
@@ -77,7 +77,12 @@ function RecommendationCard({ rec }) {
       const res = await fetch('/api/tryon/quick', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image_url: catalog_item.image_url, category: catalog_item.category }),
+        body: JSON.stringify({
+          image_url: catalog_item.image_url,
+          category: catalog_item.category,
+          wardrobe_image_url: wardrobe_item.image_url,
+          wardrobe_category: wardrobe_item.category,
+        }),
       })
       const data = await res.json()
       if (data.render_url) setRenderUrl(data.render_url)
@@ -138,11 +143,16 @@ function RecommendationCard({ rec }) {
 
         {/* Info + actions */}
         <div style={{ paddingLeft: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: style_reason ? '6px' : '10px' }}>
             <div style={{ background: 'rgba(45,106,79,0.1)', color: '#2D6A4F', borderRadius: '100px', padding: '3px 10px', fontFamily: "'Inter Tight', sans-serif", fontSize: '12px', fontWeight: 700 }}>
               ★ {similarity_score}% style match
             </div>
           </div>
+          {style_reason && (
+            <div style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: '12px', color: 'var(--muted)', fontStyle: 'italic', marginBottom: '10px', lineHeight: 1.4 }}>
+              {style_reason}
+            </div>
+          )}
 
           <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: '17px', color: 'var(--ink)', letterSpacing: '-0.01em', marginBottom: '4px', lineHeight: 1.2 }}>
             {catalog_item.name}
@@ -207,21 +217,44 @@ function RecommendationCard({ rec }) {
           <div style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: '12px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>
             Virtual Try-On Result
           </div>
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-            <div style={{ borderRadius: '12px', overflow: 'hidden', width: '180px', flexShrink: 0, border: '1px solid var(--line)' }}>
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+            <div style={{ borderRadius: '12px', overflow: 'hidden', width: '480px', flexShrink: 0, border: '1px solid var(--line)' }}>
               <img src={renderUrl} alt="Try-on render" style={{ width: '100%', display: 'block' }} />
             </div>
-            <div>
-              <div style={{ fontFamily: "'Fraunces', serif", fontSize: '15px', color: 'var(--ink)', marginBottom: '6px' }}>
-                {catalog_item.name} on you
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0', paddingTop: '4px' }}>
+              {/* Label */}
+              <div style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>
+                Now wearing
               </div>
-              <div style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', color: 'var(--muted)', marginBottom: '14px' }}>
-                From {catalog_item.brand} · ${catalog_item.price}
+
+              {/* Item name */}
+              <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: '22px', color: 'var(--ink)', letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: '10px' }}>
+                {catalog_item.name}
               </div>
+
+              {/* Brand + price */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                <span style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', color: 'var(--muted)' }}>
+                  {catalog_item.brand}
+                </span>
+                <span style={{ width: '3px', height: '3px', borderRadius: '50%', background: 'var(--line)', flexShrink: 0 }} />
+                <span style={{ fontFamily: "'Fraunces', serif", fontSize: '20px', fontWeight: 600, color: 'var(--ink)', letterSpacing: '-0.02em' }}>
+                  ${catalog_item.price}
+                </span>
+              </div>
+
+              {/* Shop Now CTA */}
               {catalog_item.store_url && (
-                <a href={catalog_item.store_url} target="_blank" rel="noreferrer" style={{ ...shopBtn, display: 'inline-flex' }}>
+                <a href={catalog_item.store_url} target="_blank" rel="noreferrer" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  background: 'var(--ink)', color: '#fff',
+                  border: 'none', borderRadius: '10px', padding: '12px 24px',
+                  fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', fontWeight: 600,
+                  textDecoration: 'none', cursor: 'pointer',
+                  transition: 'opacity 0.15s',
+                }}>
                   Shop Now
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                     <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
                   </svg>
                 </a>
