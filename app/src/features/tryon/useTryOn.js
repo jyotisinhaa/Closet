@@ -36,7 +36,7 @@ export function useTryOn() {
     return () => clearInterval(id)
   }, [generating])
 
-  async function generate({ photo, price, store, color }) {
+  async function generate({ photo, price, store, color, style = '' }) {
     if (!photo) return
     setGenerating(true)
     setGenStatus(GENERATE_STATUSES[0])
@@ -48,6 +48,8 @@ export function useTryOn() {
       formData.append('category', category)
       formData.append('store', store)
       formData.append('color', color)
+      formData.append('gender', (getProfile() || {}).gender || '')
+      formData.append('style', style)
 
       const result = await apiUpload('/tryon', formData)
       setLastResult(result)

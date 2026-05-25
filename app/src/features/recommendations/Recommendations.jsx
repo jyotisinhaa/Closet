@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getProfile } from '../../lib/session'
 
 export default function Recommendations() {
   const navigate = useNavigate()
@@ -77,7 +78,7 @@ function RecommendationCard({ rec }) {
       const res = await fetch('/api/tryon/quick', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image_url: catalog_item.image_url, category: catalog_item.category }),
+        body: JSON.stringify({ image_url: catalog_item.image_url, category: catalog_item.category, gender: (getProfile() || {}).gender || '' }),
       })
       const data = await res.json()
       if (data.render_url) setRenderUrl(data.render_url)

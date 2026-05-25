@@ -2,7 +2,7 @@ const express = require('express')
 const upload  = require('../middleware/upload')
 const pool    = require('../db/client')
 const { uploadToCloudinary }               = require('../services/cloudinary')
-const { toPerfectCorpCategory, renderOutfitChain } = require('../services/perfectCorp')
+const { renderOutfitChain }                = require('../services/perfectCorp')
 const { buildPairingWithGroq }             = require('../services/groq')
 
 const router = express.Router()
@@ -22,7 +22,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
 
     const { rows: wardrobe } = await pool.query('SELECT * FROM wardrobe_items ORDER BY created_at DESC')
 
-    const { price = '0', category = 'auto', store = '', color = '' } = req.body
+    const { price = '0', category = 'auto', store = '', color = '', gender = '', style = '' } = req.body
 
     // 3. Pairing analysis via Groq
     let combinations = [], honest_assessment = '', item_name = '', detected_category = '', style_tags = [], similar_owned = ''
@@ -39,11 +39,11 @@ router.post('/', upload.single('photo'), async (req, res) => {
       honest_assessment = 'Style analysis unavailable — check your GROQ_API_KEY.'
     }
 
-    // 4. Solo render
-    const pcCategory = toPerfectCorpCategory(detected_category || category)
+    // 4. Solo render (dispatched by category: clothes vs hat/scarf/bag/shoes)
+    const renderCategory = detected_category || category
     let soloRenderUrl = null
     try {
-      soloRenderUrl = await renderOutfitChain(profilePhotoUrl, newItemUrl, [], pcCategory)
+      soloRenderUrl = await renderOutfitChain(profilePhotoUrl, newItemUrl, [], renderCategory, gender, style)
     } catch (err) {
       console.error('Solo render failed:', err.message)
     }
@@ -54,11 +54,12 @@ router.post('/', upload.single('photo'), async (req, res) => {
         const comboItems = (combo.wardrobe_item_ids || [])
           .map(id => wardrobe.find(w => w.id === id))
           .filter(Boolean)
+          .filter(w => w.category !== 'Scarf') // scarves get erased by the clothes layer — never pair them
           .slice(0, 3)
 
         let compositeUrl = soloRenderUrl
         try {
-          compositeUrl = await renderOutfitChain(profilePhotoUrl, newItemUrl, comboItems, pcCategory)
+          compositeUrl = await renderOutfitChain(profilePhotoUrl, newItemUrl, comboItems, renderCategory, gender, style)
         } catch (err) {
           console.error(`Combo render failed for "${combo.name}":`, err.message)
         }
@@ -95,15 +96,14 @@ router.post('/', upload.single('photo'), async (req, res) => {
 // POST /api/tryon/quick — try a catalog item (by URL) onto the profile photo, no Groq, no Cloudinary
 router.post('/quick', async (req, res) => {
   try {
-    const { image_url, category } = req.body
+    const { image_url, category, gender = '' } = req.body
     if (!image_url) return res.status(400).json({ error: 'image_url required' })
 
     const { rows } = await pool.query(`SELECT profile_photo_url FROM profile WHERE id = 'demo-user-1'`)
     const profilePhotoUrl = rows[0]?.profile_photo_url
     if (!profilePhotoUrl) return res.status(400).json({ error: 'No profile photo found. Complete onboarding first.' })
 
-    const pcCategory = toPerfectCorpCategory(category || 'auto')
-    const renderUrl = await renderOutfitChain(profilePhotoUrl, image_url, [], pcCategory)
+    const renderUrl = await renderOutfitChain(profilePhotoUrl, image_url, [], category || 'auto', gender)
     res.json({ render_url: renderUrl })
   } catch (err) {
     console.error('Quick try-on error:', err)
@@ -115,7 +115,7 @@ router.post('/quick', async (req, res) => {
 // wardrobe items (manual "build your own look"). Stateless; reuses the chain.
 router.post('/combine', async (req, res) => {
   try {
-    const { new_item_image_url, garment_category, wardrobe_item_ids = [] } = req.body
+    const { new_item_image_url, garment_category, wardrobe_item_ids = [], gender = '' } = req.body
     if (!new_item_image_url) return res.status(400).json({ error: 'new_item_image_url is required' })
 
     const { rows: profileRows } = await pool.query(`SELECT profile_photo_url FROM profile WHERE id = 'demo-user-1'`)
@@ -132,8 +132,7 @@ router.post('/combine', async (req, res) => {
       .filter(Boolean)
       .slice(0, 3)
 
-    const pcCategory = toPerfectCorpCategory(garment_category)
-    const composite_render_url = await renderOutfitChain(profilePhotoUrl, new_item_image_url, items, pcCategory)
+    const composite_render_url = await renderOutfitChain(profilePhotoUrl, new_item_image_url, items, garment_category, gender)
 
     res.json({
       composite_render_url,

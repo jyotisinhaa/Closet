@@ -28,11 +28,11 @@ ${wardrobeList}
 
 Your job:
 1. Visually identify the garment — give it a short descriptive name (e.g. "Olive utility jacket", "Floral midi dress").
-2. Identify the correct category from the image (e.g. "Dress", "Jacket", "Top", "Pants", "Skirt", "Outerwear"). Trust the image, not any label provided.
+2. Identify the correct category from the image. Use exactly one of: "Top", "Shirt", "Jeans", "Bottom", "Dress", "Skirt", "Outerwear", "Shoes", "Bag", "Hat", "Scarf", "Accessory". Trust the image, not any label provided.
 3. Identify the style tags for the garment (e.g. ["Utility", "Casual"] or ["Formal", "Minimalist"]).
 4. Look at the person and the garment — assess honestly how this item would look on them. Address the user directly as "you". Be specific and kind but truthful.
 5. Check the wardrobe list — count how many similar items they already own (same type/category). Describe it briefly (e.g. "2 jackets", "1 similar dress", "none").
-6. Pick 2 outfit combinations from their wardrobe that would work well with this new item.
+6. Pick 2 outfit combinations from their wardrobe that would work well with this new item. Do NOT include any item whose category is "Scarf" in these combinations — scarves can't be layered into the try-on render. (You may still count scarves for similar_owned above.)
 
 Return ONLY valid JSON, no markdown, no code blocks:
 {
