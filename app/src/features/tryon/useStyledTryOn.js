@@ -13,7 +13,9 @@ export function useStyledTryOn() {
   const location = useLocation()
   const result = location.state?.result ?? getLastResult()
 
-  const categories = getCategoriesForGender((getProfile() || {}).gender)
+  // Scarves can't be paired in a composite — the clothes layer regenerates the
+  // torso and erases them — so they're excluded from the picker here.
+  const categories = getCategoriesForGender((getProfile() || {}).gender).filter(c => c !== 'Scarf')
 
   const [wardrobe,    setWardrobe]    = useState([])
   const [filter,      setFilter]      = useState('All')
@@ -45,6 +47,7 @@ export function useStyledTryOn() {
         new_item_image_url: result.new_item_image_url,
         garment_category: result.detected_category || result.category,
         wardrobe_item_ids: selectedIds,
+        gender: (getProfile() || {}).gender || '',
       })
       setManualRender(data)
     } catch (err) {
@@ -54,7 +57,8 @@ export function useStyledTryOn() {
     }
   }
 
-  const visible = filter === 'All' ? wardrobe : wardrobe.filter(i => i.category === filter)
+  const selectable = wardrobe.filter(i => i.category !== 'Scarf')
+  const visible = filter === 'All' ? selectable : selectable.filter(i => i.category === filter)
   const atMax = selectedIds.length >= MAX_ITEMS
 
   return {

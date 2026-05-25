@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getProfile } from '../../lib/session'
 
 export default function Recommendations() {
   const navigate = useNavigate()
@@ -82,6 +83,7 @@ function RecommendationCard({ rec }) {
           category: catalog_item.category,
           wardrobe_image_url: wardrobe_item.image_url,
           wardrobe_category: wardrobe_item.category,
+          gender: (getProfile() || {}).gender || '',
         }),
       })
       const data = await res.json()

@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useTryOn } from './useTryOn'
+import { getStylesForCategory } from '../../lib/categories'
 
 const COLOR_SWATCHES = [
   '#1a1612', '#3a322a', '#c2563a', '#e63946',
@@ -22,7 +23,13 @@ export default function TryOn() {
   const [price,       setPrice]       = useState('')
   const [store,       setStore]       = useState('')
   const [color,       setColor]       = useState('')
+  const [style,       setStyle]       = useState('')
   const [dragOver,    setDragOver]    = useState(false)
+
+  // Style presets only apply to accessory categories (Hat/Scarf/Bag/Shoes).
+  // Reset the choice whenever the category changes so a stale style isn't sent.
+  const styleOptions = getStylesForCategory(category)
+  useEffect(() => { setStyle('') }, [category])
 
   function handleFileSelect(e) {
     const file = e.target.files?.[0]
@@ -324,6 +331,33 @@ export default function TryOn() {
               </div>
             </div>
 
+            {/* Row 3: Style (accessories only) */}
+            {styleOptions.length > 0 && (
+              <div style={{ marginBottom: '20px' }}>
+                <div style={{ marginBottom: '8px' }}>
+                  <span style={{ ...labelStyle, fontSize: '13px', fontWeight: 400, letterSpacing: '0.02em', textTransform: 'none' }}>
+                    Style <span style={{ fontWeight: 400, fontSize: '10px', color: 'var(--muted)' }}>(how we style the rest of the look)</span>
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {[{ value: '', label: 'Auto' }, ...styleOptions].map(opt => {
+                    const active = style === opt.value
+                    return (
+                      <button key={opt.value || 'auto'} onClick={() => setStyle(opt.value)} style={{
+                        padding: '6px 14px', borderRadius: '7px', cursor: 'pointer', border: 'none',
+                        background: active ? 'var(--terracotta)' : 'var(--cream-deep)',
+                        color: active ? 'white' : 'var(--ink-soft)',
+                        fontFamily: "'Inter Tight', sans-serif", fontSize: '12px',
+                        fontWeight: active ? 600 : 400, transition: 'all 0.15s',
+                      }}>
+                        {opt.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Divider */}
             <div style={{ height: '1px', background: 'var(--line)', margin: '20px 0 16px' }} />
 
@@ -350,7 +384,7 @@ export default function TryOn() {
               </div>
 
               <button
-                onClick={() => generate({ photo, price, store, color })}
+                onClick={() => generate({ photo, price, store, color, style })}
                 disabled={generating || !photo}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
