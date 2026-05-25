@@ -37,10 +37,6 @@ export const CATEGORIES_ALL = [
   "Accessory",
 ];
 
-export const CATEGORIES_FEMALE = ['Top', 'Jeans', 'Bottom', 'Dress', 'Skirt', 'Outerwear', 'Shoes', 'Bag', 'Hat', 'Scarf', 'Accessory']
-export const CATEGORIES_MALE   = ['Top', 'Shirt', 'Jeans', 'Bottom', 'Outerwear', 'Shoes', 'Bag', 'Hat', 'Scarf', 'Accessory']
-export const CATEGORIES_ALL    = ['Top', 'Shirt', 'Jeans', 'Bottom', 'Dress', 'Skirt', 'Outerwear', 'Shoes', 'Bag', 'Hat', 'Scarf', 'Accessory']
-
 
 export function getCategoriesForGender(gender) {
   if (gender === "Female") return CATEGORIES_FEMALE;
