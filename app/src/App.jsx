@@ -11,6 +11,7 @@ import Profile from "./features/profile/Profile";
 import Home from "./features/home/Home";
 import Wishlist from "./features/tryon/Wishlist";
 import Recommendations from "./features/recommendations/Recommendations";
+import Settings from "./features/profile/Settings";
 
 function AppShell() {
   const location = useLocation();
@@ -64,6 +65,7 @@ function AppShell() {
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/recommendations" element={<Recommendations />} />
           <Route path="/profile" element={<Profile sidebar />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </div>
