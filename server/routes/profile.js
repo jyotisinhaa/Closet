@@ -32,7 +32,8 @@ router.post("/photo", upload.single("photo"), async (req, res) => {
 router.get("/", async (req, res) => {
   const { rows } = await pool.query(
     `SELECT id, profile_photo_url, name, gender, body_type,
-            height_ft, height_cm, size_tops, size_bottoms, size_shoes
+            height_ft, height_cm, size_tops, size_bottoms, size_shoes,
+            style_profile, style_prefs
      FROM profile WHERE id = 'demo-user-1'`,
   );
   res.json(rows[0] || {});

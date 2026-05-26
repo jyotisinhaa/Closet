@@ -3,6 +3,7 @@ const upload  = require('../middleware/upload')
 const pool    = require('../db/client')
 const { uploadToCloudinary, destroyFromCloudinary } = require('../services/cloudinary')
 const { getImageEmbedding } = require('../services/fashionclip')
+const { classifyAndRollup, recomputeProfileStyle } = require('../services/styleProfile')
 
 const router = express.Router()
 
@@ -28,6 +29,9 @@ router.post('/from-url', async (req, res) => {
     .then(emb => pool.query('UPDATE wardrobe_items SET embedding = $1 WHERE id = $2', [`[${emb.join(',')}]`, item.id]))
     .catch(err => console.error('Wardrobe embed failed:', err.message))
 
+  // Classify style + roll up the user's style profile — also background.
+  classifyAndRollup(item)
+
   res.json(item)
 })
 
@@ -52,6 +56,9 @@ router.post('/', upload.single('photo'), async (req, res) => {
       .then(emb => pool.query('UPDATE wardrobe_items SET embedding = $1 WHERE id = $2', [`[${emb.join(',')}]`, item.id]))
       .catch(err => console.error('Wardrobe embed failed:', err.message))
 
+    // Classify style + roll up the user's style profile — also background.
+    classifyAndRollup(item)
+
     res.json(item)
   } catch (err) {
     console.error('Wardrobe upload error:', err)
@@ -68,6 +75,10 @@ router.delete('/:id', async (req, res) => {
   }
 
   await pool.query('DELETE FROM wardrobe_items WHERE id = $1', [req.params.id])
+
+  // Recompute the style profile so removing a piece updates the user's prefs.
+  recomputeProfileStyle().catch(err => console.error('[wardrobe] recompute on delete failed:', err.message))
+
   res.json({ ok: true })
 })
 

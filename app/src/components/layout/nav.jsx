@@ -112,6 +112,27 @@ export const NAV = [
   },
   {
     num: "",
+    key: "lookbook",
+    label: "Lookbook",
+    path: "/looks",
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+      </svg>
+    ),
+    sub: [],
+  },
+  {
+    num: "",
     key: "recommendations",
     label: "Styled for You",
     path: "/recommendations",

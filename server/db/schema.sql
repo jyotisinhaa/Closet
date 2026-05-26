@@ -14,6 +14,11 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS profile (
   id                TEXT PRIMARY KEY DEFAULT 'demo-user-1',
   profile_photo_url TEXT,
+  -- Style aggregates derived from the wardrobe — see services/styleProfile.js.
+  -- style_profile is a count map (e.g. {"casual": 4, "classic": 2}); style_prefs
+  -- is the top-3 tags by count, used by the UI radar + style tips.
+  style_profile     JSONB DEFAULT '{}'::jsonb,
+  style_prefs       TEXT[] DEFAULT '{}',
   updated_at        TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -25,6 +30,9 @@ CREATE TABLE IF NOT EXISTS wardrobe_items (
   color                 TEXT DEFAULT '',
   description           TEXT DEFAULT '',
   price                 NUMERIC DEFAULT 0,
+  -- Style tags from the Crusoe (Nemotron) classifier, constrained to the
+  -- 8-tag vocabulary in services/styleProfile.js.
+  style_tags            TEXT[] DEFAULT '{}',
   embedding             vector(1024),
   created_at            TIMESTAMPTZ DEFAULT NOW()
 );
@@ -62,3 +70,17 @@ CREATE TABLE IF NOT EXISTS catalog_items (
 -- Index for fast vector similarity on catalog
 CREATE INDEX IF NOT EXISTS catalog_embedding_idx ON catalog_items USING ivfflat (embedding vector_cosine_ops) WITH (lists = 10);
 CREATE INDEX IF NOT EXISTS wardrobe_embedding_idx ON wardrobe_items USING ivfflat (embedding vector_cosine_ops) WITH (lists = 10);
+
+-- Liked/saved generated looks (the "Lookbook"). A look is one rendered composite
+-- image the user liked from a try-on, plus the context that produced it.
+CREATE TABLE IF NOT EXISTS saved_looks (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  render_url      TEXT NOT NULL,
+  title           TEXT DEFAULT '',
+  item_name       TEXT DEFAULT '',
+  category        TEXT DEFAULT '',
+  price           NUMERIC DEFAULT 0,
+  source          TEXT DEFAULT 'solo',   -- solo | pairing | custom
+  item_image_urls JSONB DEFAULT '[]',
+  created_at      TIMESTAMPTZ DEFAULT NOW()
+);

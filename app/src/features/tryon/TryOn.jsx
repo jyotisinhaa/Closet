@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useTryOn } from './useTryOn'
 import { getStylesForCategory } from '../../lib/categories'
 
@@ -15,6 +16,12 @@ export default function TryOn() {
   const fileInputRef = useRef(null)
   const videoRef     = useRef(null)
   const streamRef    = useRef(null)
+
+  const location = useLocation()
+  const navigate = useNavigate()
+  // Set when arriving from the Lookbook via "Style this look": the saved look's
+  // render becomes the base the new item is layered onto.
+  const baseLook = location.state?.baseLook || null
 
   const { categories, category, setCategory, generating, genStatus, genError, generate } = useTryOn()
 
@@ -94,22 +101,74 @@ export default function TryOn() {
             fontSize: 'clamp(28px, 4vw, 42px)', letterSpacing: '-0.02em',
             lineHeight: 1.1, color: 'var(--ink)', marginBottom: '0',
           }}>
-            Wear it before{' '}
-            <em style={{
-              fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
-              fontWeight: 400, color: 'var(--terracotta)',
-            }}>
-              you buy it.
-            </em>
+            {baseLook ? (
+              <>Add to{' '}
+                <em style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontWeight: 400, color: 'var(--terracotta)' }}>
+                  this look.
+                </em>
+              </>
+            ) : (
+              <>Wear it before{' '}
+                <em style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontWeight: 400, color: 'var(--terracotta)' }}>
+                  you buy it.
+                </em>
+              </>
+            )}
           </h1>
           <p style={{
             fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontWeight: 300,
             fontSize: '17px', color: 'var(--ink-soft)', marginTop: '12px', lineHeight: 1.6,
             maxWidth: '520px', margin: '12px auto 0',
           }}>
-            Upload a photo of something you're considering and we'll show you exactly how it looks on you — paired with pieces you already own.
+            {baseLook
+              ? "Upload a new piece and we'll layer it onto your saved look — see how it changes the outfit."
+              : "Upload a photo of something you're considering and we'll show you exactly how it looks on you — paired with pieces you already own."}
           </p>
+          {!baseLook && (
+            <button
+              onClick={() => navigate('/wardrobe')}
+              style={{
+                marginTop: '14px', background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', fontWeight: 600, color: 'var(--terracotta)',
+              }}
+            >
+              No new item? Try on pieces from your wardrobe →
+            </button>
+          )}
         </div>
+
+        {/* ── Base-look banner (when styling on top of a saved look) ── */}
+        {baseLook && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '14px',
+            background: 'var(--cream-deep)', border: '1.5px solid var(--line)',
+            borderRadius: '14px', padding: '12px 16px', marginBottom: '28px',
+          }}>
+            <div style={{ width: '52px', height: '64px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, background: 'var(--cream)', border: '1px solid var(--line)' }}>
+              {baseLook.render_url
+                ? <img src={baseLook.render_url} alt={baseLook.title || 'Saved look'} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                : null}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--terracotta)', marginBottom: '4px' }}>
+                Styling on top of
+              </div>
+              <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: '16px', color: 'var(--ink)', letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {baseLook.title || 'Your saved look'}
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/tryon', { replace: true, state: null })}
+              style={{
+                background: 'transparent', color: 'var(--ink-soft)', border: '1.5px solid var(--line)',
+                borderRadius: '8px', padding: '8px 14px', cursor: 'pointer',
+                fontFamily: "'Inter Tight', sans-serif", fontSize: '12px', fontWeight: 500, whiteSpace: 'nowrap',
+              }}
+            >
+              Start from my photo
+            </button>
+          </div>
+        )}
 
         {/* Divider */}
         <div style={{ height: '1px', background: 'var(--line)', margin: '0 0 36px' }} />
@@ -384,7 +443,7 @@ export default function TryOn() {
               </div>
 
               <button
-                onClick={() => generate({ photo, price, store, color, style })}
+                onClick={() => generate({ photo, price, store, color, style, baseImageUrl: baseLook?.render_url || '' })}
                 disabled={generating || !photo}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
