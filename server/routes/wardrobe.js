@@ -14,13 +14,13 @@ router.get('/', async (req, res) => {
 
 // Add from image URL (used by "Bought it" in wishlist)
 router.post('/from-url', async (req, res) => {
-  const { image_url, category, description, color } = req.body
+  const { image_url, category, description, color, price } = req.body
   if (!image_url) return res.status(400).json({ error: 'image_url required' })
 
   const { rows } = await pool.query(
-    `INSERT INTO wardrobe_items (image_url, category, description, color)
-     VALUES ($1, $2, $3, $4) RETURNING *`,
-    [image_url, category || 'Uncategorized', description || category || '', color || '']
+    `INSERT INTO wardrobe_items (image_url, category, description, color, price)
+     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+    [image_url, category || 'Uncategorized', description || category || '', color || '', parseFloat(price) || 0]
   )
   const item = rows[0]
 
@@ -45,9 +45,9 @@ router.post('/', upload.single('photo'), async (req, res) => {
     })
 
     const { rows } = await pool.query(
-      `INSERT INTO wardrobe_items (image_url, cloudinary_public_id, category, color, description)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [result.secure_url, result.public_id, req.body.category || 'top', req.body.color || '', req.body.description || '']
+      `INSERT INTO wardrobe_items (image_url, cloudinary_public_id, category, color, description, price)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [result.secure_url, result.public_id, req.body.category || 'top', req.body.color || '', req.body.description || '', parseFloat(req.body.price) || 0]
     )
     const item = rows[0]
 

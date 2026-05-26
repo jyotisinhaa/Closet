@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS wardrobe_items (
   category              TEXT NOT NULL DEFAULT 'Uncategorized',
   color                 TEXT DEFAULT '',
   description           TEXT DEFAULT '',
+  price                 NUMERIC DEFAULT 0,
   -- Style tags from the Crusoe (Nemotron) classifier, constrained to the
   -- 8-tag vocabulary in services/styleProfile.js.
   style_tags            TEXT[] DEFAULT '{}',

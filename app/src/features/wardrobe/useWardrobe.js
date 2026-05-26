@@ -87,12 +87,13 @@ export function useWardrobe() {
       .finally(() => setLoading(false));
   }, []);
 
-  async function addItem({ file, category, color, description }) {
+  async function addItem({ file, category, color, description, price }) {
     const fd = new FormData();
     fd.append("photo", file);
     fd.append("category", category);
     if (color) fd.append("color", color);
     fd.append("description", description);
+    if (price) fd.append("price", price);
     const item = await apiUpload("/wardrobe", fd);
     setItems((prev) => [item, ...prev]);
     return item;
@@ -151,6 +152,7 @@ export function useWardrobe() {
     categories,
     visible,
     counts,
+    totalValue,
     addItem,
     deleteItem,
     // Try-It-On mode

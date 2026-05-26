@@ -35,9 +35,9 @@ router.post('/:id/purchase', async (req, res) => {
   if (!wish) return res.status(404).json({ error: 'Not found' })
 
   const { rows } = await pool.query(
-    `INSERT INTO wardrobe_items (image_url, category, description)
-     VALUES ($1, $2, $3) RETURNING *`,
-    [wish.new_item_image_url, wish.category || 'Uncategorized', wish.item_name || wish.category || '']
+    `INSERT INTO wardrobe_items (image_url, category, description, price)
+     VALUES ($1, $2, $3, $4) RETURNING *`,
+    [wish.new_item_image_url, wish.category || 'Uncategorized', wish.item_name || wish.category || '', parseFloat(wish.price) || 0]
   )
   await pool.query('DELETE FROM wishlist_items WHERE id = $1', [req.params.id])
   res.json(rows[0])

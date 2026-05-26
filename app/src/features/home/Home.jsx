@@ -78,7 +78,7 @@ const SECTIONS = [
 
 export default function Home() {
   const navigate = useNavigate()
-  const { profile, itemCount } = useHome()
+  const { profile, itemCount, closetValue } = useHome()
 
   return (
     <div style={{ flex: 1, overflowY: 'auto', background: 'var(--cream)' }}>
@@ -127,7 +127,7 @@ export default function Home() {
         {/* Stats row — shown when profile exists */}
         {(profile || itemCount !== null) && (
           <div style={{
-            display: 'flex', gap: '32px', marginTop: '28px',
+            display: 'flex', gap: '32px', marginTop: '28px', alignItems: 'baseline',
           }}>
             {profile?.name && (
               <div>
@@ -153,6 +153,23 @@ export default function Home() {
                   color: 'var(--muted)', marginLeft: '6px',
                 }}>
                   items
+                </span>
+              </div>
+            )}
+            {closetValue !== null && (
+              <div>
+                <span style={{
+                  fontFamily: "'Fraunces', serif", fontSize: '22px',
+                  fontWeight: 400, letterSpacing: '-0.02em', color: 'var(--terracotta)',
+                }}>
+                  ${closetValue.toFixed(0)}
+                </span>
+                <span style={{
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: '9px',
+                  letterSpacing: '0.15em', textTransform: 'uppercase',
+                  color: 'var(--muted)', marginLeft: '6px',
+                }}>
+                  closet value
                 </span>
               </div>
             )}
