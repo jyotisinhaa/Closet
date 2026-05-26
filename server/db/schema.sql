@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS wardrobe_items (
   category              TEXT NOT NULL DEFAULT 'Uncategorized',
   color                 TEXT DEFAULT '',
   description           TEXT DEFAULT '',
+  price                 NUMERIC DEFAULT 0,
   embedding             vector(1024),
   created_at            TIMESTAMPTZ DEFAULT NOW()
 );

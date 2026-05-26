@@ -85,7 +85,9 @@ export default function Wishlist() {
           </h1>
           <p style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', color: 'var(--muted)', margin: '0 0 20px', lineHeight: 1.5 }}>
             {notBought.length} {notBought.length === 1 ? 'item' : 'items'} you've tried on but haven't bought yet
-            {totalConsidered > 0 && ` · Total considered: $${totalConsidered.toFixed(0)}`}
+            {totalConsidered > 0 && (
+              <> · Total considered: <strong style={{ color: 'var(--ink)', fontWeight: 700 }}>${totalConsidered.toFixed(0)}</strong></>
+            )}
           </p>
           <hr style={{ border: 'none', borderTop: '1px solid var(--line)', margin: 0 }} />
         </div>

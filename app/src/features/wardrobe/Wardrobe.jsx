@@ -196,6 +196,7 @@ export default function Wardrobe() {
     categories: CATEGORIES,
     visible,
     counts,
+    totalValue,
     addItem,
     deleteItem,
   } = useWardrobe();
@@ -210,12 +211,14 @@ export default function Wardrobe() {
   const [newCategory, setNewCategory] = useState("");
   const [newColor, setNewColor] = useState("");
   const [newDesc, setNewDesc] = useState("");
+  const [newPrice, setNewPrice] = useState("");
 
   function openAdd() {
     setNewPhoto(null);
     setNewCategory("");
     setNewColor("");
     setNewDesc("");
+    setNewPrice("");
     setAddError("");
     setShowAdd(true);
   }
@@ -238,8 +241,8 @@ export default function Wardrobe() {
       setAddError("Please select a category.");
       return;
     }
-    if (!newColor) {
-      setAddError("Please select a color.");
+    if (newPrice !== "" && parseFloat(newPrice) < 0) {
+      setAddError("Price cannot be negative.");
       return;
     }
     setUploading(true);
@@ -250,6 +253,7 @@ export default function Wardrobe() {
         category: newCategory,
         color: newColor,
         description: newDesc,
+        price: newPrice,
       });
       closeAdd();
     } catch {
@@ -312,19 +316,45 @@ export default function Wardrobe() {
               Every piece you own, beautifully organized. Add what you wear,
               discover what to pair.
             </p>
-            <p
+            <div
               style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: "10px",
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                color: "var(--muted)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "16px",
               }}
             >
-              {loading
-                ? "—"
-                : `${items.length} item${items.length !== 1 ? "s" : ""}`}
-            </p>
+              <p
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                  color: "var(--muted)",
+                  margin: 0,
+                }}
+              >
+                {loading
+                  ? "—"
+                  : `${items.length} item${items.length !== 1 ? "s" : ""}`}
+              </p>
+              {!loading && totalValue > 0 && (
+                <p
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                    color: "var(--terracotta)",
+                    margin: 0,
+                  }}
+                >
+                  ${totalValue.toFixed(0)} closet value
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Right: Add Item button */}
@@ -1187,7 +1217,7 @@ export default function Wardrobe() {
                   marginBottom: "10px",
                 }}
               >
-                Color
+                Color <span style={{ opacity: 0.5 }}>(optional)</span>
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {CLOTHING_COLORS.map(({ hex, name }) => {
@@ -1244,6 +1274,58 @@ export default function Wardrobe() {
                   </span>
                 </div>
               )}
+            </div>
+
+            {/* Price */}
+            <div style={{ marginBottom: "20px" }}>
+              <div
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: "var(--muted)",
+                  marginBottom: "8px",
+                }}
+              >
+                Price <span style={{ opacity: 0.5 }}>(optional)</span>
+              </div>
+              <div style={{ position: "relative" }}>
+                <span
+                  style={{
+                    position: "absolute",
+                    left: "14px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    fontFamily: "'Inter Tight', sans-serif",
+                    fontSize: "14px",
+                    color: "var(--muted)",
+                    pointerEvents: "none",
+                  }}
+                >
+                  $
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={newPrice}
+                  onChange={(e) => setNewPrice(e.target.value)}
+                  placeholder="0.00"
+                  style={{
+                    width: "100%",
+                    border: "1.5px solid var(--line)",
+                    borderRadius: "10px",
+                    padding: "12px 14px 12px 26px",
+                    fontFamily: "'Inter Tight', sans-serif",
+                    fontSize: "14px",
+                    background: "white",
+                    color: "var(--ink)",
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
             </div>
 
             {/* Description */}
