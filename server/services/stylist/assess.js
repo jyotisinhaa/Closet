@@ -1,22 +1,27 @@
 // Assessment agent (text). Fuses the deterministic signals (duplicates,
 // versatility, gap) plus the analyzer's fit note into one candid verdict.
 // The whole point of Closet's "honest take" is that it sometimes says "skip it".
-const { callGroqJSON, txt, TEXT_MODEL } = require('../groq')
+// Multimodal call helper — Crusoe-first (Nemotron), Groq fallback.
+const { callJSON, txt, TEXT_MODEL } = require('../llm')
 
-async function writeAssessment({ itemName, fitNote, duplicates, versatility, gap }) {
+async function writeAssessment({ itemName, fitNote, gender, duplicates, versatility, gap }) {
   const prompt = `You are a brutally honest but kind personal stylist. Write the verdict on whether the user should buy "${itemName}".
 
 Signals (already computed — trust them):
+- User identifies as: ${gender || 'unspecified'}
 - Fit on the user: ${fitNote || 'n/a'}
 - Similar items they already own: ${duplicates.summary} ${duplicates.count ? `(${duplicates.items.slice(0, 3).map(d => d.item.description || d.item.category).join(', ')})` : ''}
 - Versatility: pairs with ${versatility.count} of ${versatility.total} relevant items they own (${versatility.score}/100)
 - Wardrobe gap: ${gap.summary} (fills a gap: ${gap.fills_gap ? 'yes' : 'no'})
 
 Write 2-3 sentences, addressing the user directly as "you". Be specific and candid: if they already own similar pieces or it has low versatility, say "skip it" or "only if..." plainly. If it fills a real gap and is versatile, say so. Do NOT invent facts beyond the signals.
+
+Gender-fit backstop: if the "Fit on the user" signal flags a gendered-cut mismatch (e.g. wording like "cut for menswear", "men's silhouette", "the shoulders will hang", "wrong proportions for your frame"), do NOT paper over it — mirror that into your verdict and say "skip it" plainly in the first sentence.
+
 Return ONLY valid JSON, no markdown: { "honest_assessment": "..." }`
 
   try {
-    const data = await callGroqJSON({ content: [txt(prompt)], model: TEXT_MODEL, maxTokens: 300, temperature: 0.6 })
+    const data = await callJSON({ content: [txt(prompt)], model: TEXT_MODEL, maxTokens: 300, temperature: 0.6, label: 'assess-new' })
     return data.honest_assessment || fallback({ duplicates, versatility, gap })
   } catch {
     return fallback({ duplicates, versatility, gap })

@@ -1,7 +1,8 @@
 // Vision agents that produce structured style metadata. The shared vocabulary
 // (categories, formality, season) must match server/lib/styleRules.js so the
 // deterministic tools can reason over it.
-const { callGroqJSON, img, txt } = require('../groq')
+// Multimodal call helper — Crusoe-first (Nemotron), Groq fallback.
+const { callJSON, img, txt } = require('../llm')
 
 const CATEGORY_VOCAB = 'Top, Shirt, Jeans, Bottom, Dress, Skirt, Outerwear, Shoes, Bag, Accessory'
 const FORMALITY_VOCAB = 'casual, smart_casual, business, formal'
@@ -25,22 +26,36 @@ async function analyzeNewItem({ newItemUrl, profilePhotoUrl, hints = {} }) {
     hints.color ? `User-provided color hint: ${hints.color}` : '',
     hints.price ? `Price: $${hints.price}` : '',
     hints.store ? `Store: ${hints.store}` : '',
+    hints.gender ? `The user identifies as ${hints.gender}.` : '',
   ].filter(Boolean).join('\n')
 
+  // The gender-fit instruction is deliberately nuanced — cross-gender styling
+  // that genuinely works (oxford shirts, blazers cut for women, oversized tees)
+  // is fine to accept; but a piece visibly cut for the *other* gender's frame
+  // (men's suit-jacket shoulders on a women's silhouette, etc.) should be
+  // called out plainly so the assessment can recommend skipping it.
   const prompt = `You are a fashion analyst with sharp visual skills.
 Image 1 is the person who would wear the item. Image 2 is the new garment they are considering.
 ${hintLines ? `\n${hintLines}\n` : ''}
-Trust the IMAGE over any hint. Return ONLY valid JSON, no markdown:
+Trust the IMAGE over any hint.
+
+Gender-fit check (only when the user's gender is stated above):
+- Evaluate whether the garment's cut, silhouette, and intended audience suit this person.
+- Cross-gender styling that genuinely works (e.g. a woman in oversized menswear, men in unisex pieces) is FINE to approve.
+- BUT if the garment is visibly cut for a different gender's frame in a way that would noticeably read as ill-fitting on this person (e.g. menswear suit-jacket shoulders/sleeves on a women's silhouette, or a women's tailored blouse on a men's torso), say so PLAINLY in fit_note (e.g. "this is cut for menswear — the shoulders and sleeves will hang on your frame, skip it"). Do not soften it.
+
+Return ONLY valid JSON, no markdown:
 {
   "item_name": "short descriptive name, e.g. 'Olive utility jacket'",
   "metadata": ${METADATA_SHAPE},
-  "fit_note": "one honest sentence on how this would look on THIS person, addressing them as 'you'"
+  "fit_note": "one honest sentence on how this would look on THIS person, addressing them as 'you'. If the gender-fit check above triggers, lead with that."
 }`
 
-  const data = await callGroqJSON({
+  const data = await callJSON({
     content: [img(profilePhotoUrl), img(newItemUrl), txt(prompt)],
     maxTokens: 700,
     temperature: 0.5,
+    label: 'analyzer-new',
   })
 
   const m = data.metadata || {}
@@ -67,10 +82,11 @@ async function tagWardrobeItem(imageUrl) {
 }
 (Put all the metadata fields and "description" at the top level of the JSON object.)`
 
-  const m = await callGroqJSON({
+  const m = await callJSON({
     content: [img(imageUrl), txt(prompt)],
     maxTokens: 500,
     temperature: 0.4,
+    label: 'wardrobe-tag',
   })
 
   return {

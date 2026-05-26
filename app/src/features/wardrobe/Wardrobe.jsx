@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { TAG_COLORS } from "../../lib/categories";
 import { useWardrobe } from "./useWardrobe";
 import LikeButton from "../looks/LikeButton";
+import StylistTracePanel from "../tryon/StylistTracePanel";
 
 const CLOTHING_COLORS = [
   { hex: "#FFFFFF", name: "White" },
@@ -1226,7 +1227,7 @@ export default function Wardrobe() {
               background: "var(--paper)",
               borderRadius: "20px",
               width: "100%",
-              maxWidth: "560px",
+              maxWidth: "620px",
               padding: "24px 24px 28px",
               maxHeight: "90vh",
               overflowY: "auto",
@@ -1240,18 +1241,35 @@ export default function Wardrobe() {
                 marginBottom: "18px",
               }}
             >
-              <h2
-                style={{
-                  fontFamily: "'Fraunces', serif",
-                  fontWeight: 500,
-                  fontSize: "22px",
-                  letterSpacing: "-0.02em",
-                  color: "var(--ink)",
-                  margin: 0,
-                }}
-              >
-                Your look
-              </h2>
+              <div>
+                <h2
+                  style={{
+                    fontFamily: "'Fraunces', serif",
+                    fontWeight: 500,
+                    fontSize: "22px",
+                    letterSpacing: "-0.02em",
+                    color: "var(--ink)",
+                    margin: 0,
+                  }}
+                >
+                  Your look
+                </h2>
+                {tryOnResult.outfit_name && (
+                  <div
+                    style={{
+                      fontFamily: "'Fraunces', serif",
+                      fontStyle: "italic",
+                      fontWeight: 300,
+                      fontSize: "14px",
+                      color: "var(--ink-soft)",
+                      marginTop: "2px",
+                    }}
+                  >
+                    {tryOnResult.outfit_name}
+                    {tryOnResult.formality ? ` · ${tryOnResult.formality.replace("_", " ")}` : ""}
+                  </div>
+                )}
+              </div>
               <button
                 onClick={closeTryOnResult}
                 style={{
@@ -1316,6 +1334,62 @@ export default function Wardrobe() {
                 />
               ))}
             </div>
+
+            {/* AI Honest Take — Nemotron's verdict on the outfit as a whole. */}
+            {tryOnResult.honest_assessment && (
+              <div
+                style={{
+                  background: "var(--cream-deep)",
+                  borderRadius: "14px",
+                  padding: "14px 18px",
+                  border: "1.5px solid var(--line)",
+                  marginBottom: "16px",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                  <span style={{ color: "var(--terracotta)", fontSize: "12px" }}>◆</span>
+                  <span style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: "14px", color: "var(--ink)", fontWeight: 700 }}>
+                    AI Honest Take
+                  </span>
+                  {tryOnResult.critique?.overall != null && (
+                    <span
+                      style={{
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: "9px",
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        background: tryOnResult.critique.overall >= 7 ? "rgba(91,106,63,0.12)" : "rgba(194,86,58,0.08)",
+                        color: tryOnResult.critique.overall >= 7 ? "var(--olive)" : "var(--terracotta)",
+                        borderRadius: "100px",
+                        padding: "2px 8px",
+                      }}
+                    >
+                      {tryOnResult.critique.overall}/10
+                    </span>
+                  )}
+                </div>
+                <p
+                  style={{
+                    fontFamily: "'Fraunces', serif",
+                    fontStyle: "italic",
+                    fontWeight: 300,
+                    fontSize: "14px",
+                    color: "var(--ink)",
+                    lineHeight: 1.6,
+                    margin: 0,
+                  }}
+                >
+                  "{tryOnResult.honest_assessment}"
+                </p>
+              </div>
+            )}
+
+            {/* Reasoning trace from the wardrobe orchestrator (collapsible). */}
+            <StylistTracePanel
+              trace={tryOnResult.trace}
+              gap={tryOnResult.coverage ? { fills_gap: tryOnResult.coverage.complete, summary: tryOnResult.coverage.summary } : null}
+              fitNote={tryOnResult.fit_note}
+            />
 
             <div
               style={{

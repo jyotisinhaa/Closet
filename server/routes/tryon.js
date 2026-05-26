@@ -2,9 +2,14 @@ const express = require('express')
 const upload  = require('../middleware/upload')
 const pool    = require('../db/client')
 const { uploadToCloudinary, ensureCloudinaryUrl } = require('../services/cloudinary')
-const { renderOutfitChain, renderItemsChain } = require('../services/perfectCorp')
-const { buildPairingWithGroq }             = require('../services/groq')
-const { buildPairingWithCrusoe, isCrusoeEnabled } = require('../services/crusoe')
+const { renderOutfitChain, renderItemsChain, toAccessoryFeature } = require('../services/perfectCorp')
+// Multi-step stylist agent. Each reasoning node runs on Nemotron via Crusoe
+// Managed Inference with a Groq fallback (services/llm.js). Replaces the older
+// single-shot pairing call — see commit history for buildPairingWithCrusoe.
+const { runStylistAgents } = require('../services/stylist/orchestrator')
+// Wardrobe-only variant (no new item) — used by the "Try It On" mode on the
+// Wardrobe page. Runs in parallel with the Perfect Corp render below.
+const { runWardrobeStylistAgents } = require('../services/stylist/wardrobeOrchestrator')
 
 const router = express.Router()
 
@@ -39,39 +44,57 @@ router.post('/', upload.single('photo'), async (req, res) => {
       }
     }
 
-    // 3. Stylist analysis — NVIDIA Nemotron on Crusoe Managed Inference, with an
-    //    automatic fall back to Groq if Crusoe is unset or errors.
+    // 3. Multi-step stylist agent — runs on NVIDIA Nemotron via Crusoe Managed
+    //    Inference (each LLM node Crusoe-first with a Groq fallback inside
+    //    services/llm.js). The orchestrator chains 7 steps: analyzer →
+    //    duplicate-checker → candidate generator → stylist + critic →
+    //    versatility scorer → gap analyzer → assessment, building a
+    //    human-readable `trace` the Results page surfaces.
     let combinations = [], honest_assessment = '', item_name = '', detected_category = '', style_tags = [], similar_owned = ''
+    let trace = [], versatility = null, gap = null, fit_note = '', critique = '', duplicates = null
     try {
-      let pairing
-      if (isCrusoeEnabled()) {
-        try {
-          pairing = await buildPairingWithCrusoe(newItemUrl, profilePhotoUrl, category, price, color, store, wardrobe)
-        } catch (err) {
-          console.error('Crusoe (Nemotron) pairing failed, falling back to Groq:', err.message)
-          pairing = await buildPairingWithGroq(newItemUrl, profilePhotoUrl, category, price, color, store, wardrobe)
-        }
-      } else {
-        pairing = await buildPairingWithGroq(newItemUrl, profilePhotoUrl, category, price, color, store, wardrobe)
-      }
-      combinations     = pairing.combinations || []
-      honest_assessment = pairing.honest_assessment || ''
-      item_name        = pairing.item_name || ''
-      detected_category = pairing.detected_category || ''
-      style_tags       = pairing.style_tags || []
-      similar_owned    = pairing.similar_owned || ''
+      const stylist = await runStylistAgents({
+        newItemUrl,
+        profilePhotoUrl,
+        wardrobe,
+        // `gender` is what the user told us at onboarding — the analyzer uses it
+        // to flag gendered-cut mismatches (men's shoulders on a women's frame
+        // etc) and the assessment mirrors that into a plain "skip it".
+        hints: { category, price, color, store, gender },
+      })
+      combinations      = stylist.combinations || []
+      honest_assessment = stylist.honest_assessment || ''
+      item_name         = stylist.item_name || ''
+      detected_category = stylist.detected_category || ''
+      style_tags        = stylist.style_tags || []
+      similar_owned     = stylist.similar_owned || ''
+      trace             = stylist.trace || []
+      versatility       = stylist.versatility || null
+      gap               = stylist.gap || null
+      fit_note          = stylist.fit_note || ''
+      critique          = stylist.critique || ''
+      duplicates        = stylist.duplicates || null
     } catch (err) {
-      console.error('Stylist analysis failed:', err.message)
+      console.error('Stylist agent failed:', err.message)
       honest_assessment = 'Style analysis unavailable — check your CRUSOE_API_KEY / GROQ_API_KEY.'
     }
 
-    // 4. Solo render (dispatched by category: clothes vs hat/scarf/bag/shoes)
+    // 4. Solo render (dispatched by category: clothes vs hat/scarf/bag/shoes).
+    //    Accessories are deliberately SKIPPED: Perfect Corp's accessory endpoints
+    //    regenerate the entire styled outfit (a hallucinated dress will replace
+    //    the user's real one), so a solo try-on with just shoes/hat/bag/scarf is
+    //    not visually trustworthy. The frontend routes accessory results
+    //    straight to the closet picker, where chaining a body garment after the
+    //    accessory restores the real outfit via the clean clothes-V3 swap.
     const renderCategory = detected_category || category
+    const accessorySoloSkipped = !!toAccessoryFeature(renderCategory)
     let soloRenderUrl = null
-    try {
-      soloRenderUrl = await renderOutfitChain(renderBaseUrl, newItemUrl, [], renderCategory, gender, style)
-    } catch (err) {
-      console.error('Solo render failed:', err.message)
+    if (!accessorySoloSkipped) {
+      try {
+        soloRenderUrl = await renderOutfitChain(renderBaseUrl, newItemUrl, [], renderCategory, gender, style)
+      } catch (err) {
+        console.error('Solo render failed:', err.message)
+      }
     }
 
     // 5. Combo renders
@@ -119,8 +142,21 @@ router.post('/', upload.single('photo'), async (req, res) => {
       item_name, detected_category, style_tags, similar_owned,
       base_image_url: base_image_url || null,
       solo_render_url: soloRenderUrl,
+      // True when the new item is an accessory (shoes/hat/bag/scarf) and we
+      // intentionally skipped the solo render — the client uses this to route
+      // straight to the closet picker for a stable composite.
+      accessory_solo_skipped: accessorySoloSkipped,
       honest_assessment,
       combinations: enrichedCombos,
+      // Agent-only extras for the Results page. `trace` powers the collapsible
+      // "How the stylist thought about this" panel; the others are optional
+      // signals the UI can surface later (versatility score, gap analysis, etc).
+      trace,
+      versatility,
+      gap,
+      fit_note,
+      critique,
+      duplicates,
     })
   } catch (err) {
     console.error('Try-on error:', err)
@@ -248,7 +284,20 @@ router.post('/wardrobe', async (req, res) => {
       image_url: await ensureCloudinaryUrl(it.image_url).catch(() => it.image_url),
     })))
 
-    const composite_render_url = await renderItemsChain(baseUrl, safeItems, gender)
+    // Run the agentic analysis IN PARALLEL with the Perfect Corp render. The
+    // LLM calls are seconds each; the render is minutes. With Promise.all the
+    // total wait stays dominated by the render and the agent output comes
+    // along for ~free. Agent failures are non-fatal — the user still gets a
+    // valid render even if the stylist couldn't be reached.
+    //
+    // The agent uses profilePhotoUrl (the user's actual photo) for its vision
+    // context, not baseUrl — consistent with the new-item try-on, the
+    // analyzer needs to see the person to comment on fit.
+    const [agentResult, composite_render_url] = await Promise.all([
+      runWardrobeStylistAgents({ profilePhotoUrl, items: safeItems, hints: { gender } })
+        .catch(err => { console.error('[wardrobe try-on] stylist agent failed:', err.message); return null }),
+      renderItemsChain(baseUrl, safeItems, gender),
+    ])
 
     res.json({
       composite_render_url,
@@ -257,6 +306,17 @@ router.post('/wardrobe', async (req, res) => {
         description: w.description || w.category,
         color: w.color || '', image_url: w.image_url,
       })),
+      // Agentic extras — powering the honest take + collapsible trace panel
+      // in the Wardrobe modal. All optional; the UI degrades cleanly if null.
+      outfit_name:       agentResult?.outfit_name       || '',
+      occasion:          agentResult?.occasion          || '',
+      formality:         agentResult?.formality         || '',
+      palette:           agentResult?.palette           || [],
+      fit_note:          agentResult?.fit_note          || '',
+      coverage:          agentResult?.coverage          || null,
+      critique:          agentResult?.critique          || null,
+      honest_assessment: agentResult?.honest_assessment || '',
+      trace:             agentResult?.trace             || [],
     })
   } catch (err) {
     console.error('Wardrobe try-on error:', err)

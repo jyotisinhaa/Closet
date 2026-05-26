@@ -2,7 +2,8 @@
 // pre-filtered candidate outfits while actually looking at the garments; the
 // Critic (text) reviews those scores and selects the final top 2, with a written
 // critique for the reasoning trace. The expensive vision pass runs once.
-const { callGroqJSON, img, txt, TEXT_MODEL } = require('../groq')
+// Multimodal call helper — Crusoe-first (Nemotron), Groq fallback.
+const { callJSON, img, txt, TEXT_MODEL, SCORING_RUBRIC } = require('../llm')
 
 // Collect the distinct wardrobe items used across candidates (cap for token cost).
 function distinctItems(candidates, cap = 10) {
@@ -32,11 +33,15 @@ ${legend}
 Candidate outfits (new item worn WITH these wardrobe pieces):
 ${comboLines}
 
-Score EVERY candidate from 0-10 on each: color_harmony, formality_match, occasion (does it read as a coherent occasion), silhouette (proportions/balance). Then give an overall 0-10.
+${SCORING_RUBRIC}
+
+Score EVERY candidate on color_harmony, formality_match, occasion (occasion_coherence), silhouette, and overall.
+SPREAD the scores across candidates — if two candidates look broadly similar, the better one should score a point or two higher than the weaker one. Identical scores across different outfits are almost never correct.
+
 Return ONLY valid JSON, no markdown:
 {
   "scores": [
-    { "candidate": "C1", "color_harmony": 0, "formality_match": 0, "occasion": 0, "silhouette": 0, "overall": 0, "name": "short occasion name", "styling_note": "one sentence on why it works" }
+    { "candidate": "C1", "color_harmony": 0, "formality_match": 0, "occasion": 0, "silhouette": 0, "overall": 0, "name": "short occasion name", "styling_note": "one sentence — if any axis is low, NAME the weakness (e.g. 'the blue-on-blue is monotone; needs a contrast piece')" }
   ]
 }`
 
@@ -47,7 +52,7 @@ Return ONLY valid JSON, no markdown:
     txt(prompt),
   ]
 
-  const data = await callGroqJSON({ content, maxTokens: 1200, temperature: 0.5 })
+  const data = await callJSON({ content, maxTokens: 1200, temperature: 0.5, label: 'critic-score' })
   return Array.isArray(data.scores) ? data.scores : []
 }
 
@@ -71,11 +76,12 @@ Return ONLY valid JSON, no markdown:
 }
 "score" is 0-100.`
 
-  const data = await callGroqJSON({
+  const data = await callJSON({
     content: [txt(prompt)],
     model: TEXT_MODEL,
     maxTokens: 600,
     temperature: 0.4,
+    label: 'critic-select',
   })
   return { critique: data.critique || '', selected: Array.isArray(data.selected) ? data.selected.slice(0, take) : [] }
 }
