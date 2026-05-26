@@ -134,6 +134,8 @@ export function useWardrobe() {
     return acc;
   }, {});
 
+  const totalValue = items.reduce((sum, i) => sum + (parseFloat(i.price) || 0), 0);
+
   const tryOnSelectedItems = tryOnSelectedIds
     .map((id) => items.find((i) => i.id === id))
     .filter(Boolean);

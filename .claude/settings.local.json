@@ -31,7 +31,16 @@
       "Bash(node -e ' *)",
       "WebFetch(domain:unsplash.com)",
       "WebFetch(domain:www.uniqlo.com)",
-      "Bash(node db/migrate-wardrobe-price.js)"
+      "Bash(node db/migrate-wardrobe-price.js)",
+      "Bash(node db/migrate-style-tags.js)",
+      "Bash(node db/migrate-saved-looks.js)",
+      "Bash(node db/migrate-catalog-gender.js)",
+      "Bash(node db/seed.js)",
+      "Bash(node -e \"require\\('@playwright/test'\\)\")",
+      "Bash(node -e \"require\\('playwright-core'\\)\")",
+      "Bash(playwright --version)",
+      "Bash(npx --yes playwright@1.60.0 --version)",
+      "Bash(playwright screenshot *)"
     ]
   }
 }
