@@ -71,6 +71,7 @@ export const NAV = [
     key: "results",
     label: "Results",
     path: "/tryon/result",
+    hidden: true,
     icon: (
       <svg
         width="16"
@@ -113,7 +114,7 @@ export const NAV = [
   {
     num: "",
     key: "lookbook",
-    label: "Lookbook",
+    label: "Liked Styles",
     path: "/looks",
     icon: (
       <svg

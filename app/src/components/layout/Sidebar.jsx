@@ -8,7 +8,8 @@ export default function Sidebar({ collapsed, setCollapsed, openSections, toggleS
 
   const activeKey =
     NAV.find((n) => location.pathname === n.path)?.key ??
-    NAV.find((n) => n.path !== '/' && location.pathname.startsWith(n.path))?.key ??
+    NAV.filter((n) => n.path !== '/' && location.pathname.startsWith(n.path))
+       .sort((a, b) => b.path.length - a.path.length)[0]?.key ??
     "wardrobe";
 
   return (
@@ -128,7 +129,7 @@ export default function Sidebar({ collapsed, setCollapsed, openSections, toggleS
           padding: collapsed ? "12px 0" : "12px 0",
         }}
       >
-        {NAV.map((item) => {
+        {NAV.filter((item) => !item.hidden).map((item) => {
           const isActive = activeKey === item.key;
           const isOpen = openSections[item.key];
 

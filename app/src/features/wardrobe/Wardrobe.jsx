@@ -331,7 +331,7 @@ export default function Wardrobe() {
           }}
         >
           {/* Left spacer — mirrors button width to keep title truly centered */}
-          <div style={{ flex: "0 0 160px" }} />
+          <div style={{ flex: "0 0 220px" }} />
 
           {/* Centered title */}
           <div style={{ flex: 1, textAlign: "center" }}>
@@ -400,14 +400,42 @@ export default function Wardrobe() {
             </div>
           </div>
 
-          {/* Right: Add Item button */}
+          {/* Right: Try It On + Add Item */}
           <div
             style={{
-              flex: "0 0 160px",
+              flex: "0 0 220px",
               display: "flex",
-              justifyContent: "center",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              gap: "8px",
             }}
           >
+            <button
+              onClick={() => (tryOnMode ? exitTryOnMode() : enterTryOnMode())}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "10px 16px",
+                borderRadius: "10px",
+                cursor: "pointer",
+                border: tryOnMode ? "1.5px solid var(--terracotta)" : "1.5px solid var(--line)",
+                background: tryOnMode ? "var(--terracotta)" : "white",
+                color: tryOnMode ? "white" : "var(--ink-soft)",
+                fontFamily: "'Inter Tight', sans-serif",
+                fontSize: "13px",
+                fontWeight: 600,
+                transition: "all 0.15s",
+                boxShadow: tryOnMode ? "0 4px 14px rgba(194,86,58,0.3)" : "0 1px 4px rgba(26,22,18,0.07)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+              {tryOnMode ? "Cancel" : "Try It On"}
+            </button>
             <button
               onClick={openAdd}
               style={{
@@ -418,24 +446,17 @@ export default function Wardrobe() {
                 color: "white",
                 border: "1.5px solid var(--terracotta)",
                 borderRadius: "10px",
-                padding: "10px 20px",
+                padding: "10px 18px",
                 cursor: "pointer",
                 fontFamily: "'Inter Tight', sans-serif",
                 fontSize: "13px",
                 fontWeight: 600,
                 boxShadow: "0 4px 14px rgba(194,86,58,0.3)",
                 transition: "all 0.18s ease",
+                whiteSpace: "nowrap",
               }}
             >
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
@@ -736,46 +757,6 @@ export default function Wardrobe() {
                   );
                 })()}
             </div>
-
-            {/* Try It On toggle — kicks off / cancels selection mode */}
-            <button
-              onClick={() => (tryOnMode ? exitTryOnMode() : enterTryOnMode())}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "9px 14px",
-                borderRadius: "10px",
-                cursor: "pointer",
-                border: tryOnMode
-                  ? "1.5px solid var(--terracotta)"
-                  : "1.5px solid var(--line)",
-                background: tryOnMode
-                  ? "var(--terracotta)"
-                  : "rgba(194,86,58,0.07)",
-                color: tryOnMode ? "white" : "var(--ink-soft)",
-                fontFamily: "'Inter Tight', sans-serif",
-                fontSize: "13px",
-                fontWeight: tryOnMode ? 600 : 500,
-                transition: "all 0.15s",
-                boxShadow: tryOnMode ? "0 4px 14px rgba(194,86,58,0.3)" : "none",
-              }}
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                <circle cx="12" cy="13" r="4" />
-              </svg>
-              {tryOnMode ? "Cancel" : "Try It On"}
-            </button>
 
             {/* Favorites toggle */}
             <button
@@ -1085,125 +1066,123 @@ export default function Wardrobe() {
             bottom: 0,
             left: 0,
             right: 0,
-            background: "white",
-            borderTop: "1.5px solid var(--line)",
-            padding: "14px 28px",
+            background: "rgba(255,255,255,0.95)",
+            backdropFilter: "blur(12px)",
+            borderTop: "1px solid var(--line)",
+            padding: "16px 28px",
             display: "flex",
             alignItems: "center",
-            gap: "16px",
-            flexWrap: "wrap",
-            boxShadow: "0 -6px 20px rgba(26,22,18,0.08)",
+            justifyContent: "space-between",
+            gap: "20px",
+            boxShadow: "0 -8px 32px rgba(26,22,18,0.10)",
             zIndex: 20,
           }}
         >
-          {/* Selected thumbnails */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1, minWidth: 0 }}>
-            <div
-              style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: "9px",
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                color: "var(--muted)",
-              }}
-            >
-              {tryOnSelectedIds.length} of {tryOnMaxItems} selected
+          {/* Left: instruction + thumbnails */}
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", flex: 1, minWidth: 0 }}>
+            <div>
+              <div style={{ fontFamily: "'Fraunces', serif", fontSize: "15px", fontWeight: 500, color: "var(--ink)", letterSpacing: "-0.01em" }}>
+                {tryOnSelectedIds.length === 0
+                  ? "Select pieces to try on"
+                  : `${tryOnSelectedIds.length} piece${tryOnSelectedIds.length > 1 ? "s" : ""} selected`}
+              </div>
+              <div style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: "11px", color: "var(--muted)", marginTop: "2px" }}>
+                {tryOnSelectedIds.length === 0
+                  ? `Tap up to ${tryOnMaxItems} items from your wardrobe`
+                  : tryOnRendering ? "◆ Layering each piece — this takes a moment…" : `Up to ${tryOnMaxItems} items · tap to deselect`}
+              </div>
             </div>
-            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-              {tryOnSelectedItems.map((item) => (
-                <img
-                  key={item.id}
-                  src={item.image_url}
-                  alt={item.description || item.category}
-                  style={{
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "8px",
-                    objectFit: "cover",
-                    border: "1.5px solid var(--terracotta)",
-                    display: "block",
-                  }}
-                />
-              ))}
-            </div>
+
+            {/* Thumbnails */}
+            {tryOnSelectedItems.length > 0 && (
+              <div style={{ display: "flex", gap: "6px" }}>
+                {tryOnSelectedItems.map((item) => (
+                  <img
+                    key={item.id}
+                    src={item.image_url}
+                    alt={item.description || item.category}
+                    style={{
+                      width: "44px",
+                      height: "44px",
+                      borderRadius: "10px",
+                      objectFit: "cover",
+                      border: "2px solid var(--terracotta)",
+                      display: "block",
+                      boxShadow: "0 2px 8px rgba(194,86,58,0.2)",
+                    }}
+                  />
+                ))}
+                {/* Empty slots */}
+                {Array.from({ length: tryOnMaxItems - tryOnSelectedItems.length }).map((_, i) => (
+                  <div
+                    key={`empty-${i}`}
+                    style={{
+                      width: "44px", height: "44px", borderRadius: "10px",
+                      border: "1.5px dashed var(--line)", background: "var(--cream-deep)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="1.5" strokeLinecap="round">
+                      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {tryOnError && (
-            <div
-              style={{
-                fontFamily: "'Inter Tight', sans-serif",
-                fontSize: "12px",
-                color: "var(--terracotta)",
-                maxWidth: "240px",
-              }}
-            >
-              {tryOnError}
-            </div>
-          )}
-
-          {tryOnRendering && (
-            <span
-              style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: "11px",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                color: "var(--muted)",
-              }}
-            >
-              ◆ Layering each piece — this can take a minute or two
-            </span>
-          )}
-
-          {tryOnSelectedIds.length > 0 && !tryOnRendering && (
+          {/* Right: error / actions */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+            {tryOnError && (
+              <span style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: "12px", color: "var(--terracotta)" }}>
+                {tryOnError}
+              </span>
+            )}
+            {tryOnSelectedIds.length > 0 && !tryOnRendering && (
+              <button
+                onClick={clearTryOnSelection}
+                style={{
+                  background: "none", border: "1.5px solid var(--line)", cursor: "pointer",
+                  padding: "9px 16px", borderRadius: "10px",
+                  fontFamily: "'Inter Tight', sans-serif", fontSize: "13px",
+                  color: "var(--ink-soft)", fontWeight: 500,
+                }}
+              >
+                Clear
+              </button>
+            )}
             <button
-              onClick={clearTryOnSelection}
+              onClick={runTryOn}
+              disabled={tryOnSelectedIds.length === 0 || tryOnRendering}
               style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: 0,
-                fontFamily: "'Inter Tight', sans-serif",
-                fontSize: "13px",
-                color: "var(--muted)",
-                textDecoration: "underline",
-                textDecorationColor: "var(--line)",
+                display: "flex", alignItems: "center", gap: "8px",
+                background: tryOnSelectedIds.length === 0 || tryOnRendering ? "var(--cream-deep)" : "var(--ink)",
+                color: tryOnSelectedIds.length === 0 || tryOnRendering ? "var(--muted)" : "white",
+                border: "none", borderRadius: "10px", padding: "11px 24px",
+                cursor: tryOnSelectedIds.length === 0 || tryOnRendering ? "not-allowed" : "pointer",
+                fontFamily: "'Inter Tight', sans-serif", fontSize: "14px", fontWeight: 600,
+                whiteSpace: "nowrap",
+                boxShadow: tryOnSelectedIds.length > 0 && !tryOnRendering ? "0 4px 14px rgba(26,22,18,0.2)" : "none",
+                transition: "all 0.15s",
               }}
             >
-              Clear
+              {tryOnRendering ? (
+                <>◆ Rendering…</>
+              ) : (
+                <>
+                  Try on selected
+                  {tryOnSelectedIds.length > 0 && (
+                    <span style={{
+                      background: "rgba(255,255,255,0.2)", borderRadius: "100px",
+                      padding: "1px 8px", fontSize: "12px",
+                    }}>
+                      {tryOnSelectedIds.length}
+                    </span>
+                  )}
+                </>
+              )}
             </button>
-          )}
-
-          <button
-            onClick={runTryOn}
-            disabled={tryOnSelectedIds.length === 0 || tryOnRendering}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              background:
-                tryOnSelectedIds.length === 0 || tryOnRendering
-                  ? "var(--cream-deep)"
-                  : "var(--ink)",
-              color:
-                tryOnSelectedIds.length === 0 || tryOnRendering
-                  ? "var(--muted)"
-                  : "white",
-              border: "none",
-              borderRadius: "10px",
-              padding: "11px 22px",
-              cursor:
-                tryOnSelectedIds.length === 0 || tryOnRendering
-                  ? "not-allowed"
-                  : "pointer",
-              fontFamily: "'Inter Tight', sans-serif",
-              fontSize: "14px",
-              fontWeight: 600,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {tryOnRendering ? "Rendering…" : `Try on selected (${tryOnSelectedIds.length})`}
-          </button>
+          </div>
         </div>
       )}
 
