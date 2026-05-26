@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useTryOnResult } from './useTryOnResult'
 import LikeButton from '../looks/LikeButton'
+import StylistTracePanel from './StylistTracePanel'
 
 const COLOR_NAMES = {
   '#1a1612': 'Espresso', '#3a322a': 'Dark Brown', '#c2563a': 'Terracotta',
@@ -37,7 +38,7 @@ export default function TryOnResult() {
     )
   }
 
-  const { solo_render_url, new_item_image_url, honest_assessment, combinations, price, store, category, color, item_name, detected_category, style_tags, similar_owned } = result
+  const { solo_render_url, new_item_image_url, honest_assessment, combinations, price, store, category, color, item_name, detected_category, style_tags, similar_owned, trace, versatility, gap, fit_note } = result
   console.log('[TryOnResult] full result from API:', result)
   console.log('[TryOnResult] category:', category, '| detected_category:', detected_category, '| item_name:', item_name)
   const displayCategory = detected_category || category
@@ -128,6 +129,11 @@ export default function TryOnResult() {
                 "{honest_assessment || 'This piece complements several items already in your wardrobe.'}"
               </p>
             </div>}
+
+            {/* Agent reasoning trace — only when the orchestrator returned one. */}
+            {Array.isArray(trace) && trace.length > 0 && (
+              <StylistTracePanel trace={trace} versatility={versatility} gap={gap} fitNote={fit_note} />
+            )}
 
 
             {/* Save to Wishlist */}
@@ -319,3 +325,4 @@ const outlineBtn = {
   border: '1.5px solid var(--line)', borderRadius: '8px', padding: '9px 16px',
   cursor: 'pointer', fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', fontWeight: 500,
 }
+
