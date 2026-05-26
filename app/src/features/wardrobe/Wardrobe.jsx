@@ -7,20 +7,30 @@ const CLOTHING_COLORS = [
   { hex: "#F5F0E8", name: "Cream" },
   { hex: "#D4CBB8", name: "Linen" },
   { hex: "#C4A882", name: "Beige" },
+  { hex: "#C3B091", name: "Khaki" },
   { hex: "#8C8273", name: "Taupe" },
+  { hex: "#808080", name: "Gray" },
+  { hex: "#36454F", name: "Charcoal" },
   { hex: "#1A1612", name: "Black" },
   { hex: "#1D3557", name: "Navy" },
+  { hex: "#1560BD", name: "Denim Blue" },
   { hex: "#4A6FA5", name: "Blue" },
   { hex: "#87A9C9", name: "Light Blue" },
+  { hex: "#2A9D8F", name: "Teal" },
   { hex: "#2E7D32", name: "Green" },
   { hex: "#4A7A4A", name: "Olive" },
   { hex: "#8FAF8F", name: "Sage" },
+  { hex: "#800000", name: "Maroon" },
   { hex: "#C0392B", name: "Red" },
   { hex: "#800020", name: "Burgundy" },
+  { hex: "#FF6B6B", name: "Coral" },
   { hex: "#C07050", name: "Terracotta" },
-  { hex: "#F0C040", name: "Yellow" },
-  { hex: "#F4A5B4", name: "Pink" },
+  { hex: "#8B4513", name: "Brown" },
+  { hex: "#6B3FA0", name: "Purple" },
   { hex: "#C3A8C8", name: "Lavender" },
+  { hex: "#F4A5B4", name: "Pink" },
+  { hex: "#E3A008", name: "Mustard" },
+  { hex: "#F0C040", name: "Yellow" },
   { hex: "#F5A623", name: "Orange" },
 ];
 
@@ -226,6 +236,10 @@ export default function Wardrobe() {
     }
     if (!newCategory) {
       setAddError("Please select a category.");
+      return;
+    }
+    if (!newColor) {
+      setAddError("Please select a color.");
       return;
     }
     setUploading(true);
@@ -1173,7 +1187,7 @@ export default function Wardrobe() {
                   marginBottom: "10px",
                 }}
               >
-                Color <span style={{ opacity: 0.5 }}>(optional)</span>
+                Color
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {CLOTHING_COLORS.map(({ hex, name }) => {
