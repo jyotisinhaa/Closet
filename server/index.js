@@ -13,6 +13,7 @@ const wardrobeRouter = require('./routes/wardrobe')
 const wishlistRouter = require('./routes/wishlist')
 const tryonRouter = require('./routes/tryon')
 const recommendationsRouter = require('./routes/recommendations')
+const looksRouter = require('./routes/looks')
 
 const app = express()
 
@@ -25,6 +26,7 @@ app.use('/api/profile', profileRouter)
 app.use('/api/wardrobe', wardrobeRouter)
 app.use('/api/wishlist', wishlistRouter)
 app.use('/api/tryon', tryonRouter)
+app.use('/api/looks', looksRouter)
 app.use('/api', recommendationsRouter)
 
 app.listen(config.PORT, () => console.log(`Closet API running on http://localhost:${config.PORT}`))

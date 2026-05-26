@@ -61,3 +61,17 @@ CREATE TABLE IF NOT EXISTS catalog_items (
 -- Index for fast vector similarity on catalog
 CREATE INDEX IF NOT EXISTS catalog_embedding_idx ON catalog_items USING ivfflat (embedding vector_cosine_ops) WITH (lists = 10);
 CREATE INDEX IF NOT EXISTS wardrobe_embedding_idx ON wardrobe_items USING ivfflat (embedding vector_cosine_ops) WITH (lists = 10);
+
+-- Liked/saved generated looks (the "Lookbook"). A look is one rendered composite
+-- image the user liked from a try-on, plus the context that produced it.
+CREATE TABLE IF NOT EXISTS saved_looks (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  render_url      TEXT NOT NULL,
+  title           TEXT DEFAULT '',
+  item_name       TEXT DEFAULT '',
+  category        TEXT DEFAULT '',
+  price           NUMERIC DEFAULT 0,
+  source          TEXT DEFAULT 'solo',   -- solo | pairing | custom
+  item_image_urls JSONB DEFAULT '[]',
+  created_at      TIMESTAMPTZ DEFAULT NOW()
+);

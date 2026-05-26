@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { TAG_COLORS } from '../../lib/categories'
 import { useStyledTryOn } from './useStyledTryOn'
+import LikeButton from '../looks/LikeButton'
 
 export default function TryOnStyled() {
   const navigate = useNavigate()
@@ -150,6 +151,7 @@ export default function TryOnStyled() {
                 newItemImageUrl={new_item_image_url}
                 items={manualRender.wardrobe_item_details || []}
                 price={price}
+                itemName={displayName}
               />
             </div>
           )}
@@ -238,10 +240,18 @@ function PickCard({ item, selected, disabled, onToggle }) {
 }
 
 // Rendered composite (used by the manual picker result).
-function ResultCard({ renderUrl, newItemImageUrl, items, price }) {
+function ResultCard({ renderUrl, newItemImageUrl, items, price, itemName }) {
   return (
     <div style={{ border: '1.5px solid var(--line)', borderRadius: '16px', overflow: 'hidden', background: 'var(--paper)', display: 'flex' }}>
-      <div style={{ width: '220px', flexShrink: 0, background: 'var(--cream-deep)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '260px' }}>
+      <div style={{ width: '220px', flexShrink: 0, background: 'var(--cream-deep)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '260px', position: 'relative' }}>
+        {renderUrl && (
+          <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 2 }}>
+            <LikeButton look={{
+              render_url: renderUrl, title: 'Custom look', item_name: itemName, source: 'custom', price,
+              item_image_urls: [newItemImageUrl, ...items.map(i => i.image_url)].filter(Boolean),
+            }} />
+          </div>
+        )}
         <img src={renderUrl} alt="Your custom look" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
       </div>
       <div style={{ flex: 1, padding: '20px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minWidth: 0 }}>
@@ -275,7 +285,15 @@ function ComboCard({ combo, newItemImageUrl, price }) {
   return (
     <div style={{ border: '1.5px solid var(--line)', borderRadius: '16px', overflow: 'hidden', background: 'var(--paper)', display: 'flex' }}>
       {/* Render thumbnail */}
-      <div style={{ width: '200px', flexShrink: 0, background: 'var(--cream-deep)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '240px' }}>
+      <div style={{ width: '200px', flexShrink: 0, background: 'var(--cream-deep)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '240px', position: 'relative' }}>
+        {composite_render_url && (
+          <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 2 }}>
+            <LikeButton look={{
+              render_url: composite_render_url, title: name, source: 'pairing', price,
+              item_image_urls: [newItemImageUrl, ...(wardrobe_item_details || []).map(i => i.image_url)].filter(Boolean),
+            }} />
+          </div>
+        )}
         {composite_render_url ? (
           <img src={composite_render_url} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
         ) : (

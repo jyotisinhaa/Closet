@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useTryOnResult } from './useTryOnResult'
+import LikeButton from '../looks/LikeButton'
 
 const COLOR_NAMES = {
   '#1a1612': 'Espresso', '#3a322a': 'Dark Brown', '#c2563a': 'Terracotta',
@@ -195,8 +196,19 @@ export default function TryOnResult() {
             {/* Render image */}
             <div style={{
               borderRadius: '16px', overflow: 'hidden', border: '1.5px solid var(--line)',
-              background: 'var(--cream-deep)',
+              background: 'var(--cream-deep)', position: 'relative',
             }}>
+              {solo_render_url && (
+                <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 2 }}>
+                  <LikeButton look={{
+                    render_url: solo_render_url,
+                    title: item_name || displayCategory || 'My look',
+                    item_name, category: displayCategory, price,
+                    source: 'solo',
+                    item_image_urls: [new_item_image_url].filter(Boolean),
+                  }} />
+                </div>
+              )}
               {renderSrc ? (
                 <img src={renderSrc} alt="Your look" style={{ width: '100%', display: 'block' }} />
               ) : (

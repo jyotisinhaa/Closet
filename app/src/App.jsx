@@ -10,6 +10,7 @@ import TryOnStyled from "./features/tryon/TryOnStyled";
 import Profile from "./features/profile/Profile";
 import Home from "./features/home/Home";
 import Wishlist from "./features/tryon/Wishlist";
+import Lookbook from "./features/looks/Lookbook";
 import Recommendations from "./features/recommendations/Recommendations";
 import Settings from "./features/profile/Settings";
 
@@ -63,6 +64,7 @@ function AppShell() {
           <Route path="/tryon/result" element={<TryOnResult />} />
           <Route path="/tryon/result/styled" element={<TryOnStyled />} />
           <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/looks" element={<Lookbook />} />
           <Route path="/recommendations" element={<Recommendations />} />
           <Route path="/profile" element={<Profile sidebar />} />
           <Route path="/settings" element={<Settings />} />
