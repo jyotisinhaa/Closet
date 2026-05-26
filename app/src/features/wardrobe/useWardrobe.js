@@ -134,14 +134,7 @@ export function useWardrobe() {
     return acc;
   }, {});
 
-  // Closet total value — referenced by Wardrobe.jsx's value chip. PR #10
-  // shipped the feature wiring but never computed this; the chip rendered
-  // nothing because `undefined > 0` short-circuits. Sum across the same
-  // filtered set the counts use so the value follows favourite / color filters.
-  const totalValue = baseFiltered.reduce(
-    (sum, i) => sum + (parseFloat(i.price) || 0),
-    0,
-  );
+  const totalValue = items.reduce((sum, i) => sum + (parseFloat(i.price) || 0), 0);
 
   const tryOnSelectedItems = tryOnSelectedIds
     .map((id) => items.find((i) => i.id === id))
