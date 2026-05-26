@@ -55,7 +55,14 @@ export default function Lookbook() {
 
         {!loading && looks.length > 0 && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px' }}>
-            {looks.map(look => <LookCard key={look.id} look={look} onRemove={() => remove(look.id)} />)}
+            {looks.map(look => (
+              <LookCard
+                key={look.id}
+                look={look}
+                onRemove={() => remove(look.id)}
+                onStyle={() => navigate('/tryon', { state: { baseLook: { render_url: look.render_url, title: look.title || look.item_name || 'Your saved look' } } })}
+              />
+            ))}
           </div>
         )}
 
@@ -64,7 +71,7 @@ export default function Lookbook() {
   )
 }
 
-function LookCard({ look, onRemove }) {
+function LookCard({ look, onRemove, onStyle }) {
   const items = Array.isArray(look.item_image_urls) ? look.item_image_urls : []
   const price = parseFloat(look.price) || 0
 
@@ -109,6 +116,19 @@ function LookCard({ look, onRemove }) {
             <span style={{ fontFamily: "'Fraunces', serif", fontSize: '15px', fontWeight: 600, color: 'var(--terracotta)' }}>${price.toFixed(2)}</span>
           </div>
         )}
+
+        <button onClick={onStyle} style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', width: '100%',
+          background: 'var(--ink)', color: 'white', border: 'none', borderRadius: '9px', padding: '9px 14px',
+          cursor: 'pointer', marginTop: '2px',
+          fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', fontWeight: 600,
+        }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+            <circle cx="12" cy="13" r="4" />
+          </svg>
+          Style this look
+        </button>
       </div>
     </div>
   )

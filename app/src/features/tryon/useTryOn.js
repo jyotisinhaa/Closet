@@ -36,7 +36,7 @@ export function useTryOn() {
     return () => clearInterval(id)
   }, [generating])
 
-  async function generate({ photo, price, store, color, style = '' }) {
+  async function generate({ photo, price, store, color, style = '', baseImageUrl = '' }) {
     if (!photo) return
     setGenerating(true)
     setGenStatus(GENERATE_STATUSES[0])
@@ -50,6 +50,8 @@ export function useTryOn() {
       formData.append('color', color)
       formData.append('gender', (getProfile() || {}).gender || '')
       formData.append('style', style)
+      // When styling on top of a saved look, send its render as the base canvas.
+      if (baseImageUrl) formData.append('base_image_url', baseImageUrl)
 
       const result = await apiUpload('/tryon', formData)
       setLastResult(result)

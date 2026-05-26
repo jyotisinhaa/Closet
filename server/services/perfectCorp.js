@@ -151,4 +151,27 @@ async function renderOutfitChain(profilePhotoUrl, newItemUrl, additionalItems = 
   return output.url
 }
 
-module.exports = { toPerfectCorpCategory, toAccessoryFeature, renderSingleItem, renderOutfitChain }
+// Chain a list of items onto a base photo with no "new" item — used for the
+// wardrobe-only try-on (Mix & Match). Same ordering rule as renderOutfitChain:
+// accessories first (they regenerate the whole outfit), body garments last (clean
+// swaps), preserving the caller's order within each group. Returns the base URL
+// unchanged if there's nothing to render.
+async function renderItemsChain(baseUrl, items = [], gender) {
+  const steps = items
+    .filter(it => it && it.image_url)
+    .map(it => ({ refUrl: it.image_url, category: it.category }))
+  if (steps.length === 0) return baseUrl
+
+  const isAccessory = (s) => !!toAccessoryFeature(s.category)
+  const ordered = [...steps.filter(isAccessory), ...steps.filter(s => !isAccessory(s))]
+
+  let srcFileUrl = baseUrl
+  let output
+  for (const step of ordered) {
+    output = await renderSingleItem({ srcFileUrl, refFileUrl: step.refUrl, category: step.category, gender })
+    srcFileUrl = output.url
+  }
+  return output.url
+}
+
+module.exports = { toPerfectCorpCategory, toAccessoryFeature, renderSingleItem, renderOutfitChain, renderItemsChain }

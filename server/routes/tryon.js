@@ -2,7 +2,7 @@ const express = require('express')
 const upload  = require('../middleware/upload')
 const pool    = require('../db/client')
 const { uploadToCloudinary, ensureCloudinaryUrl } = require('../services/cloudinary')
-const { renderOutfitChain }                = require('../services/perfectCorp')
+const { renderOutfitChain, renderItemsChain } = require('../services/perfectCorp')
 const { buildPairingWithGroq }             = require('../services/groq')
 const { buildPairingWithCrusoe, isCrusoeEnabled } = require('../services/crusoe')
 
@@ -23,7 +23,21 @@ router.post('/', upload.single('photo'), async (req, res) => {
 
     const { rows: wardrobe } = await pool.query('SELECT * FROM wardrobe_items ORDER BY created_at DESC')
 
-    const { price = '0', category = 'auto', store = '', color = '', gender = '', style = '' } = req.body
+    const { price = '0', category = 'auto', store = '', color = '', gender = '', style = '', base_image_url = '' } = req.body
+
+    // Render base: a saved look ("style this look") takes the place of the profile
+    // photo as the canvas the new item is layered onto. Mirror it to Cloudinary so
+    // Perfect Corp can fetch it reliably (saved looks store expiring vendor URLs).
+    // Stylist analysis still runs against the profile photo so it knows the person.
+    let renderBaseUrl = profilePhotoUrl
+    if (base_image_url) {
+      try {
+        renderBaseUrl = await ensureCloudinaryUrl(base_image_url)
+      } catch (err) {
+        console.warn('[try-on] base look mirror failed, using URL as-is:', err.message)
+        renderBaseUrl = base_image_url
+      }
+    }
 
     // 3. Stylist analysis — NVIDIA Nemotron on Crusoe Managed Inference, with an
     //    automatic fall back to Groq if Crusoe is unset or errors.
@@ -55,7 +69,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
     const renderCategory = detected_category || category
     let soloRenderUrl = null
     try {
-      soloRenderUrl = await renderOutfitChain(profilePhotoUrl, newItemUrl, [], renderCategory, gender, style)
+      soloRenderUrl = await renderOutfitChain(renderBaseUrl, newItemUrl, [], renderCategory, gender, style)
     } catch (err) {
       console.error('Solo render failed:', err.message)
     }
@@ -79,7 +93,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
 
         let compositeUrl = soloRenderUrl
         try {
-          compositeUrl = await renderOutfitChain(profilePhotoUrl, newItemUrl, safeComboItems, renderCategory, gender, style)
+          compositeUrl = await renderOutfitChain(renderBaseUrl, newItemUrl, safeComboItems, renderCategory, gender, style)
         } catch (err) {
           console.error(`Combo render failed for "${combo.name}":`, err.message)
         }
@@ -103,6 +117,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
       price: parseFloat(price) || 0,
       category, store, color,
       item_name, detected_category, style_tags, similar_owned,
+      base_image_url: base_image_url || null,
       solo_render_url: soloRenderUrl,
       honest_assessment,
       combinations: enrichedCombos,
@@ -191,6 +206,60 @@ router.post('/combine', async (req, res) => {
     })
   } catch (err) {
     console.error('Combine try-on error:', err)
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// POST /api/tryon/wardrobe — wardrobe-only try-on ("Mix & Match"). Render a set
+// of the user's own wardrobe pieces onto the profile photo (or a saved look via
+// base_image_url) with no new/external item. Stateless.
+router.post('/wardrobe', async (req, res) => {
+  try {
+    const { wardrobe_item_ids = [], base_image_url = '', gender = '' } = req.body
+    if (!Array.isArray(wardrobe_item_ids) || wardrobe_item_ids.length === 0) {
+      return res.status(400).json({ error: 'Select at least one wardrobe item.' })
+    }
+
+    const { rows: profileRows } = await pool.query(`SELECT profile_photo_url FROM profile WHERE id = 'demo-user-1'`)
+    const profilePhotoUrl = profileRows[0]?.profile_photo_url
+    if (!profilePhotoUrl) return res.status(400).json({ error: 'No profile photo found. Please complete onboarding first.' })
+
+    // Base canvas: profile photo by default, or a saved look if provided.
+    let baseUrl = profilePhotoUrl
+    if (base_image_url) {
+      try {
+        baseUrl = await ensureCloudinaryUrl(base_image_url)
+      } catch (err) {
+        console.warn('[wardrobe try-on] base mirror failed, using URL as-is:', err.message)
+        baseUrl = base_image_url
+      }
+    }
+
+    const { rows: wardrobe } = await pool.query('SELECT * FROM wardrobe_items ORDER BY created_at DESC')
+    const items = wardrobe_item_ids
+      .map(id => wardrobe.find(w => w.id === id))
+      .filter(Boolean)
+      .slice(0, 4)
+    if (items.length === 0) return res.status(400).json({ error: 'Selected items not found.' })
+
+    // Mirror every item image to Cloudinary so Perfect Corp can fetch them.
+    const safeItems = await Promise.all(items.map(async (it) => ({
+      ...it,
+      image_url: await ensureCloudinaryUrl(it.image_url).catch(() => it.image_url),
+    })))
+
+    const composite_render_url = await renderItemsChain(baseUrl, safeItems, gender)
+
+    res.json({
+      composite_render_url,
+      wardrobe_item_details: items.map(w => ({
+        id: w.id, category: w.category,
+        description: w.description || w.category,
+        color: w.color || '', image_url: w.image_url,
+      })),
+    })
+  } catch (err) {
+    console.error('Wardrobe try-on error:', err)
     res.status(500).json({ error: err.message })
   }
 })
