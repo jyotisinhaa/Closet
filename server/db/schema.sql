@@ -14,6 +14,11 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS profile (
   id                TEXT PRIMARY KEY DEFAULT 'demo-user-1',
   profile_photo_url TEXT,
+  -- Style aggregates derived from the wardrobe — see services/styleProfile.js.
+  -- style_profile is a count map (e.g. {"casual": 4, "classic": 2}); style_prefs
+  -- is the top-3 tags by count, used by the UI radar + style tips.
+  style_profile     JSONB DEFAULT '{}'::jsonb,
+  style_prefs       TEXT[] DEFAULT '{}',
   updated_at        TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -24,6 +29,9 @@ CREATE TABLE IF NOT EXISTS wardrobe_items (
   category              TEXT NOT NULL DEFAULT 'Uncategorized',
   color                 TEXT DEFAULT '',
   description           TEXT DEFAULT '',
+  -- Style tags from the Crusoe (Nemotron) classifier, constrained to the
+  -- 8-tag vocabulary in services/styleProfile.js.
+  style_tags            TEXT[] DEFAULT '{}',
   embedding             vector(1024),
   created_at            TIMESTAMPTZ DEFAULT NOW()
 );

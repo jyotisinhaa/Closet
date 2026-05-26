@@ -131,4 +131,63 @@ style_score is how well the best pick pairs with the wardrobe item as a complete
   }
 }
 
-module.exports = { buildPairingWithGroq, rankCandidatesWithGroq, buildStylistPrompt, parseStylistJson }
+// ── Wardrobe item style classification ────────────────────────────────────
+// Single-image classifier shared by the Crusoe (Nemotron) and Groq paths. Picks
+// 1-3 tags from a fixed 8-tag vocabulary so the result drops straight into the
+// existing radar / style-tip logic in the Profile UI.
+function buildClassifyPrompt({ category, color, description }) {
+  return `You are a fashion classifier. Identify the style of this single clothing item.
+
+Pick 1 to 3 tags from this exact list, using lowercase keys exactly as shown:
+- casual       (relaxed everyday wear: t-shirts, jeans, sneakers, hoodies)
+- formal       (business / evening: tailored suits, dress shoes, blouses)
+- classic      (timeless staples: oxford shirts, trench coats, loafers, A-line)
+- minimalist   (clean lines, neutral tones, simple silhouettes, no logos)
+- bohemian     (flowy, eclectic, layered prints, fringe, earthy tones)
+- streetwear   (urban, oversized fits, graphics, sneakers, hoodies)
+- romantic     (florals, soft textures, ruffles, lace, pastels)
+- sporty       (athleisure, technical fabrics, performance, leggings)
+
+Context (use only as a hint — trust the image first):
+- Category: ${category || 'unspecified'}
+- Color: ${color || 'unspecified'}
+- User description: ${description || '(none)'}
+
+Return ONLY valid JSON, no markdown, no code fences:
+{ "style_tags": ["tag1", "tag2"], "primary_style": "tag1" }
+
+Rules:
+- All tags MUST be lowercase keys from the list above. Do not invent tags.
+- primary_style must be the single most defining tag (from style_tags).
+- Prefer fewer, more accurate tags over more.`
+}
+
+function parseClassifyJson(text) {
+  // Reuses the same fence-tolerant parsing as the pairing JSON.
+  const obj = parseStylistJson(text)
+  const tags = Array.isArray(obj.style_tags) ? obj.style_tags : []
+  const primary = typeof obj.primary_style === 'string' ? obj.primary_style : ''
+  return { style_tags: tags, primary_style: primary }
+}
+
+async function classifyItemWithGroq({ imageUrl, category, color, description }) {
+  const prompt = buildClassifyPrompt({ category, color, description })
+  const response = await groq.chat.completions.create({
+    model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+    messages: [{
+      role: 'user',
+      content: [
+        { type: 'image_url', image_url: { url: imageUrl } },
+        { type: 'text', text: prompt },
+      ],
+    }],
+    max_tokens: 200,
+    temperature: 0.2,
+  })
+  return parseClassifyJson(response.choices[0].message.content)
+}
+
+module.exports = {
+  buildPairingWithGroq, rankCandidatesWithGroq, buildStylistPrompt, parseStylistJson,
+  buildClassifyPrompt, parseClassifyJson, classifyItemWithGroq,
+}

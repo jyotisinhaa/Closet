@@ -19,7 +19,7 @@ function colorLabel(hex) {
 
 export default function TryOnResult() {
   const navigate = useNavigate()
-  const { result, preview, saving, saved, saveToWishlist } = useTryOnResult()
+  const { result, preview, saving, saved, saveToWishlist, adding, added, addError, addToWardrobe } = useTryOnResult()
 
   // Only the solo view is currently wired up.
   const activeTab = 'solo'
@@ -150,6 +150,34 @@ export default function TryOnResult() {
                 </svg>
                 {saving ? 'Saving…' : 'Save to Wishlist'}
               </button>
+            )}
+
+            {/* Add to Wardrobe — when the user actually owns / bought this piece. */}
+            {added ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', color: 'var(--olive)', fontWeight: 500 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Added to Wardrobe
+              </div>
+            ) : (
+              <button onClick={addToWardrobe} disabled={adding} style={{
+                display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'center',
+                background: 'rgba(91,106,63,0.08)', color: 'var(--olive)',
+                border: '1.5px solid rgba(91,106,63,0.3)', borderRadius: '10px', padding: '11px 20px',
+                cursor: adding ? 'not-allowed' : 'pointer', marginBottom: '12px',
+                fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', fontWeight: 600,
+                opacity: adding ? 0.7 : 1, transition: 'all 0.15s',
+              }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+                {adding ? 'Adding…' : 'Add to Wardrobe'}
+              </button>
+            )}
+            {addError && (
+              <div style={{ marginBottom: '12px', padding: '8px 12px', background: 'rgba(194,86,58,0.08)', border: '1px solid rgba(194,86,58,0.25)', borderRadius: '8px', fontFamily: "'Inter Tight', sans-serif", fontSize: '12px', color: 'var(--terracotta)' }}>
+                {addError}
+              </div>
             )}
 
             <button onClick={() => navigate('/tryon')} style={{

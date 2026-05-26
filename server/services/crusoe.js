@@ -2,7 +2,7 @@
 // on a multimodal Nemotron model via Crusoe's OpenAI-compatible endpoint. Shares
 // the prompt + JSON parser with the Groq path so the two stay in lockstep.
 const { CRUSOE_API_KEY, CRUSOE_BASE_URL, CRUSOE_MODEL } = require('../config')
-const { buildStylistPrompt, parseStylistJson } = require('./groq')
+const { buildStylistPrompt, parseStylistJson, buildClassifyPrompt, parseClassifyJson } = require('./groq')
 
 const isCrusoeEnabled = () => Boolean(CRUSOE_API_KEY)
 
@@ -47,4 +47,45 @@ async function buildPairingWithCrusoe(newItemUrl, profilePhotoUrl, category, pri
   return parseStylistJson(text)
 }
 
-module.exports = { buildPairingWithCrusoe, isCrusoeEnabled }
+// Classify a single wardrobe item's style on Nemotron. Same Crusoe endpoint as
+// the pairing call; just one image and a tight classifier prompt.
+async function classifyItemWithCrusoe({ imageUrl, category, color, description }) {
+  if (!CRUSOE_API_KEY) throw new Error('CRUSOE_API_KEY not set')
+
+  const prompt = buildClassifyPrompt({ category, color, description })
+
+  const body = {
+    model: CRUSOE_MODEL,
+    messages: [{
+      role: 'user',
+      content: [
+        { type: 'image_url', image_url: { url: imageUrl } },
+        { type: 'text', text: prompt },
+      ],
+    }],
+    // Nemotron emits a reasoning trace before the JSON — and even with
+    // reasoning_effort:'low' the trace can blow past 2k on borderline items
+    // (relaxed-fit oxford? minimalist or classic?). Budget covers reasoning AND
+    // the JSON; if it runs short, `content` comes back null and we'd fall back
+    // to Groq unnecessarily. 4k is plenty for the actual answer (~80 tokens).
+    max_tokens: 4000,
+    reasoning_effort: 'low',
+    temperature: 0.2,
+  }
+
+  const res = await fetch(`${CRUSOE_BASE_URL}/chat/completions`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${CRUSOE_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '')
+    throw new Error(`Crusoe ${res.status}: ${detail.slice(0, 300)}`)
+  }
+  const json = await res.json()
+  const text = json.choices?.[0]?.message?.content
+  if (!text) throw new Error(`Crusoe returned no content: ${JSON.stringify(json).slice(0, 300)}`)
+  return parseClassifyJson(text)
+}
+
+module.exports = { buildPairingWithCrusoe, classifyItemWithCrusoe, isCrusoeEnabled }
