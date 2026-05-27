@@ -158,4 +158,44 @@ silhouette — proportions and balance on this person's frame
 
 WEAKEST-LINK RULE on overall: if any axis is 4 or below, overall cannot exceed 6. If every score is 8+, you're being too generous — find the weak point.`
 
-module.exports = { callJSON, img, txt, TEXT_MODEL, VISION_MODEL, isCrusoeEnabled, SCORING_RUBRIC }
+// Nemotron-first candidate ranker for recommendations. Same prompt as the Groq
+// path but routed through callJSON so Crusoe/Nemotron is tried first.
+async function rankCandidates(wardrobeItem, candidates) {
+  const wardrobeDesc = `${wardrobeItem.color || 'unknown color'} ${wardrobeItem.category}${wardrobeItem.description ? ` — ${wardrobeItem.description}` : ''}`
+  const candidateList = candidates.map((c, i) =>
+    `${i}: ${c.color || 'unknown color'} ${c.category} — "${c.name}" by ${c.brand}`
+  ).join('\n')
+
+  const prompt = `You are a professional fashion stylist. Pick the single best outfit pairing for the wardrobe item below.
+
+Wardrobe item: ${wardrobeDesc}
+
+Candidates:
+${candidateList}
+
+Fashion rules:
+- Colors must COMPLEMENT, not match (blue jeans → white/black/grey/red top, NOT another blue item)
+- Use contrast: dark bottom + light top, or vice versa
+- Match the style register (casual with casual, formal with formal)
+- A dress is a full outfit — only pairs with outerwear or shoes
+
+Return ONLY valid JSON, no markdown: { "best_index": <0-${candidates.length - 1}>, "style_score": <60-99>, "reason": "<one sentence>" }
+
+style_score is how well the best pick pairs with the wardrobe item as a complete outfit (60 = decent, 75 = good, 90+ = excellent). Be honest — reserve 90+ for truly great pairings.`
+
+  const result = await callJSON({
+    content: [txt(prompt)],
+    maxTokens: 150,
+    temperature: 0.2,
+    label: 'rank-candidates',
+  })
+  const idx = parseInt(result.best_index)
+  const score = parseInt(result.style_score)
+  return {
+    index: Number.isFinite(idx) ? Math.min(idx, candidates.length - 1) : 0,
+    reason: result.reason || '',
+    styleScore: Number.isFinite(score) ? Math.min(99, Math.max(60, score)) : null,
+  }
+}
+
+module.exports = { callJSON, rankCandidates, img, txt, TEXT_MODEL, VISION_MODEL, isCrusoeEnabled, SCORING_RUBRIC }

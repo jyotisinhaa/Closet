@@ -168,39 +168,62 @@ router.post('/', upload.single('photo'), async (req, res) => {
 // optionally paired with one of the user's wardrobe items. The catalog item is
 // the focus (rendered last/on top). Falls back to catalog-only if the wardrobe
 // layer fails (e.g. a lifestyle photo that can't be processed).
+// Runs the Nemotron stylist assessment in parallel with the Perfect Corp render.
 router.post('/quick', async (req, res) => {
   try {
-    const { image_url, category, wardrobe_image_url, wardrobe_category, gender = '' } = req.body
+    const { image_url, category, wardrobe_image_url, wardrobe_category, gender = '',
+            price = '0', color = '', store_url = '', name = '' } = req.body
     if (!image_url) return res.status(400).json({ error: 'image_url required' })
 
-    const { rows } = await pool.query(`SELECT profile_photo_url FROM profile WHERE id = 'demo-user-1'`)
+    const [{ rows }, { rows: wardrobeRows }] = await Promise.all([
+      pool.query(`SELECT profile_photo_url FROM profile WHERE id = 'demo-user-1'`),
+      pool.query('SELECT * FROM wardrobe_items ORDER BY created_at DESC'),
+    ])
     const profilePhotoUrl = rows[0]?.profile_photo_url
     if (!profilePhotoUrl) return res.status(400).json({ error: 'No profile photo found. Complete onboarding first.' })
 
-    // External catalog images (e.g. Unsplash) must be mirrored to Cloudinary so
-    // Perfect Corp can reliably fetch them.
+    // External catalog images must be mirrored to Cloudinary so Perfect Corp can fetch them.
     const safeImageUrl = await ensureCloudinaryUrl(image_url)
 
-    let renderUrl
-    if (wardrobe_image_url) {
-      try {
-        const safeWardrobeUrl = await ensureCloudinaryUrl(wardrobe_image_url)
-        renderUrl = await renderOutfitChain(
-          profilePhotoUrl,
-          safeImageUrl,
-          [{ image_url: safeWardrobeUrl, category: wardrobe_category }],
-          category || 'auto',
-          gender,
-        )
-      } catch (err) {
-        console.warn('[quick try-on] wardrobe layer failed:', err.message)
-        renderUrl = await renderOutfitChain(profilePhotoUrl, safeImageUrl, [], category || 'auto', gender)
+    // Run Perfect Corp render + Nemotron stylist assessment in parallel.
+    const renderPromise = (async () => {
+      if (wardrobe_image_url) {
+        try {
+          const safeWardrobeUrl = await ensureCloudinaryUrl(wardrobe_image_url)
+          return await renderOutfitChain(
+            profilePhotoUrl, safeImageUrl,
+            [{ image_url: safeWardrobeUrl, category: wardrobe_category }],
+            category || 'auto', gender,
+          )
+        } catch (err) {
+          console.warn('[quick try-on] wardrobe layer failed:', err.message)
+          return await renderOutfitChain(profilePhotoUrl, safeImageUrl, [], category || 'auto', gender)
+        }
       }
-    } else {
-      renderUrl = await renderOutfitChain(profilePhotoUrl, safeImageUrl, [], category || 'auto', gender)
-    }
+      return await renderOutfitChain(profilePhotoUrl, safeImageUrl, [], category || 'auto', gender)
+    })()
 
-    res.json({ render_url: renderUrl })
+    const stylistPromise = runStylistAgents({
+      newItemUrl: safeImageUrl,
+      profilePhotoUrl,
+      wardrobe: wardrobeRows,
+      hints: { category: category || 'auto', price, color, store: store_url, gender, item_name: name },
+    }).catch(err => { console.error('[quick try-on] stylist agent failed:', err.message); return null })
+
+    const [renderUrl, stylist] = await Promise.all([renderPromise, stylistPromise])
+
+    res.json({
+      render_url: renderUrl,
+      honest_assessment: stylist?.honest_assessment || '',
+      item_name:         stylist?.item_name         || name || '',
+      detected_category: stylist?.detected_category || category || '',
+      style_tags:        stylist?.style_tags         || [],
+      similar_owned:     stylist?.similar_owned      || '',
+      trace:             stylist?.trace              || [],
+      versatility:       stylist?.versatility        || null,
+      gap:               stylist?.gap                || null,
+      fit_note:          stylist?.fit_note           || '',
+    })
   } catch (err) {
     console.error('Quick try-on error:', err)
     res.status(500).json({ error: err.message })

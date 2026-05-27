@@ -1,7 +1,7 @@
 const express = require('express')
 const pool    = require('../db/client')
 const { getImageEmbedding } = require('../services/fashionclip')
-const { rankCandidatesWithGroq } = require('../services/groq')
+const { rankCandidates } = require('../services/llm')
 
 const router = express.Router()
 
@@ -13,7 +13,7 @@ router.get('/catalog', async (req, res) => {
 
 // POST /api/catalog
 router.post('/catalog', async (req, res) => {
-  const { brand, name, category, color, price, store_url, image_url, style_tags } = req.body
+  const { brand, name, category, color, price, store_url, image_url, style_tags, gender } = req.body
   if (!image_url || !category) return res.status(400).json({ error: 'image_url and category required' })
 
   let embedding = null
@@ -24,9 +24,9 @@ router.post('/catalog', async (req, res) => {
   }
 
   const { rows } = await pool.query(
-    `INSERT INTO catalog_items (brand, name, category, color, price, store_url, image_url, style_tags, sponsored, embedding)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,true,$9) RETURNING *`,
-    [brand || 'Unknown', name || category, category, color || '', parseFloat(price) || 0, store_url || '', image_url, style_tags || [], embedding ? `[${embedding.join(',')}]` : null]
+    `INSERT INTO catalog_items (brand, name, category, color, price, store_url, image_url, style_tags, sponsored, gender, embedding)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,true,$9,$10) RETURNING *`,
+    [brand || 'H&M', name || category, category, color || '', parseFloat(price) || 0, store_url || '', image_url, style_tags || [], gender || 'female', embedding ? `[${embedding.join(',')}]` : null]
   )
   res.json(rows[0])
 })
@@ -67,6 +67,10 @@ router.post('/catalog/embed-all', async (req, res) => {
 // GET /api/recommendations — pgvector cosine similarity matching
 router.get('/recommendations', async (req, res) => {
   try {
+    // Resolve the user's gender so we can filter catalog items
+    const { rows: profileRows } = await pool.query(`SELECT gender FROM profile WHERE id = 'demo-user-1' LIMIT 1`)
+    const userGender = (profileRows[0]?.gender || '').toLowerCase().trim()
+
     // Lazily embed any wardrobe items missing embeddings
     const { rows: missing } = await pool.query('SELECT id, image_url FROM wardrobe_items WHERE embedding IS NULL')
     for (const item of missing) {
@@ -108,6 +112,9 @@ router.get('/recommendations', async (req, res) => {
         SELECT * FROM catalog_items c
         WHERE c.embedding IS NOT NULL
 
+          -- Gender filter: show unisex + items matching user's gender (or all if gender unknown)
+          AND (c.gender = 'unisex' OR $1 = '' OR c.gender = $1)
+
           -- Must be a different clothing group
           AND (
             CASE WHEN LOWER(c.category) IN ('jeans','shorts','skirt','bottom','trousers','pants') THEN 'bottoms'
@@ -146,7 +153,7 @@ router.get('/recommendations', async (req, res) => {
       ) c
       WHERE w.embedding IS NOT NULL
       ORDER BY w.id, similarity_score DESC
-    `)
+    `, [userGender])
 
     // Group top-15 candidates by wardrobe item
     const grouped = new Map()
@@ -175,7 +182,7 @@ router.get('/recommendations', async (req, res) => {
             category: c.catalog_category,
             color: c.catalog_color || '',
           }))
-          const { index, reason, styleScore } = await rankCandidatesWithGroq(wardrobeItem, catalogCandidates)
+          const { index, reason, styleScore } = await rankCandidates(wardrobeItem, catalogCandidates)
           chosen = candidates[index]
           styleReason = reason
           if (styleScore) chosen = { ...chosen, ai_style_score: styleScore }

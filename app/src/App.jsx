@@ -13,6 +13,7 @@ import Wishlist from "./features/tryon/Wishlist";
 import Lookbook from "./features/looks/Lookbook";
 import Recommendations from "./features/recommendations/Recommendations";
 import Settings from "./features/profile/Settings";
+import CatalogAdmin from "./features/admin/CatalogAdmin";
 
 function AppShell() {
   const location = useLocation();
@@ -68,6 +69,7 @@ function AppShell() {
           <Route path="/recommendations" element={<Recommendations />} />
           <Route path="/profile" element={<Profile sidebar />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/admin/catalog" element={<CatalogAdmin />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </div>
