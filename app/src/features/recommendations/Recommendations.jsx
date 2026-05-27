@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getProfile } from '../../lib/session'
+import StylistTracePanel from '../tryon/StylistTracePanel'
 
 export default function Recommendations() {
   const navigate = useNavigate()
@@ -63,31 +64,35 @@ export default function Recommendations() {
 }
 
 function RecommendationCard({ rec }) {
-  const [hover, setHover]         = useState(false)
-  const [tryingOn, setTryingOn]   = useState(false)
-  const [renderUrl, setRenderUrl] = useState(null)
+  const [hover, setHover]           = useState(false)
+  const [tryingOn, setTryingOn]     = useState(false)
+  const [tryOnResult, setTryOnResult] = useState(null)
   const [tryOnError, setTryOnError] = useState(null)
 
   const { wardrobe_item, catalog_item, similarity_score, style_reason } = rec
 
   async function handleTryOn() {
     setTryingOn(true)
-    setRenderUrl(null)
+    setTryOnResult(null)
     setTryOnError(null)
     try {
       const res = await fetch('/api/tryon/quick', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          image_url: catalog_item.image_url,
-          category: catalog_item.category,
+          image_url:          catalog_item.image_url,
+          category:           catalog_item.category,
           wardrobe_image_url: wardrobe_item.image_url,
-          wardrobe_category: wardrobe_item.category,
-          gender: (getProfile() || {}).gender || '',
+          wardrobe_category:  wardrobe_item.category,
+          gender:             (getProfile() || {}).gender || '',
+          price:              catalog_item.price || '0',
+          color:              catalog_item.color || '',
+          store_url:          catalog_item.store_url || '',
+          name:               catalog_item.name || '',
         }),
       })
       const data = await res.json()
-      if (data.render_url) setRenderUrl(data.render_url)
+      if (data.render_url) setTryOnResult(data)
       else setTryOnError(data.error || 'Render failed')
     } catch {
       setTryOnError('Could not connect')
@@ -183,7 +188,7 @@ function RecommendationCard({ rec }) {
               {tryingOn ? (
                 <>
                   <span style={{ display: 'inline-block', width: '12px', height: '12px', border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-                  Rendering…
+                  Analysing…
                 </>
               ) : (
                 <>
@@ -214,49 +219,63 @@ function RecommendationCard({ rec }) {
       </div>
 
       {/* Inline try-on result */}
-      {renderUrl && (
+      {tryOnResult && (
         <div style={{ marginTop: '20px', borderTop: '1px solid var(--line)', paddingTop: '20px' }}>
           <div style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: '12px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>
             Virtual Try-On Result
           </div>
-          <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-            <div style={{ borderRadius: '12px', overflow: 'hidden', width: '480px', flexShrink: 0, border: '1px solid var(--line)' }}>
-              <img src={renderUrl} alt="Try-on render" style={{ width: '100%', display: 'block' }} />
+          <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+            <div style={{ borderRadius: '12px', overflow: 'hidden', width: '340px', flexShrink: 0, border: '1px solid var(--line)' }}>
+              <img src={tryOnResult.render_url} alt="Try-on render" style={{ width: '100%', display: 'block' }} />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0', paddingTop: '4px' }}>
-              {/* Label */}
-              <div style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>
-                Now wearing
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '4px' }}>
+              {/* Item name + price */}
+              <div>
+                <div style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '6px' }}>
+                  Now wearing
+                </div>
+                <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: '20px', color: 'var(--ink)', letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: '6px' }}>
+                  {tryOnResult.item_name || catalog_item.name}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', color: 'var(--muted)' }}>{catalog_item.brand}</span>
+                  <span style={{ width: '3px', height: '3px', borderRadius: '50%', background: 'var(--line)', flexShrink: 0 }} />
+                  <span style={{ fontFamily: "'Fraunces', serif", fontSize: '17px', fontWeight: 600, color: 'var(--ink)', letterSpacing: '-0.02em' }}>${catalog_item.price}</span>
+                </div>
               </div>
 
-              {/* Item name */}
-              <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: '22px', color: 'var(--ink)', letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: '10px' }}>
-                {catalog_item.name}
-              </div>
+              {/* AI Honest Take */}
+              {tryOnResult.honest_assessment && (
+                <div style={{ background: 'var(--cream-deep)', borderRadius: '12px', padding: '14px 16px', border: '1.5px solid var(--line)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                    <span style={{ color: 'var(--terracotta)', fontSize: '11px' }}>◆</span>
+                    <span style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', fontWeight: 700, color: 'var(--ink)' }}>AI Honest Take</span>
+                  </div>
+                  <p style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontWeight: 300, fontSize: '14px', color: 'var(--ink)', lineHeight: 1.6, margin: 0 }}>
+                    "{tryOnResult.honest_assessment}"
+                  </p>
+                </div>
+              )}
 
-              {/* Brand + price */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                <span style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', color: 'var(--muted)' }}>
-                  {catalog_item.brand}
-                </span>
-                <span style={{ width: '3px', height: '3px', borderRadius: '50%', background: 'var(--line)', flexShrink: 0 }} />
-                <span style={{ fontFamily: "'Fraunces', serif", fontSize: '20px', fontWeight: 600, color: 'var(--ink)', letterSpacing: '-0.02em' }}>
-                  ${catalog_item.price}
-                </span>
-              </div>
+              {/* Stylist trace */}
+              <StylistTracePanel
+                trace={tryOnResult.trace}
+                versatility={tryOnResult.versatility}
+                gap={tryOnResult.gap}
+                fitNote={tryOnResult.fit_note}
+              />
 
               {/* Shop Now CTA */}
               {catalog_item.store_url && (
                 <a href={catalog_item.store_url} target="_blank" rel="noreferrer" style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  display: 'inline-flex', alignItems: 'center', gap: '8px', alignSelf: 'flex-start',
                   background: 'var(--ink)', color: '#fff',
-                  border: 'none', borderRadius: '10px', padding: '12px 24px',
-                  fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', fontWeight: 600,
-                  textDecoration: 'none', cursor: 'pointer',
-                  transition: 'opacity 0.15s',
+                  border: 'none', borderRadius: '10px', padding: '10px 20px',
+                  fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', fontWeight: 600,
+                  textDecoration: 'none', cursor: 'pointer', transition: 'opacity 0.15s',
                 }}>
                   Shop Now
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                     <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
                   </svg>
                 </a>
