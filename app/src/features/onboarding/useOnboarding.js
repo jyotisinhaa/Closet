@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiUpload } from '../../api/client'
+import { apiGet, apiPatch, apiUpload, apiDelete } from '../../api/client'
 import { getProfile, setProfile, clearProfile } from '../../lib/session'
 
 // Downscale large images client-side before upload to keep payloads small.
@@ -39,8 +39,7 @@ export function useOnboarding() {
 
   useEffect(() => {
     const local = getProfile() || {}
-    fetch('/api/profile')
-      .then(r => r.json())
+    apiGet('/profile')
       .then(profile => {
         if (!profile.profile_photo_url) {
           clearProfile()
@@ -78,11 +77,7 @@ export function useOnboarding() {
       const fd = new FormData()
       fd.append('photo', compressed)
       const json = await apiUpload('/profile/photo', fd)
-      await fetch('/api/profile/preferences', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gender, bodyType, name }),
-      })
+      await apiPatch('/profile/preferences', { gender, bodyType, name })
       setProfile({ gender, bodyType, name, profilePhotoUrl: json.profile_photo_url })
       navigate('/wardrobe')
     } catch (err) {
@@ -93,7 +88,7 @@ export function useOnboarding() {
   }
 
   async function resetProfile() {
-    try { await fetch('/api/profile', { method: 'DELETE' }) } catch {}
+    try { await apiDelete('/profile') } catch {}
     clearProfile()
     window.location.reload()
   }
