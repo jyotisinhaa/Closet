@@ -114,7 +114,7 @@ export const NAV = [
   {
     num: "",
     key: "lookbook",
-    label: "Liked Styles",
+    label: "My Lookbook",
     path: "/looks",
     icon: (
       <svg

@@ -12,7 +12,7 @@
 
   <!-- Title -->
   <text x="550" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1A1612">System Architecture</text>
-  <text x="550" y="58" text-anchor="middle" font-size="13" font-style="italic" fill="#8C8273">Claude does the thinking · Perfect Corp does the rendering · Cloudinary does the hosting</text>
+  <text x="550" y="58" text-anchor="middle" font-size="13" font-style="italic" fill="#8C8273">Nemotron does the thinking · Perfect Corp does the rendering · Cloudinary does the hosting</text>
 
   <!-- User -->
   <g>
@@ -44,8 +44,8 @@
     <ellipse cx="590" cy="466" rx="80" ry="14" fill="#EBE3D4" stroke="#1A1612" stroke-width="1.5"/>
     <line x1="510" y1="430" x2="510" y2="466" stroke="#1A1612" stroke-width="1.5"/>
     <line x1="670" y1="430" x2="670" y2="466" stroke="#1A1612" stroke-width="1.5"/>
-    <text x="590" y="447" text-anchor="middle" font-size="11" font-weight="600" fill="#1A1612">SQLite</text>
-    <text x="590" y="461" text-anchor="middle" font-size="9" fill="#3A322A">users · wardrobe · wishlist</text>
+    <text x="590" y="447" text-anchor="middle" font-size="11" font-weight="600" fill="#1A1612">Postgres + pgvector</text>
+    <text x="590" y="461" text-anchor="middle" font-size="9" fill="#3A322A">wardrobe · catalog · wishlist · looks (1024-dim)</text>
   </g>
 
   <!-- Cloudinary -->
@@ -56,13 +56,14 @@
     <text x="880" y="156" text-anchor="middle" font-size="10" fill="#8C8273" font-style="italic">free tier · 25GB</text>
   </g>
 
-  <!-- Claude -->
+  <!-- Nemotron via Crusoe (Groq fallback) -->
   <g>
     <rect x="760" y="225" width="240" height="100" rx="12" fill="#5B6A3F"/>
-    <text x="880" y="258" text-anchor="middle" font-size="15" font-weight="600" fill="#FBF8F1">🧠 Claude API</text>
-    <text x="880" y="280" text-anchor="middle" font-size="11" fill="#EBE3D4">vision + pairing logic</text>
-    <text x="880" y="298" text-anchor="middle" font-size="10" fill="#D4CBB8" font-style="italic">tags wardrobe, picks combos,</text>
-    <text x="880" y="312" text-anchor="middle" font-size="10" fill="#D4CBB8" font-style="italic">honest assessment</text>
+    <text x="880" y="252" text-anchor="middle" font-size="15" font-weight="600" fill="#FBF8F1">🧠 Nemotron · Crusoe</text>
+    <text x="880" y="270" text-anchor="middle" font-size="10" fill="#EBE3D4">Nemotron-3-Nano-Omni Reasoning 30B</text>
+    <text x="880" y="288" text-anchor="middle" font-size="10" fill="#D4CBB8" font-style="italic">7-step stylist agent · style tagger</text>
+    <text x="880" y="302" text-anchor="middle" font-size="10" fill="#D4CBB8" font-style="italic">picks combos · honest assessment</text>
+    <text x="880" y="318" text-anchor="middle" font-size="9" fill="#D4CBB8">↳ Groq (llama-4-scout) fallback</text>
   </g>
 
   <!-- Perfect Corp -->

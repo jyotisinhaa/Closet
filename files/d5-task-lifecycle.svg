@@ -1,97 +1,154 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 720" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
   <defs>
     <marker id="ar5" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
       <path d="M0,0 L0,6 L9,3 z" fill="#1A1612"/>
     </marker>
+    <marker id="ar5g" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#5B6A3F"/>
+    </marker>
+    <marker id="ar5r" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#C2563A"/>
+    </marker>
+    <marker id="ar5o" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#9A3E26"/>
+    </marker>
   </defs>
 
-  <rect width="1000" height="500" fill="#FBF8F1"/>
+  <rect width="1100" height="720" fill="#FBF8F1"/>
 
-  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1A1612">Perfect Corp Task Lifecycle</text>
-  <text x="500" y="58" text-anchor="middle" font-size="13" font-style="italic" fill="#8C8273">Every render goes through these states — your polling logic handles all of them</text>
+  <text x="550" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1A1612">Perfect Corp API · Endpoints + Task Lifecycle</text>
+  <text x="550" y="58" text-anchor="middle" font-size="13" font-style="italic" fill="#8C8273">All five task families share the same async POST → poll → success/error pattern</text>
+
+  <!-- ============================== ENDPOINTS BLOCK ============================== -->
+  <text x="60" y="100" font-size="14" font-weight="600" fill="#1A1612">Base URL</text>
+  <rect x="200" y="84" width="430" height="24" rx="4" fill="#1A1612"/>
+  <text x="210" y="101" font-size="12" font-family="'JetBrains Mono', monospace" fill="#FBF8F1">https://yce-api-01.makeupar.com/s2s/v2.0</text>
+  <text x="650" y="100" font-size="11" fill="#3A322A" font-style="italic">Auth: Authorization: Bearer PERFECT_CORP_API_KEY</text>
+
+  <text x="60" y="138" font-size="14" font-weight="600" fill="#1A1612">Endpoints used by Closet</text>
+
+  <!-- Body garments / cloth-v3 -->
+  <g>
+    <rect x="60" y="156" width="980" height="84" rx="10" fill="#EBE3D4" stroke="#1A1612" stroke-width="1.2"/>
+    <text x="78" y="180" font-size="12" font-weight="600" fill="#1A1612">1 · Body garments — AI Clothes V3</text>
+    <rect x="78" y="190" width="170" height="22" rx="4" fill="#1A1612"/>
+    <text x="83" y="206" font-size="11" font-family="'JetBrains Mono', monospace" fill="#FBF8F1">POST /task/cloth-v3</text>
+    <text x="262" y="205" font-size="11" fill="#3A322A">→ task_id · clean garment-region swap (renders last in the chain)</text>
+    <text x="78" y="228" font-size="11" fill="#3A322A">Body: { src_file_url, ref_file_url, garment_category, change_shoes:false }</text>
+    <text x="610" y="228" font-size="10" fill="#8C8273" font-style="italic">
+      garment_category ∈ { upper_body, lower_body, full_body, auto }
+    </text>
+  </g>
+
+  <!-- Accessory endpoints (one row per feature, share shape) -->
+  <g>
+    <rect x="60" y="252" width="980" height="220" rx="10" fill="#EBE3D4" stroke="#1A1612" stroke-width="1.2"/>
+    <text x="78" y="276" font-size="12" font-weight="600" fill="#1A1612">2 · Accessory tasks — each has its own endpoint, requires gender</text>
+    <text x="78" y="292" font-size="10" fill="#8C8273" font-style="italic">All four share body shape: { src_file_url, ref_file_url, gender, style? } · gender normalized to "male" | "female"</text>
+
+    <!-- Hat row -->
+    <rect x="78" y="304" width="120" height="22" rx="4" fill="#1A1612"/>
+    <text x="83" y="320" font-size="11" font-family="'JetBrains Mono', monospace" fill="#FBF8F1">POST /task/hat</text>
+    <text x="210" y="320" font-size="11" fill="#3A322A">styles: sporty_casual · urban_fashion · vacation_casual · warm_cozy · bohemian</text>
+
+    <!-- Scarf -->
+    <rect x="78" y="336" width="120" height="22" rx="4" fill="#1A1612"/>
+    <text x="83" y="352" font-size="11" font-family="'JetBrains Mono', monospace" fill="#FBF8F1">POST /task/scarf</text>
+    <text x="210" y="352" font-size="11" fill="#3A322A">styles: french_elegance · light_luxury · cottagecore · modern_chic · bohemian</text>
+
+    <!-- Bag -->
+    <rect x="78" y="368" width="120" height="22" rx="4" fill="#1A1612"/>
+    <text x="83" y="384" font-size="11" font-family="'JetBrains Mono', monospace" fill="#FBF8F1">POST /task/bag</text>
+    <text x="210" y="384" font-size="11" fill="#3A322A">styles: parisian_chic · urban_chic · mediterranean_chic · art_deco_style</text>
+
+    <!-- Shoes -->
+    <rect x="78" y="400" width="120" height="22" rx="4" fill="#1A1612"/>
+    <text x="83" y="416" font-size="11" font-family="'JetBrains Mono', monospace" fill="#FBF8F1">POST /task/shoes</text>
+    <text x="210" y="416" font-size="11" fill="#3A322A">styles: minimalist · bohemian · cottagecore · french_elegance · retro_fashion</text>
+
+    <text x="78" y="448" font-size="10" fill="#8C8273" font-style="italic">Routed by category in services/perfectCorp.js → ACCESSORY_FEATURE_MAP (hat/cap/beanie · scarf · bag/purse/tote/backpack · shoes/sneakers/boots/heels…)</text>
+    <text x="78" y="462" font-size="10" fill="#8C8273" font-style="italic">Solo accessory render is deliberately skipped — these endpoints regenerate the entire outfit, so the chained cloth-v3 swap restores the user's real garments on top.</text>
+  </g>
+
+  <!-- Polling endpoint -->
+  <g>
+    <rect x="60" y="484" width="980" height="64" rx="10" fill="#EBE3D4" stroke="#1A1612" stroke-width="1.2"/>
+    <text x="78" y="508" font-size="12" font-weight="600" fill="#1A1612">3 · Result polling — same path for every task family</text>
+    <rect x="78" y="518" width="290" height="22" rx="4" fill="#1A1612"/>
+    <text x="83" y="534" font-size="11" font-family="'JetBrains Mono', monospace" fill="#FBF8F1">GET /task/{feature}/{task_id}</text>
+    <text x="384" y="533" font-size="11" fill="#3A322A">Response: { data: { task_status, results: { url, dst_id }, error } }</text>
+  </g>
+
+  <!-- ============================== TASK LIFECYCLE ============================== -->
+  <text x="60" y="586" font-size="14" font-weight="600" fill="#1A1612">Per-task state machine (same for cloth-v3 + every accessory endpoint)</text>
 
   <!-- Start -->
-  <circle cx="60" cy="240" r="10" fill="#1A1612"/>
+  <circle cx="80" cy="650" r="10" fill="#1A1612"/>
 
   <!-- Submitted -->
   <g>
-    <rect x="130" y="215" width="140" height="50" rx="25" fill="#F4EFE6" stroke="#1A1612" stroke-width="1.5"/>
-    <text x="200" y="246" text-anchor="middle" font-size="13" font-weight="600" fill="#1A1612">Submitted</text>
+    <rect x="130" y="625" width="140" height="50" rx="25" fill="#F4EFE6" stroke="#1A1612" stroke-width="1.5"/>
+    <text x="200" y="656" text-anchor="middle" font-size="13" font-weight="600" fill="#1A1612">Submitted</text>
   </g>
 
   <!-- Running -->
   <g>
-    <rect x="340" y="215" width="140" height="50" rx="25" fill="#EBE3D4" stroke="#C2563A" stroke-width="1.5"/>
-    <text x="410" y="246" text-anchor="middle" font-size="13" font-weight="600" fill="#1A1612">Running</text>
+    <rect x="370" y="625" width="140" height="50" rx="25" fill="#EBE3D4" stroke="#C2563A" stroke-width="1.5"/>
+    <text x="440" y="656" text-anchor="middle" font-size="13" font-weight="600" fill="#1A1612">Running</text>
   </g>
 
-  <!-- Success -->
+  <!-- Success / Error / Timeout (compact, side-by-side) -->
   <g>
-    <rect x="600" y="135" width="140" height="50" rx="25" fill="#5B6A3F" stroke="#5B6A3F" stroke-width="1.5"/>
-    <text x="670" y="166" text-anchor="middle" font-size="13" font-weight="600" fill="#FBF8F1">Success</text>
+    <rect x="600" y="600" width="120" height="36" rx="18" fill="#5B6A3F"/>
+    <text x="660" y="623" text-anchor="middle" font-size="12" font-weight="600" fill="#FBF8F1">Success</text>
   </g>
-
-  <!-- Error -->
   <g>
-    <rect x="600" y="225" width="140" height="50" rx="25" fill="#C2563A" stroke="#C2563A" stroke-width="1.5"/>
-    <text x="670" y="256" text-anchor="middle" font-size="13" font-weight="600" fill="#FBF8F1">Error</text>
+    <rect x="600" y="642" width="120" height="36" rx="18" fill="#C2563A"/>
+    <text x="660" y="665" text-anchor="middle" font-size="12" font-weight="600" fill="#FBF8F1">Error</text>
   </g>
-
-  <!-- Timeout -->
   <g>
-    <rect x="600" y="315" width="140" height="50" rx="25" fill="#9A3E26" stroke="#9A3E26" stroke-width="1.5"/>
-    <text x="670" y="346" text-anchor="middle" font-size="13" font-weight="600" fill="#FBF8F1">Timeout</text>
+    <rect x="600" y="684" width="120" height="36" rx="18" fill="#9A3E26"/>
+    <text x="660" y="707" text-anchor="middle" font-size="12" font-weight="600" fill="#FBF8F1">Timeout</text>
   </g>
 
   <!-- End -->
   <g>
-    <circle cx="880" cy="240" r="14" fill="none" stroke="#1A1612" stroke-width="1.5"/>
-    <circle cx="880" cy="240" r="8" fill="#1A1612"/>
+    <circle cx="900" cy="650" r="14" fill="none" stroke="#1A1612" stroke-width="1.5"/>
+    <circle cx="900" cy="650" r="8" fill="#1A1612"/>
   </g>
 
   <!-- Arrows -->
-  <!-- start -> Submitted -->
-  <line x1="70" y1="240" x2="125" y2="240" stroke="#1A1612" stroke-width="1.5" marker-end="url(#ar5)"/>
-  <text x="98" y="232" text-anchor="middle" font-size="9" fill="#3A322A" font-style="italic">POST</text>
+  <line x1="90" y1="650" x2="125" y2="650" stroke="#1A1612" stroke-width="1.5" marker-end="url(#ar5)"/>
+  <text x="108" y="643" text-anchor="middle" font-size="9" fill="#3A322A" font-style="italic">POST</text>
 
-  <!-- Submitted -> Running -->
-  <line x1="275" y1="240" x2="335" y2="240" stroke="#1A1612" stroke-width="1.5" marker-end="url(#ar5)"/>
-  <text x="305" y="232" text-anchor="middle" font-size="9" fill="#3A322A" font-style="italic">task_id</text>
+  <line x1="275" y1="650" x2="365" y2="650" stroke="#1A1612" stroke-width="1.5" marker-end="url(#ar5)"/>
+  <text x="320" y="643" text-anchor="middle" font-size="9" fill="#3A322A" font-style="italic">task_id</text>
 
-  <!-- Running -> Running (self-loop poll) -->
-  <path d="M 360 215 Q 360 180 410 180 Q 460 180 460 215" fill="none" stroke="#1A1612" stroke-width="1.2" marker-end="url(#ar5)"/>
-  <text x="410" y="173" text-anchor="middle" font-size="9" fill="#3A322A" font-style="italic">poll every 3s · running</text>
+  <!-- Self-loop poll -->
+  <path d="M 390 625 Q 390 590 440 590 Q 490 590 490 625" fill="none" stroke="#1A1612" stroke-width="1.2" marker-end="url(#ar5)"/>
+  <text x="440" y="582" text-anchor="middle" font-size="9" fill="#3A322A" font-style="italic">GET poll every 3s · 429 keeps polling</text>
 
   <!-- Running -> Success -->
-  <line x1="485" y1="225" x2="595" y2="170" stroke="#5B6A3F" stroke-width="1.5" marker-end="url(#ar5)"/>
-  <text x="540" y="190" font-size="10" fill="#5B6A3F" font-weight="600">~15-25s</text>
+  <line x1="515" y1="640" x2="595" y2="618" stroke="#5B6A3F" stroke-width="1.5" marker-end="url(#ar5g)"/>
+  <text x="555" y="610" font-size="10" fill="#5B6A3F" font-weight="600">~15–25s · url + dst_id</text>
 
   <!-- Running -> Error -->
-  <line x1="485" y1="240" x2="595" y2="245" stroke="#C2563A" stroke-width="1.5" marker-end="url(#ar5)"/>
-  <text x="538" y="237" font-size="9" fill="#C2563A" font-style="italic">error_download_image, etc.</text>
+  <line x1="515" y1="652" x2="595" y2="660" stroke="#C2563A" stroke-width="1.5" marker-end="url(#ar5r)"/>
+  <text x="555" y="675" font-size="9" fill="#C2563A" font-style="italic">error_download_image · no_face · pose</text>
 
   <!-- Running -> Timeout -->
-  <line x1="485" y1="260" x2="595" y2="335" stroke="#9A3E26" stroke-width="1.5" marker-end="url(#ar5)"/>
-  <text x="540" y="320" font-size="9" fill="#9A3E26" font-style="italic">&gt; 60s</text>
+  <line x1="515" y1="665" x2="595" y2="700" stroke="#9A3E26" stroke-width="1.5" marker-end="url(#ar5o)"/>
+  <text x="555" y="713" font-size="9" fill="#9A3E26" font-style="italic">&gt; 4 min wall clock</text>
 
-  <!-- Success -> End -->
-  <line x1="745" y1="170" x2="868" y2="232" stroke="#1A1612" stroke-width="1.5" marker-end="url(#ar5)"/>
-  <text x="820" y="190" font-size="9" fill="#3A322A" font-style="italic">save url, dst_id</text>
+  <!-- Success/Error/Timeout -> End -->
+  <line x1="720" y1="618" x2="888" y2="644" stroke="#1A1612" stroke-width="1.5" marker-end="url(#ar5)"/>
+  <text x="800" y="612" font-size="9" fill="#3A322A" font-style="italic">save url, feed next chain step</text>
+  <line x1="720" y1="660" x2="885" y2="652" stroke="#1A1612" stroke-width="1.5" marker-end="url(#ar5)"/>
+  <line x1="720" y1="702" x2="888" y2="660" stroke="#1A1612" stroke-width="1.5" marker-end="url(#ar5)"/>
 
-  <!-- Error -> End -->
-  <line x1="745" y1="248" x2="865" y2="244" stroke="#1A1612" stroke-width="1.5" marker-end="url(#ar5)"/>
-  <text x="805" y="240" font-size="9" fill="#3A322A" font-style="italic">user-friendly error</text>
-
-  <!-- Timeout -> End -->
-  <line x1="745" y1="335" x2="868" y2="252" stroke="#1A1612" stroke-width="1.5" marker-end="url(#ar5)"/>
-  <text x="820" y="320" font-size="9" fill="#3A322A" font-style="italic">abort, surface error</text>
-
-  <!-- Polling rules box -->
+  <!-- Chain note -->
   <g>
-    <rect x="160" y="395" width="680" height="80" rx="8" fill="#EBE3D4" stroke="#3A322A"/>
-    <text x="180" y="418" font-size="12" font-weight="600" fill="#1A1612">Polling rules for the dev:</text>
-    <text x="180" y="438" font-size="11" fill="#3A322A">· Start polling 2s after the initial POST · Poll every 3s · Abort after 60s</text>
-    <text x="180" y="455" font-size="11" fill="#3A322A">· On success: cache the result URL — never re-render the same combination</text>
-    <text x="180" y="472" font-size="11" fill="#3A322A">· On error: show user-friendly message, let them retry · Result URL lives ~2 hours, download to keep longer</text>
+    <rect x="60" y="586" width="0" height="0"/>
   </g>
+  <text x="80" y="611" font-size="11" fill="#3A322A">Chained renders: success url becomes the next call's src_file_url. Order: accessories first, body garments last (clean swap on top).</text>
 </svg>
