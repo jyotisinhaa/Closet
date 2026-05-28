@@ -20,6 +20,7 @@ export default function Onboarding() {
     resetProfile,
   } = useOnboarding();
 
+  const [name, setName] = useState("");
   const [gender, setGender] = useState("");
   const [bodyType, setBodyType] = useState("");
   const [photo, setPhoto] = useState(null);
@@ -479,6 +480,30 @@ export default function Onboarding() {
             }}
           />
 
+          {/* Full name */}
+          <div style={{ marginBottom: "28px" }}>
+            <h3 style={sectionHeader}>Full Name</h3>
+            <p style={sectionSub}>So we can personalise your experience</p>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your name"
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                padding: "12px 16px",
+                borderRadius: "10px",
+                border: "1.5px solid var(--line)",
+                fontFamily: "'Inter Tight', sans-serif",
+                fontSize: "14px",
+                color: "var(--ink)",
+                background: "white",
+                outline: "none",
+              }}
+            />
+          </div>
+
           {/* Gender */}
           <div style={{ marginBottom: "28px" }}>
             <h3 style={sectionHeader}>Gender</h3>
@@ -759,7 +784,7 @@ export default function Onboarding() {
 
           {/* Submit */}
           <button
-            onClick={() => submit({ photo, gender, bodyType })}
+            onClick={() => submit({ photo, gender, bodyType, name })}
             disabled={uploading}
             style={{
               width: "100%",

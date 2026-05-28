@@ -21,6 +21,9 @@ export function useProfile() {
         const serverPrefs = Array.isArray(data.style_prefs) ? data.style_prefs : []
         const merged = {
           ...(getProfile() || {}),
+          ...(data.name       ? { name: data.name }               : {}),
+          ...(data.gender     ? { gender: data.gender }           : {}),
+          ...(data.body_type  ? { bodyType: data.body_type }      : {}),
           stylePrefs: serverPrefs.length > 0 ? serverPrefs : (getProfile()?.stylePrefs || []),
           styleProfile: data.style_profile || {},
         }

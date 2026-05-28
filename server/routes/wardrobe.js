@@ -8,7 +8,10 @@ const { classifyAndRollup, recomputeProfileStyle } = require('../services/styleP
 const router = express.Router()
 
 router.get('/', async (req, res) => {
-  const { rows } = await pool.query('SELECT * FROM wardrobe_items ORDER BY created_at DESC')
+  const { rows } = await pool.query(
+    'SELECT * FROM wardrobe_items WHERE user_id = $1 ORDER BY created_at DESC',
+    [req.userId],
+  )
   res.json(rows)
 })
 
@@ -18,19 +21,17 @@ router.post('/from-url', async (req, res) => {
   if (!image_url) return res.status(400).json({ error: 'image_url required' })
 
   const { rows } = await pool.query(
-    `INSERT INTO wardrobe_items (image_url, category, description, color, price)
-     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-    [image_url, category || 'Uncategorized', description || category || '', color || '', parseFloat(price) || 0]
+    `INSERT INTO wardrobe_items (user_id, image_url, category, description, color, price)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    [req.userId, image_url, category || 'Uncategorized', description || category || '', color || '', parseFloat(price) || 0]
   )
   const item = rows[0]
 
-  // Embed in background — don't block the response
   getImageEmbedding(image_url)
     .then(emb => pool.query('UPDATE wardrobe_items SET embedding = $1 WHERE id = $2', [`[${emb.join(',')}]`, item.id]))
     .catch(err => console.error('Wardrobe embed failed:', err.message))
 
-  // Classify style + roll up the user's style profile — also background.
-  classifyAndRollup(item)
+  classifyAndRollup(item, req.userId)
 
   res.json(item)
 })
@@ -45,19 +46,17 @@ router.post('/', upload.single('photo'), async (req, res) => {
     })
 
     const { rows } = await pool.query(
-      `INSERT INTO wardrobe_items (image_url, cloudinary_public_id, category, color, description, price)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [result.secure_url, result.public_id, req.body.category || 'top', req.body.color || '', req.body.description || '', parseFloat(req.body.price) || 0]
+      `INSERT INTO wardrobe_items (user_id, image_url, cloudinary_public_id, category, color, description, price)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [req.userId, result.secure_url, result.public_id, req.body.category || 'top', req.body.color || '', req.body.description || '', parseFloat(req.body.price) || 0]
     )
     const item = rows[0]
 
-    // Embed in background — don't block the response
     getImageEmbedding(result.secure_url)
       .then(emb => pool.query('UPDATE wardrobe_items SET embedding = $1 WHERE id = $2', [`[${emb.join(',')}]`, item.id]))
       .catch(err => console.error('Wardrobe embed failed:', err.message))
 
-    // Classify style + roll up the user's style profile — also background.
-    classifyAndRollup(item)
+    classifyAndRollup(item, req.userId)
 
     res.json(item)
   } catch (err) {
@@ -67,17 +66,20 @@ router.post('/', upload.single('photo'), async (req, res) => {
 })
 
 router.delete('/:id', async (req, res) => {
-  const { rows } = await pool.query('SELECT cloudinary_public_id FROM wardrobe_items WHERE id = $1', [req.params.id])
+  const { rows } = await pool.query(
+    'SELECT cloudinary_public_id FROM wardrobe_items WHERE id = $1 AND user_id = $2',
+    [req.params.id, req.userId],
+  )
   const item = rows[0]
+  if (!item) return res.status(404).json({ error: 'Not found' })
 
-  if (item?.cloudinary_public_id) {
+  if (item.cloudinary_public_id) {
     try { await destroyFromCloudinary(item.cloudinary_public_id, { invalidate: true }) } catch {}
   }
 
-  await pool.query('DELETE FROM wardrobe_items WHERE id = $1', [req.params.id])
+  await pool.query('DELETE FROM wardrobe_items WHERE id = $1 AND user_id = $2', [req.params.id, req.userId])
 
-  // Recompute the style profile so removing a piece updates the user's prefs.
-  recomputeProfileStyle().catch(err => console.error('[wardrobe] recompute on delete failed:', err.message))
+  recomputeProfileStyle(req.userId).catch(err => console.error('[wardrobe] recompute on delete failed:', err.message))
 
   res.json({ ok: true })
 })

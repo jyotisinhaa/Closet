@@ -68,11 +68,11 @@ router.post('/catalog/embed-all', async (req, res) => {
 router.get('/recommendations', async (req, res) => {
   try {
     // Resolve the user's gender so we can filter catalog items
-    const { rows: profileRows } = await pool.query(`SELECT gender FROM profile WHERE id = 'demo-user-1' LIMIT 1`)
+    const { rows: profileRows } = await pool.query(`SELECT gender FROM profile WHERE id = $1 LIMIT 1`, [req.userId])
     const userGender = (profileRows[0]?.gender || '').toLowerCase().trim()
 
     // Lazily embed any wardrobe items missing embeddings
-    const { rows: missing } = await pool.query('SELECT id, image_url FROM wardrobe_items WHERE embedding IS NULL')
+    const { rows: missing } = await pool.query('SELECT id, image_url FROM wardrobe_items WHERE user_id = $1 AND embedding IS NULL', [req.userId])
     for (const item of missing) {
       try {
         const emb = await getImageEmbedding(item.image_url)
@@ -151,9 +151,9 @@ router.get('/recommendations', async (req, res) => {
         ORDER BY (c.embedding <=> w.embedding) + (RANDOM() * 0.18)
         LIMIT 15
       ) c
-      WHERE w.embedding IS NOT NULL
+      WHERE w.embedding IS NOT NULL AND w.user_id = $2
       ORDER BY w.id, similarity_score DESC
-    `, [userGender])
+    `, [userGender, req.userId])
 
     // Group top-15 candidates by wardrobe item
     const grouped = new Map()

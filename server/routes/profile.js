@@ -11,15 +11,15 @@ router.post("/photo", upload.single("photo"), async (req, res) => {
 
     const result = await uploadToCloudinary(req.file.buffer, {
       folder: "closet/profile",
-      public_id: "demo-user-1",
+      public_id: req.userId,
       overwrite: true,
       resource_type: "image",
     });
 
     await pool.query(
-      `INSERT INTO profile (id, profile_photo_url) VALUES ('demo-user-1', $1)
-       ON CONFLICT (id) DO UPDATE SET profile_photo_url = $1, updated_at = NOW()`,
-      [result.secure_url],
+      `INSERT INTO profile (id, profile_photo_url) VALUES ($1, $2)
+       ON CONFLICT (id) DO UPDATE SET profile_photo_url = $2, updated_at = NOW()`,
+      [req.userId, result.secure_url],
     );
 
     res.json({ profile_photo_url: result.secure_url });
@@ -34,7 +34,8 @@ router.get("/", async (req, res) => {
     `SELECT id, profile_photo_url, name, gender, body_type,
             height_ft, height_cm, size_tops, size_bottoms, size_shoes,
             style_profile, style_prefs
-     FROM profile WHERE id = 'demo-user-1'`,
+     FROM profile WHERE id = $1`,
+    [req.userId],
   );
   res.json(rows[0] || {});
 });
@@ -52,13 +53,14 @@ router.patch("/", async (req, res) => {
   } = req.body;
   await pool.query(
     `INSERT INTO profile (id, name, gender, body_type, height_ft, height_cm, size_tops, size_bottoms, size_shoes)
-     VALUES ('demo-user-1', $1, $2, $3, $4, $5, $6, $7, $8)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      ON CONFLICT (id) DO UPDATE SET
-       name = $1, gender = $2, body_type = $3,
-       height_ft = $4, height_cm = $5,
-       size_tops = $6, size_bottoms = $7, size_shoes = $8,
+       name = $2, gender = $3, body_type = $4,
+       height_ft = $5, height_cm = $6,
+       size_tops = $7, size_bottoms = $8, size_shoes = $9,
        updated_at = NOW()`,
     [
+      req.userId,
       name || "",
       gender || "",
       bodyType || "",
@@ -73,17 +75,17 @@ router.patch("/", async (req, res) => {
 });
 
 router.patch("/preferences", async (req, res) => {
-  const { gender, bodyType } = req.body;
+  const { gender, bodyType, name } = req.body;
   await pool.query(
-    `INSERT INTO profile (id, gender, body_type) VALUES ('demo-user-1', $1, $2)
-     ON CONFLICT (id) DO UPDATE SET gender = $1, body_type = $2, updated_at = NOW()`,
-    [gender || null, bodyType || null],
+    `INSERT INTO profile (id, name, gender, body_type) VALUES ($1, $2, $3, $4)
+     ON CONFLICT (id) DO UPDATE SET name = COALESCE($2, name), gender = $3, body_type = $4, updated_at = NOW()`,
+    [req.userId, name || null, gender || null, bodyType || null],
   );
   res.json({ ok: true });
 });
 
 router.delete("/", async (req, res) => {
-  await pool.query(`DELETE FROM profile WHERE id = 'demo-user-1'`);
+  await pool.query(`DELETE FROM profile WHERE id = $1`, [req.userId]);
   res.json({ ok: true });
 });
 

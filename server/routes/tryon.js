@@ -22,11 +22,11 @@ router.post('/', upload.single('photo'), async (req, res) => {
     const newItemUrl  = cloudResult.secure_url
 
     // 2. Profile photo + wardrobe from Postgres
-    const { rows: profileRows } = await pool.query(`SELECT profile_photo_url FROM profile WHERE id = 'demo-user-1'`)
+    const { rows: profileRows } = await pool.query(`SELECT profile_photo_url FROM profile WHERE id = $1`, [req.userId])
     const profilePhotoUrl = profileRows[0]?.profile_photo_url
     if (!profilePhotoUrl) return res.status(400).json({ error: 'No profile photo found. Please complete onboarding first.' })
 
-    const { rows: wardrobe } = await pool.query('SELECT * FROM wardrobe_items ORDER BY created_at DESC')
+    const { rows: wardrobe } = await pool.query('SELECT * FROM wardrobe_items WHERE user_id = $1 ORDER BY created_at DESC', [req.userId])
 
     const { price = '0', category = 'auto', store = '', color = '', gender = '', style = '', base_image_url = '' } = req.body
 
@@ -176,8 +176,8 @@ router.post('/quick', async (req, res) => {
     if (!image_url) return res.status(400).json({ error: 'image_url required' })
 
     const [{ rows }, { rows: wardrobeRows }] = await Promise.all([
-      pool.query(`SELECT profile_photo_url FROM profile WHERE id = 'demo-user-1'`),
-      pool.query('SELECT * FROM wardrobe_items ORDER BY created_at DESC'),
+      pool.query(`SELECT profile_photo_url FROM profile WHERE id = $1`, [req.userId]),
+      pool.query('SELECT * FROM wardrobe_items WHERE user_id = $1 ORDER BY created_at DESC', [req.userId]),
     ])
     const profilePhotoUrl = rows[0]?.profile_photo_url
     if (!profilePhotoUrl) return res.status(400).json({ error: 'No profile photo found. Complete onboarding first.' })
@@ -237,13 +237,13 @@ router.post('/combine', async (req, res) => {
     const { new_item_image_url, garment_category, wardrobe_item_ids = [], gender = '' } = req.body
     if (!new_item_image_url) return res.status(400).json({ error: 'new_item_image_url is required' })
 
-    const { rows: profileRows } = await pool.query(`SELECT profile_photo_url FROM profile WHERE id = 'demo-user-1'`)
+    const { rows: profileRows } = await pool.query(`SELECT profile_photo_url FROM profile WHERE id = $1`, [req.userId])
     const profilePhotoUrl = profileRows[0]?.profile_photo_url
     if (!profilePhotoUrl) {
       return res.status(400).json({ error: 'No profile photo found. Please complete onboarding first.' })
     }
 
-    const { rows: wardrobe } = await pool.query('SELECT * FROM wardrobe_items ORDER BY created_at DESC')
+    const { rows: wardrobe } = await pool.query('SELECT * FROM wardrobe_items WHERE user_id = $1 ORDER BY created_at DESC', [req.userId])
 
     // Resolve selected wardrobe items (max 3), preserving the user's order.
     const items = wardrobe_item_ids
@@ -279,7 +279,7 @@ router.post('/wardrobe', async (req, res) => {
       return res.status(400).json({ error: 'Select at least one wardrobe item.' })
     }
 
-    const { rows: profileRows } = await pool.query(`SELECT profile_photo_url FROM profile WHERE id = 'demo-user-1'`)
+    const { rows: profileRows } = await pool.query(`SELECT profile_photo_url FROM profile WHERE id = $1`, [req.userId])
     const profilePhotoUrl = profileRows[0]?.profile_photo_url
     if (!profilePhotoUrl) return res.status(400).json({ error: 'No profile photo found. Please complete onboarding first.' })
 
@@ -294,7 +294,7 @@ router.post('/wardrobe', async (req, res) => {
       }
     }
 
-    const { rows: wardrobe } = await pool.query('SELECT * FROM wardrobe_items ORDER BY created_at DESC')
+    const { rows: wardrobe } = await pool.query('SELECT * FROM wardrobe_items WHERE user_id = $1 ORDER BY created_at DESC', [req.userId])
     const items = wardrobe_item_ids
       .map(id => wardrobe.find(w => w.id === id))
       .filter(Boolean)
