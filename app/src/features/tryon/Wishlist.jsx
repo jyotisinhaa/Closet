@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { apiGet, apiPost, apiDelete } from '../../api/client'
 
 const SORT_OPTIONS = ['Recently saved', 'Price: Low–High', 'Price: High–Low']
 
@@ -37,8 +38,7 @@ export default function Wishlist() {
   const [activeTab, setActiveTab] = useState('All')
 
   useEffect(() => {
-    fetch('/api/wishlist')
-      .then(r => r.json())
+    apiGet('/wishlist')
       .then(data => setItems(Array.isArray(data) ? data : []))
       .catch(() => setItems([]))
   }, [])
@@ -47,14 +47,14 @@ export default function Wishlist() {
     const item = items.find(it => it.id === id)
     if (item) {
       try {
-        await fetch(`/api/wishlist/${id}/purchase`, { method: 'POST' })
+        await apiPost(`/wishlist/${id}/purchase`)
       } catch {}
     }
     setItems(prev => prev.filter(it => it.id !== id))
   }
 
   async function removeItem(id) {
-    try { await fetch(`/api/wishlist/${id}`, { method: 'DELETE' }) } catch {}
+    try { await apiDelete(`/wishlist/${id}`) } catch {}
     setItems(prev => prev.filter(it => it.id !== id))
   }
 

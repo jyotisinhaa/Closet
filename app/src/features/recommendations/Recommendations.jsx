@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { apiGet, apiPost } from '../../api/client'
 import { getProfile } from '../../lib/session'
 import StylistTracePanel from '../tryon/StylistTracePanel'
 
@@ -10,8 +11,7 @@ export default function Recommendations() {
   const [error, setError]     = useState(null)
 
   useEffect(() => {
-    fetch('/api/recommendations')
-      .then(r => r.json())
+    apiGet('/recommendations')
       .then(data => { setRecs(data); setLoading(false) })
       .catch(() => { setError('Could not load recommendations.'); setLoading(false) })
   }, [])
@@ -76,26 +76,21 @@ function RecommendationCard({ rec }) {
     setTryOnResult(null)
     setTryOnError(null)
     try {
-      const res = await fetch('/api/tryon/quick', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          image_url:          catalog_item.image_url,
-          category:           catalog_item.category,
-          wardrobe_image_url: wardrobe_item.image_url,
-          wardrobe_category:  wardrobe_item.category,
-          gender:             (getProfile() || {}).gender || '',
-          price:              catalog_item.price || '0',
-          color:              catalog_item.color || '',
-          store_url:          catalog_item.store_url || '',
-          name:               catalog_item.name || '',
-        }),
+      const data = await apiPost('/tryon/quick', {
+        image_url:          catalog_item.image_url,
+        category:           catalog_item.category,
+        wardrobe_image_url: wardrobe_item.image_url,
+        wardrobe_category:  wardrobe_item.category,
+        gender:             (getProfile() || {}).gender || '',
+        price:              catalog_item.price || '0',
+        color:              catalog_item.color || '',
+        store_url:          catalog_item.store_url || '',
+        name:               catalog_item.name || '',
       })
-      const data = await res.json()
       if (data.render_url) setTryOnResult(data)
       else setTryOnError(data.error || 'Render failed')
-    } catch {
-      setTryOnError('Could not connect')
+    } catch (err) {
+      setTryOnError(err.message || 'Could not connect')
     } finally {
       setTryingOn(false)
     }
