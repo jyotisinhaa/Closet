@@ -1351,7 +1351,7 @@ export default function Profile() {
 function Section({ label, children }) {
   return (
     <div style={{ padding: "20px 0", borderBottom: "1px solid var(--line)" }}>
-      <div style={{ ...monoLabel, marginBottom: "12px" }}>{label}</div>
+      <div style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: "14px", fontWeight: 600, color: "var(--ink)", marginBottom: "12px" }}>{label}</div>
       {children}
     </div>
   );
