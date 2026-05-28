@@ -3,8 +3,8 @@
 // runs on Crusoe/Nemotron with a Groq fallback so a missing/transient CRUSOE
 // key never blocks a wardrobe add.
 const pool = require('../db/client')
-const { isCrusoeEnabled, classifyItemWithCrusoe } = require('./crusoe')
-const { classifyItemWithGroq } = require('./groq')
+const { callJSON, img, txt } = require('./llm')
+const { buildClassifyPrompt } = require('./groq')
 
 // Canonical 8-tag vocabulary. Must match STYLE_LABELS in
 // app/src/features/profile/Profile.jsx — the radar chart, style score, and
@@ -27,28 +27,23 @@ function normalizeTags(tags) {
   return out
 }
 
-// Call the classifier with a Crusoe → Groq fallback. Returns a normalized array
-// of tags (possibly empty if both providers fail or the response was unusable).
+// Call the classifier via callJSON (Crusoe-first with tiered budget + Groq fallback).
+// classifyItemWithCrusoe used a hardcoded 4k budget — too small for Nemotron's
+// reasoning trace, causing content:null on every call. callJSON uses 32k baseline.
 async function classifyItem({ imageUrl, category, color, description }) {
-  const args = { imageUrl, category, color, description }
-  let result = null
-
-  if (isCrusoeEnabled()) {
-    try {
-      result = await classifyItemWithCrusoe(args)
-    } catch (err) {
-      console.warn('[styleProfile] Crusoe classify failed, falling back to Groq:', err.message)
-    }
+  try {
+    const prompt = buildClassifyPrompt({ category, color, description })
+    const result = await callJSON({
+      content: [img(imageUrl), txt(prompt)],
+      maxTokens: 200,
+      temperature: 0.2,
+      label: 'classify-item',
+    })
+    return normalizeTags(result.style_tags)
+  } catch (err) {
+    console.warn('[styleProfile] classify failed:', err.message)
+    return []
   }
-  if (!result) {
-    try {
-      result = await classifyItemWithGroq(args)
-    } catch (err) {
-      console.warn('[styleProfile] Groq classify failed:', err.message)
-      return []
-    }
-  }
-  return normalizeTags(result.style_tags)
 }
 
 // Recompute profile.style_profile (counts) and profile.style_prefs (top N tags)
