@@ -1,17 +1,27 @@
 import { useState } from "react";
+import { getCategoriesForGender } from "../../lib/categories";
 const API = "/api";
 
-const CATEGORIES = ["Dress", "Top", "Skirt", "Shorts", "Jeans", "Shoes", "Sandals", "Bag", "Hat", "Bottom"];
 const GENDERS = ["female", "male", "unisex"];
 
-const empty = () => ({ name: "", brand: "H&M", category: "Dress", gender: "female", price: "", color: "", store_url: "", image_url: "", style_tags: "" });
+const empty = () => ({ name: "", brand: "H&M", category: "", gender: "female", price: "", color: "", store_url: "", image_url: "", style_tags: "" });
 
 export default function CatalogAdmin() {
   const [form, setForm] = useState(empty());
   const [saving, setSaving] = useState(false);
   const [log, setLog] = useState([]);
 
-  function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
+  function set(k, v) {
+    setForm(f => {
+      const next = { ...f, [k]: v };
+      if (k === "gender") next.category = "";
+      return next;
+    });
+  }
+
+  const categories = getCategoriesForGender(
+    form.gender === "female" ? "Female" : form.gender === "male" ? "Male" : null
+  );
 
   async function submit(e) {
     e.preventDefault();
@@ -31,7 +41,7 @@ export default function CatalogAdmin() {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setLog(l => [{ ok: true, msg: `✓ Saved: ${data.name} (${data.category})`, id: data.id }, ...l]);
-      setForm(f => ({ ...empty(), brand: f.brand, category: f.category, gender: f.gender }));
+      setForm(f => ({ ...empty(), brand: f.brand, gender: f.gender }));
     } catch (err) {
       setLog(l => [{ ok: false, msg: `✗ ${err.message}` }, ...l]);
     } finally {
@@ -73,7 +83,8 @@ export default function CatalogAdmin() {
             <label style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--muted)" }}>Category *</label>
             <select value={form.category} onChange={e => set("category", e.target.value)}
               style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid var(--line)", fontFamily: "'Inter Tight', sans-serif", fontSize: 13, background: "var(--paper)", color: "var(--ink)" }}>
-              {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+              <option value="">Select…</option>
+              {categories.map(c => <option key={c}>{c}</option>)}
             </select>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
