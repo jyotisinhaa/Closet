@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { getCategoriesForGender } from "../../lib/categories";
-const API = "/api";
+import { apiPost } from "../../api/client";
 
 const GENDERS = ["female", "male", "unisex"];
 
@@ -33,13 +33,7 @@ export default function CatalogAdmin() {
         price: parseFloat(form.price) || 0,
         style_tags: form.style_tags ? form.style_tags.split(",").map(s => s.trim()).filter(Boolean) : [],
       };
-      const res = await fetch(`${API}/catalog`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      const data = await apiPost("/catalog", payload);
       setLog(l => [{ ok: true, msg: `✓ Saved: ${data.name} (${data.category})`, id: data.id }, ...l]);
       setForm(f => ({ ...empty(), brand: f.brand, gender: f.gender }));
     } catch (err) {
