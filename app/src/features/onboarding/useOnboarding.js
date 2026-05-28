@@ -67,7 +67,7 @@ export function useOnboarding() {
   const [uploading, setUploading] = useState(false)
   const [error,     setError]     = useState('')
 
-  async function submit({ photo, gender, bodyType }) {
+  async function submit({ photo, gender, bodyType, name }) {
     if (!photo)    { setError('Please add a photo to continue.'); return }
     if (!gender)   { setError('Please select your gender.'); return }
     if (!bodyType) { setError('Please select your body type.'); return }
@@ -81,9 +81,9 @@ export function useOnboarding() {
       await fetch('/api/profile/preferences', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gender, bodyType }),
+        body: JSON.stringify({ gender, bodyType, name }),
       })
-      setProfile({ gender, bodyType, profilePhotoUrl: json.profile_photo_url })
+      setProfile({ gender, bodyType, name, profilePhotoUrl: json.profile_photo_url })
       navigate('/wardrobe')
     } catch (err) {
       setError(err.message || 'Upload failed. Please try again.')

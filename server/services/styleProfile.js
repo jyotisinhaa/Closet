@@ -54,9 +54,11 @@ async function classifyItem({ imageUrl, category, color, description }) {
 // Recompute profile.style_profile (counts) and profile.style_prefs (top N tags)
 // from every wardrobe item's style_tags. Called after each add/delete. Upserts
 // the profile row so it works even before onboarding has run.
-async function recomputeProfileStyle() {
+async function recomputeProfileStyle(userId) {
   const { rows } = await pool.query(
-    `SELECT style_tags FROM wardrobe_items WHERE style_tags IS NOT NULL AND array_length(style_tags, 1) > 0`,
+    `SELECT style_tags FROM wardrobe_items
+     WHERE user_id = $1 AND style_tags IS NOT NULL AND array_length(style_tags, 1) > 0`,
+    [userId],
   )
   const counts = {}
   for (const r of rows) for (const t of r.style_tags) counts[t] = (counts[t] || 0) + 1
@@ -69,12 +71,12 @@ async function recomputeProfileStyle() {
 
   await pool.query(
     `INSERT INTO profile (id, style_profile, style_prefs)
-     VALUES ('demo-user-1', $1::jsonb, $2)
+     VALUES ($1, $2::jsonb, $3)
      ON CONFLICT (id) DO UPDATE SET
-       style_profile = $1::jsonb,
-       style_prefs   = $2,
+       style_profile = $2::jsonb,
+       style_prefs   = $3,
        updated_at    = NOW()`,
-    [JSON.stringify(counts), prefs],
+    [userId, JSON.stringify(counts), prefs],
   )
   return { counts, prefs }
 }
@@ -82,7 +84,7 @@ async function recomputeProfileStyle() {
 // Classify one item and refresh the aggregate. Designed for fire-and-forget:
 // errors are swallowed (and logged) so an LLM hiccup never breaks the wardrobe
 // add path. `item` is the row that was just inserted.
-async function classifyAndRollup(item) {
+async function classifyAndRollup(item, userId) {
   try {
     const tags = await classifyItem({
       imageUrl: item.image_url,
@@ -92,7 +94,7 @@ async function classifyAndRollup(item) {
     })
     if (tags.length === 0) return
     await pool.query('UPDATE wardrobe_items SET style_tags = $1 WHERE id = $2', [tags, item.id])
-    await recomputeProfileStyle()
+    await recomputeProfileStyle(userId)
   } catch (err) {
     console.error('[styleProfile] classifyAndRollup failed:', err.message)
   }
