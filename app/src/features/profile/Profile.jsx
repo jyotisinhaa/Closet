@@ -1273,15 +1273,6 @@ export default function Profile() {
                   borderLeft: "3px solid var(--terracotta)",
                 }}
               >
-                <div
-                  style={{
-                    ...monoLabel,
-                    color: "var(--terracotta)",
-                    marginBottom: "8px",
-                  }}
-                >
-                  ★ Your tip
-                </div>
                 <p
                   style={{
                     fontFamily: "'Fraunces', serif",
