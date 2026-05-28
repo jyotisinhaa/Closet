@@ -78,7 +78,7 @@ router.patch("/preferences", async (req, res) => {
   const { gender, bodyType, name } = req.body;
   await pool.query(
     `INSERT INTO profile (id, name, gender, body_type) VALUES ($1, $2, $3, $4)
-     ON CONFLICT (id) DO UPDATE SET name = COALESCE($2, name), gender = $3, body_type = $4, updated_at = NOW()`,
+     ON CONFLICT (id) DO UPDATE SET name = COALESCE($2, profile.name), gender = $3, body_type = $4, updated_at = NOW()`,
     [req.userId, name || null, gender || null, bodyType || null],
   );
   res.json({ ok: true });
